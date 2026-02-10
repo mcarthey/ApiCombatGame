@@ -1,0 +1,105 @@
+@page
+@model ApiCombatGame.Pages.Account.ApiKeysModel
+@{
+    ViewData["Title"] = "API Keys";
+}
+
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+    <h1 class="text-3xl font-bold mb-2">API Keys</h1>
+    <p class="text-gray-600 mb-8">Use these keys to authenticate with the Combat API. Keep them secret!</p>
+
+    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+    {
+        <div class="bg-red-50 border-l-4 border-red-400 p-4 mb-6">
+            <p class="text-sm text-red-700">@Model.ErrorMessage</p>
+        </div>
+    }
+
+    @if (!string.IsNullOrEmpty(Model.NewlyCreatedKey))
+    {
+        <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-8">
+            <div class="flex">
+                <div class="ml-3 flex-1">
+                    <p class="text-sm text-yellow-700 font-semibold mb-2">
+                        Save this API key now! You won't be able to see it again.
+                    </p>
+                    <div class="bg-white rounded p-3 font-mono text-sm break-all border border-yellow-200">
+                        @Model.NewlyCreatedKey
+                    </div>
+                    <button onclick="copyToClipboard('@Model.NewlyCreatedKey')" class="mt-2 text-sm text-blue-600 hover:text-blue-700">
+                        Copy to clipboard
+                    </button>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- API Keys List -->
+    <div class="space-y-4 mb-8">
+        @foreach (var apiKey in Model.ApiKeys)
+        {
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-start justify-between">
+                    <div class="flex-1">
+                        <h3 class="text-lg font-semibold mb-1">@apiKey.Name</h3>
+                        <div class="font-mono text-sm text-gray-600 mb-2">@(apiKey.KeyPrefix)...</div>
+                        <div class="text-sm text-gray-500 space-y-1">
+                            <div>Created: @apiKey.CreatedAt.ToString("MMM dd, yyyy")</div>
+                            <div>
+                                Last used:
+                                @if (apiKey.LastUsedAt.HasValue)
+                                {
+                                    @apiKey.LastUsedAt.Value.ToString("MMM dd, yyyy HH:mm")
+                                }
+                                else
+                                {
+                                    <text>Never</text>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                    <div class="ml-4">
+                        <form method="post" asp-page-handler="Revoke" class="inline">
+                            <input type="hidden" name="apiKeyId" value="@apiKey.Id" />
+                            <button type="submit" onclick="return confirm('Are you sure you want to revoke this API key? This cannot be undone.')"
+                                    class="text-sm text-red-600 hover:text-red-700">
+                                Revoke
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        }
+
+        @if (!Model.ApiKeys.Any())
+        {
+            <div class="bg-gray-50 rounded-lg p-8 text-center">
+                <p class="text-gray-600">No API keys yet. Create one to get started!</p>
+            </div>
+        }
+    </div>
+
+    <!-- Create New Key -->
+    <div class="bg-white rounded-lg shadow p-6">
+        <h2 class="text-lg font-semibold mb-4">Create New API Key</h2>
+        <form method="post" asp-page-handler="Create">
+            <div class="mb-4">
+                <label for="keyName" class="block text-sm font-medium text-gray-700 mb-2">Key Name</label>
+                <input type="text" id="keyName" name="keyName" required
+                       placeholder="e.g., Production, Development, Testing"
+                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+            <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+                Create API Key
+            </button>
+        </form>
+    </div>
+
+    <!-- Security Warning -->
+    <div class="mt-8 bg-red-50 border-l-4 border-red-400 p-4">
+        <p class="text-sm text-red-700">
+            <strong>Security Warning:</strong> Never share your API keys or commit them to version control.
+            Treat them like passwords. If a key is compromised, revoke it immediately and create a new one.
+        </p>
+    </div>
+</div>

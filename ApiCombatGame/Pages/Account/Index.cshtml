@@ -1,0 +1,108 @@
+@page
+@model ApiCombatGame.Pages.Account.DashboardModel
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <h1 class="text-3xl font-bold mb-8">Dashboard</h1>
+
+    <!-- Stats Overview -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div class="bg-white rounded-lg shadow p-6">
+            <div class="text-sm text-gray-600 mb-1">Battles Today</div>
+            <div class="text-3xl font-bold">
+                @Model.Dashboard.BattlesToday / @(Model.Dashboard.DailyLimit == -1 ? "Unlimited" : Model.Dashboard.DailyLimit.ToString())
+            </div>
+            <div class="text-xs text-gray-500 mt-1">
+                @Model.Dashboard.CurrentTier tier
+            </div>
+        </div>
+        <div class="bg-white rounded-lg shadow p-6">
+            <div class="text-sm text-gray-600 mb-1">Win Rate</div>
+            <div class="text-3xl font-bold">@Model.Dashboard.WinRate%</div>
+            <div class="text-xs text-gray-500 mt-1">All time</div>
+        </div>
+        <div class="bg-white rounded-lg shadow p-6">
+            <div class="text-sm text-gray-600 mb-1">Ranking</div>
+            <div class="text-3xl font-bold">#@Model.Dashboard.GlobalRank</div>
+            <div class="text-xs text-gray-500 mt-1">Global leaderboard</div>
+        </div>
+        <div class="bg-white rounded-lg shadow p-6">
+            <div class="text-sm text-gray-600 mb-1">Rating</div>
+            <div class="text-3xl font-bold">@Model.Dashboard.Rating</div>
+            <div class="text-xs text-gray-500 mt-1">Currency: @Model.Dashboard.Currency</div>
+        </div>
+    </div>
+
+    <!-- Upgrade Banner (Free tier only) -->
+    @if (Model.Dashboard.CurrentTier == "Free")
+    {
+        <div class="bg-blue-50 border-l-4 border-blue-400 p-4 mb-8">
+            <div class="flex">
+                <div class="ml-3 flex-1">
+                    <p class="text-sm text-blue-700">
+                        You've used <strong>@Model.Dashboard.BattlesToday of @Model.Dashboard.DailyLimit</strong> battles today.
+                        <a asp-page="/Account/Subscription" class="font-medium underline">Upgrade to Premium</a> for unlimited battles.
+                    </p>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Quick Actions -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <a asp-page="/Account/ApiKeys" class="block bg-white rounded-lg shadow p-6 hover:shadow-md transition">
+            <div class="text-lg font-semibold mb-2">API Keys</div>
+            <p class="text-sm text-gray-600">Manage your API keys and access tokens</p>
+        </a>
+        <a asp-page="/Account/Subscription" class="block bg-white rounded-lg shadow p-6 hover:shadow-md transition">
+            <div class="text-lg font-semibold mb-2">Subscription</div>
+            <p class="text-sm text-gray-600">Upgrade or manage your plan</p>
+        </a>
+        <a href="/swagger" class="block bg-white rounded-lg shadow p-6 hover:shadow-md transition">
+            <div class="text-lg font-semibold mb-2">API Docs</div>
+            <p class="text-sm text-gray-600">View the complete API reference</p>
+        </a>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="bg-white rounded-lg shadow">
+        <div class="px-6 py-4 border-b">
+            <h2 class="text-lg font-semibold">Recent Battles</h2>
+        </div>
+        <div class="divide-y">
+            @if (Model.Dashboard.RecentBattles.Any())
+            {
+                @foreach (var battle in Model.Dashboard.RecentBattles)
+                {
+                    <div class="px-6 py-4 flex items-center justify-between">
+                        <div>
+                            <div class="font-medium">vs @battle.OpponentName</div>
+                            <div class="text-sm text-gray-500">@battle.CompletedAt.ToString("MMM dd, yyyy HH:mm")</div>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <span class="text-sm @(battle.RatingChange >= 0 ? "text-green-600" : "text-red-600")">
+                                @(battle.RatingChange >= 0 ? "+" : "")@battle.RatingChange
+                            </span>
+                            @if (battle.IsWin)
+                            {
+                                <span class="px-3 py-1 bg-green-100 text-green-800 text-sm font-medium rounded">Won</span>
+                            }
+                            else
+                            {
+                                <span class="px-3 py-1 bg-red-100 text-red-800 text-sm font-medium rounded">Lost</span>
+                            }
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="px-6 py-8 text-center text-gray-500">
+                    No battles yet. Queue your first battle via the API!
+                </div>
+            }
+        </div>
+    </div>
+</div>
