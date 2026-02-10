@@ -1,4 +1,5 @@
 using System.Text;
+using ApiCombatGame.BackgroundJobs;
 using ApiCombatGame.Data;
 using ApiCombatGame.Middleware;
 using ApiCombatGame.Services;
@@ -77,8 +78,22 @@ builder.Services.AddScoped<IMatchmakingService, MatchmakingService>();
 builder.Services.AddScoped<ISubscriptionService, SubscriptionService>();
 builder.Services.AddScoped<IApiKeyService, ApiKeyService>();
 
-// Background service
+// Phase 3: Engagement & Anti-Meta Services
+builder.Services.AddScoped<IModifierService, ModifierService>();
+builder.Services.AddScoped<IGuildBossService, GuildBossService>();
+builder.Services.AddScoped<IChallengeService, ChallengeService>();
+builder.Services.AddScoped<IStrategyMarketplaceService, StrategyMarketplaceService>();
+builder.Services.AddScoped<IMasteryService, MasteryService>();
+builder.Services.AddScoped<IReplayService, ReplayService>();
+
+// Background services
 builder.Services.AddHostedService<BackgroundBattleProcessor>();
+
+// Phase 3: Background Jobs
+builder.Services.AddHostedService<WeeklyModifierRotationJob>();
+builder.Services.AddHostedService<DailyChallengeGenerationJob>();
+builder.Services.AddHostedService<StrategyDecayJob>();
+builder.Services.AddHostedService<GuildBossSpawnJob>();
 
 // Controllers (API)
 builder.Services.AddControllers()
@@ -193,6 +208,7 @@ using (var scope = app.Services.CreateScope())
     var context = scope.ServiceProvider.GetRequiredService<GameDbContext>();
     await context.Database.EnsureCreatedAsync();
     await SeedData.InitializeAsync(context);
+    await Phase3SeedData.InitializeAsync(context);
 }
 
 await app.RunAsync();

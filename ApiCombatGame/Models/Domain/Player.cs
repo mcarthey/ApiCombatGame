@@ -31,9 +31,22 @@ public class Player
     public int DailyBattlesUsed { get; set; }
     public DateTime LastBattleResetDate { get; set; } = DateTime.UtcNow.Date;
 
+    // Phase 3: Progression
+    public Guid? ActiveTitleId { get; set; }
+    public PlayerTitle? ActiveTitle { get; set; }
+    public int AchievementPoints { get; set; } = 0;
+
     // Navigation properties
     public List<Unit> Roster { get; set; } = new();
     public List<Team> Teams { get; set; } = new();
     public Subscription? Subscription { get; set; }
     public List<ApiKey> ApiKeys { get; set; } = new();
+
+    // Phase 3 navigation
+    public GuildMembership? GuildMembership { get; set; }
+    public List<DailyChallenge> DailyChallenges { get; set; } = new();
+    public List<Strategy> CreatedStrategies { get; set; } = new();
+    public List<UnitMastery> UnitMasteries { get; set; } = new();
+    public List<PlayerAchievement> Achievements { get; set; } = new();
+    public List<GuildBossAttempt> BossAttempts { get; set; } = new();
 }
