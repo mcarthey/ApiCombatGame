@@ -1,0 +1,313 @@
+using System.Text.Json;
+using ApiCombatGame.Data;
+using ApiCombatGame.Models.Domain;
+using ApiCombatGame.Models.DTOs.Battle;
+using ApiCombatGame.Models.DTOs.Strategy;
+using ApiCombatGame.Models.Enums;
+using ApiCombatGame.Services.Interfaces;
+using Microsoft.EntityFrameworkCore;
+
+namespace ApiCombatGame.Services;
+
+public class BattleService : IBattleService
+{
+    private readonly GameDbContext _context;
+    private readonly IStrategyEngine _strategyEngine;
+    private readonly IMatchmakingService _matchmaking;
+    private readonly IConfiguration _config;
+    private readonly ILogger<BattleService> _logger;
+    private static readonly JsonSerializerOptions JsonOptions = new() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
+
+    public BattleService(
+        GameDbContext context,
+        IStrategyEngine strategyEngine,
+        IMatchmakingService matchmaking,
+        IConfiguration config,
+        ILogger<BattleService> logger)
+    {
+        _context = context;
+        _strategyEngine = strategyEngine;
+        _matchmaking = matchmaking;
+        _config = config;
+        _logger = logger;
+    }
+
+    public async Task<BattleStatusResponse> QueueBattleAsync(Guid playerId, BattleQueueRequest request)
+    {
+        // Validate team ownership
+        var team = await _context.Teams.FirstOrDefaultAsync(t => t.Id == request.TeamId && t.PlayerId == playerId);
+        if (team == null)
+            throw new InvalidOperationException("Team not found or doesn't belong to you.");
+
+        var unitIds = JsonSerializer.Deserialize<List<Guid>>(team.UnitIdsJson, JsonOptions) ?? new();
+        if (unitIds.Count == 0)
+            throw new InvalidOperationException("Team has no units configured.");
+
+        // Check player doesn't already have a queued battle
+        var existingQueued = await _context.Battles
+            .AnyAsync(b => b.Player1Id == playerId && b.Status == BattleStatus.Queued);
+        if (existingQueued)
+            throw new InvalidOperationException("You already have a battle in the queue.");
+
+        var battle = new Battle
+        {
+            Id = Guid.NewGuid(),
+            Player1Id = playerId,
+            Team1Id = request.TeamId,
+            Status = BattleStatus.Queued,
+            Mode = request.Mode ?? "ranked",
+            QueuedAt = DateTime.UtcNow
+        };
+
+        _context.Battles.Add(battle);
+        await _context.SaveChangesAsync();
+
+        // Count queue position
+        var queuePosition = await _context.Battles
+            .CountAsync(b => b.Status == BattleStatus.Queued && b.QueuedAt <= battle.QueuedAt);
+
+        _logger.LogInformation("Player {PlayerId} queued for battle with team {TeamId}", playerId, request.TeamId);
+
+        return new BattleStatusResponse
+        {
+            BattleId = battle.Id,
+            Status = "queued",
+            QueuePosition = queuePosition,
+            EstimatedWaitSeconds = queuePosition * 5,
+            QueuedAt = battle.QueuedAt
+        };
+    }
+
+    public async Task<BattleStatusResponse> GetBattleStatusAsync(Guid battleId, Guid playerId)
+    {
+        var battle = await _context.Battles
+            .FirstOrDefaultAsync(b => b.Id == battleId && (b.Player1Id == playerId || b.Player2Id == playerId));
+
+        if (battle == null)
+            throw new KeyNotFoundException("Battle not found.");
+
+        int? queuePosition = null;
+        int? estimatedWait = null;
+
+        if (battle.Status == BattleStatus.Queued)
+        {
+            queuePosition = await _context.Battles
+                .CountAsync(b => b.Status == BattleStatus.Queued && b.QueuedAt <= battle.QueuedAt);
+            estimatedWait = queuePosition * 5;
+        }
+
+        return new BattleStatusResponse
+        {
+            BattleId = battle.Id,
+            Status = battle.Status.ToString().ToLower(),
+            QueuePosition = queuePosition,
+            EstimatedWaitSeconds = estimatedWait,
+            QueuedAt = battle.QueuedAt,
+            StartedAt = battle.StartedAt,
+            CompletedAt = battle.CompletedAt
+        };
+    }
+
+    public async Task<BattleResultResponse> GetBattleResultAsync(Guid battleId, Guid playerId)
+    {
+        var battle = await _context.Battles
+            .FirstOrDefaultAsync(b => b.Id == battleId && (b.Player1Id == playerId || b.Player2Id == playerId));
+
+        if (battle == null)
+            throw new KeyNotFoundException("Battle not found.");
+
+        var logEntries = JsonSerializer.Deserialize<List<BattleLogEntry>>(battle.BattleLogJson, JsonOptions)
+            ?? new List<BattleLogEntry>();
+
+        Guid? loserId = null;
+        if (battle.WinnerId.HasValue && battle.Player2Id.HasValue)
+        {
+            loserId = battle.WinnerId == battle.Player1Id ? battle.Player2Id : battle.Player1Id;
+        }
+
+        int ratingChange = 0;
+        if (battle.WinnerId == playerId)
+            ratingChange = battle.Player1Id == playerId ? (battle.Player1RatingChange ?? 0) : (battle.Player2RatingChange ?? 0);
+        else if (battle.WinnerId.HasValue)
+            ratingChange = battle.Player1Id == playerId ? (battle.Player1RatingChange ?? 0) : (battle.Player2RatingChange ?? 0);
+
+        return new BattleResultResponse
+        {
+            BattleId = battle.Id,
+            Status = battle.Status.ToString().ToLower(),
+            WinnerId = battle.WinnerId,
+            LoserId = loserId,
+            Turns = battle.Turns,
+            BattleLog = logEntries,
+            Rewards = battle.Status == BattleStatus.Completed ? new BattleRewards
+            {
+                Currency = battle.CurrencyReward ?? 0,
+                RatingChange = ratingChange
+            } : null,
+            CompletedAt = battle.CompletedAt
+        };
+    }
+
+    public async Task<List<BattleResultResponse>> GetBattleHistoryAsync(Guid playerId, int limit, int offset)
+    {
+        var battles = await _context.Battles
+            .Where(b => (b.Player1Id == playerId || b.Player2Id == playerId) && b.Status == BattleStatus.Completed)
+            .OrderByDescending(b => b.CompletedAt)
+            .Skip(offset)
+            .Take(limit)
+            .ToListAsync();
+
+        return battles.Select(battle =>
+        {
+            Guid? loserId = null;
+            if (battle.WinnerId.HasValue && battle.Player2Id.HasValue)
+                loserId = battle.WinnerId == battle.Player1Id ? battle.Player2Id : battle.Player1Id;
+
+            int ratingChange = battle.Player1Id == playerId
+                ? (battle.Player1RatingChange ?? 0)
+                : (battle.Player2RatingChange ?? 0);
+
+            return new BattleResultResponse
+            {
+                BattleId = battle.Id,
+                Status = "completed",
+                WinnerId = battle.WinnerId,
+                LoserId = loserId,
+                Turns = battle.Turns,
+                BattleLog = new List<BattleLogEntry>(), // Omit log in history for brevity
+                Rewards = new BattleRewards
+                {
+                    Currency = battle.CurrencyReward ?? 0,
+                    RatingChange = ratingChange
+                },
+                CompletedAt = battle.CompletedAt
+            };
+        }).ToList();
+    }
+
+    public async Task ProcessQueuedBattlesAsync(CancellationToken cancellationToken)
+    {
+        var match = await _matchmaking.FindMatchAsync();
+        if (match == null) return;
+
+        var (battle1, battle2) = match.Value;
+
+        try
+        {
+            // Merge into single battle record
+            battle1.Player2Id = battle2.Player1Id;
+            battle1.Team2Id = battle2.Team1Id;
+            battle1.Status = BattleStatus.InProgress;
+            battle1.StartedAt = DateTime.UtcNow;
+
+            // Remove the second queue entry
+            battle2.Status = BattleStatus.Cancelled;
+
+            await _context.SaveChangesAsync(cancellationToken);
+
+            // Load teams and units
+            var team1 = await _context.Teams.FindAsync(new object[] { battle1.Team1Id }, cancellationToken);
+            var team2 = await _context.Teams.FindAsync(new object[] { battle1.Team2Id!.Value }, cancellationToken);
+
+            if (team1 == null || team2 == null)
+            {
+                battle1.Status = BattleStatus.Cancelled;
+                await _context.SaveChangesAsync(cancellationToken);
+                return;
+            }
+
+            var team1UnitIds = JsonSerializer.Deserialize<List<Guid>>(team1.UnitIdsJson, JsonOptions) ?? new();
+            var team2UnitIds = JsonSerializer.Deserialize<List<Guid>>(team2.UnitIdsJson, JsonOptions) ?? new();
+
+            var team1Units = await _context.Units
+                .Include(u => u.Abilities)
+                .Where(u => team1UnitIds.Contains(u.Id))
+                .ToListAsync(cancellationToken);
+
+            var team2Units = await _context.Units
+                .Include(u => u.Abilities)
+                .Where(u => team2UnitIds.Contains(u.Id))
+                .ToListAsync(cancellationToken);
+
+            var strategy1 = !string.IsNullOrEmpty(team1.StrategyJson) && team1.StrategyJson != "{}"
+                ? JsonSerializer.Deserialize<StrategyConfig>(team1.StrategyJson, JsonOptions) ?? new StrategyConfig()
+                : new StrategyConfig();
+
+            var strategy2 = !string.IsNullOrEmpty(team2.StrategyJson) && team2.StrategyJson != "{}"
+                ? JsonSerializer.Deserialize<StrategyConfig>(team2.StrategyJson, JsonOptions) ?? new StrategyConfig()
+                : new StrategyConfig();
+
+            int maxTurns = _config.GetValue<int>("GameSettings:MaxTurnsPerBattle", 50);
+
+            // Resolve battle
+            var resolution = _strategyEngine.ResolveBattle(team1Units, strategy1, team2Units, strategy2, maxTurns);
+
+            // Update battle record
+            battle1.Turns = resolution.TotalTurns;
+            battle1.BattleLogJson = JsonSerializer.Serialize(resolution.Log, JsonOptions);
+            battle1.Status = BattleStatus.Completed;
+            battle1.CompletedAt = DateTime.UtcNow;
+
+            // Determine winner and update ratings
+            if (resolution.WinnerTeam == 1)
+            {
+                battle1.WinnerId = battle1.Player1Id;
+                await UpdateRatingsAndCurrency(battle1.Player1Id, battle1.Player2Id!.Value, battle1, cancellationToken);
+            }
+            else if (resolution.WinnerTeam == 2)
+            {
+                battle1.WinnerId = battle1.Player2Id;
+                await UpdateRatingsAndCurrency(battle1.Player2Id!.Value, battle1.Player1Id, battle1, cancellationToken);
+            }
+            else
+            {
+                // Draw - small rating change
+                battle1.WinnerId = null;
+                battle1.Player1RatingChange = 0;
+                battle1.Player2RatingChange = 0;
+                battle1.CurrencyReward = 25;
+            }
+
+            await _context.SaveChangesAsync(cancellationToken);
+
+            _logger.LogInformation(
+                "Battle {BattleId} completed: {Turns} turns, Winner: {Winner}",
+                battle1.Id, resolution.TotalTurns, battle1.WinnerId?.ToString() ?? "Draw");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error processing battle {BattleId}", battle1.Id);
+            battle1.Status = BattleStatus.Cancelled;
+            await _context.SaveChangesAsync(cancellationToken);
+        }
+    }
+
+    private async Task UpdateRatingsAndCurrency(Guid winnerId, Guid loserId, Battle battle, CancellationToken ct)
+    {
+        var winner = await _context.Players.FindAsync(new object[] { winnerId }, ct);
+        var loser = await _context.Players.FindAsync(new object[] { loserId }, ct);
+
+        if (winner == null || loser == null) return;
+
+        // ELO-style rating calculation
+        double expectedWinner = 1.0 / (1.0 + Math.Pow(10, (loser.Rating - winner.Rating) / 400.0));
+        int kFactor = 32;
+        int winnerChange = (int)(kFactor * (1 - expectedWinner));
+        int loserChange = -(int)(kFactor * expectedWinner);
+
+        winner.Rating += winnerChange;
+        loser.Rating += loserChange;
+
+        // Ensure rating doesn't go below 100
+        if (loser.Rating < 100) loser.Rating = 100;
+
+        // Currency rewards
+        int currencyReward = 100 + Math.Abs(winnerChange);
+        winner.Currency += currencyReward;
+        loser.Currency += 25; // Consolation prize
+
+        battle.Player1RatingChange = winnerId == battle.Player1Id ? winnerChange : loserChange;
+        battle.Player2RatingChange = winnerId == battle.Player2Id ? winnerChange : loserChange;
+        battle.CurrencyReward = currencyReward;
+    }
+}
