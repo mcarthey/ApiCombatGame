@@ -4,6 +4,7 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using ApiCombatGame.Data;
 using ApiCombatGame.Models.DTOs.Auth;
+using ApiCombatGame.Tests.Helpers;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -18,6 +19,8 @@ public class AuthTests : IClassFixture<WebApplicationFactory<Program>>
 
     public AuthTests(WebApplicationFactory<Program> factory)
     {
+        IntegrationTestSetup.DisableRateLimiting();
+        var dbName = $"TestDb_Auth_{Guid.NewGuid()}";
         _client = factory.WithWebHostBuilder(builder =>
         {
             builder.ConfigureServices(services =>
@@ -30,7 +33,7 @@ public class AuthTests : IClassFixture<WebApplicationFactory<Program>>
 
                 // Add in-memory database for testing
                 services.AddDbContext<GameDbContext>(options =>
-                    options.UseInMemoryDatabase($"TestDb_Auth_{Guid.NewGuid()}"));
+                    options.UseInMemoryDatabase(dbName));
             });
         }).CreateClient();
     }

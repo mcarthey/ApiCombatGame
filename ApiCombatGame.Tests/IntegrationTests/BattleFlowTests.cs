@@ -7,6 +7,7 @@ using ApiCombatGame.Models.DTOs.Auth;
 using ApiCombatGame.Models.DTOs.Battle;
 using ApiCombatGame.Models.DTOs.Strategy;
 using ApiCombatGame.Models.DTOs.Team;
+using ApiCombatGame.Tests.Helpers;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -21,6 +22,8 @@ public class BattleFlowTests : IClassFixture<WebApplicationFactory<Program>>
 
     public BattleFlowTests(WebApplicationFactory<Program> factory)
     {
+        IntegrationTestSetup.DisableRateLimiting();
+        var dbName = $"TestDb_Battle_{Guid.NewGuid()}";
         _factory = factory.WithWebHostBuilder(builder =>
         {
             builder.ConfigureServices(services =>
@@ -31,7 +34,7 @@ public class BattleFlowTests : IClassFixture<WebApplicationFactory<Program>>
                     services.Remove(descriptor);
 
                 services.AddDbContext<GameDbContext>(options =>
-                    options.UseInMemoryDatabase($"TestDb_Battle_{Guid.NewGuid()}"));
+                    options.UseInMemoryDatabase(dbName));
             });
         });
     }
