@@ -78,7 +78,7 @@ public class LoginModel : PageModel
 
         _logger.LogInformation("Player {Username} logged in via web UI", player.Username);
 
-        return RedirectToPage("/Account/Index");
+        return RedirectToPage("/Dashboard");
     }
 
     public class LoginInputModel

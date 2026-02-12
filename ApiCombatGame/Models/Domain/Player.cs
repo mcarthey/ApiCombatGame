@@ -36,6 +36,11 @@ public class Player
     public int WinStreak { get; set; } = 0;
     public DateTime? LastFirstBattleBonus { get; set; }
 
+    // Daily login streak
+    public int LoginStreak { get; set; } = 0;
+    public DateTime? LastLoginRewardDate { get; set; }
+    public DateTime? LastLoginRewardClaimedAt { get; set; }
+
     // Admin
     public bool IsAdmin { get; set; } = false;
     public AdminRole AdminRole { get; set; } = AdminRole.None;

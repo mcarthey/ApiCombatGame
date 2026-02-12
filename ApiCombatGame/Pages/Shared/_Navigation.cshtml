@@ -2,7 +2,7 @@
 <nav class="space-y-1">
     <a asp-page="/Account/Index"
        class="@(ViewContext.RouteData.Values["page"]?.ToString() == "/Account/Index" ? "bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white" : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white") group flex items-center px-3 py-2 text-sm font-medium rounded-md">
-        Dashboard
+        Account Overview
     </a>
     <a asp-page="/Account/Subscription"
        class="@(ViewContext.RouteData.Values["page"]?.ToString() == "/Account/Subscription" ? "bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white" : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white") group flex items-center px-3 py-2 text-sm font-medium rounded-md">

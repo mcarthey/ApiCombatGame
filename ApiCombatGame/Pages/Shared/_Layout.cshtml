@@ -42,8 +42,11 @@
                         </a>
                         @if (User.Identity?.IsAuthenticated == true)
                         {
-                            <a asp-page="/Account/Index" class="@NavClass(currentPath.StartsWith("/Account"))">
+                            <a asp-page="/Dashboard" class="@NavClass(currentPath == "/Dashboard")">
                                 Dashboard
+                            </a>
+                            <a asp-page="/Account/Index" class="@NavClass(currentPath.StartsWith("/Account"))">
+                                Account
                             </a>
                             @if (User.IsInRole("Admin"))
                             {

@@ -280,7 +280,7 @@ using (var scope = app.Services.CreateScope())
         try
         {
             // Quick schema check — if a query on a new column fails, recreate
-            await context.Database.ExecuteSqlRawAsync("SELECT NotificationPreferencesJson FROM Players LIMIT 0");
+            await context.Database.ExecuteSqlRawAsync("SELECT LoginStreak FROM Players LIMIT 0");
         }
         catch
         {
