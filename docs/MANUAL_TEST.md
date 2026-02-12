@@ -363,22 +363,86 @@ Use a tool like **curl**, **Postman**, or the built-in Swagger UI at `/swagger` 
 
 ---
 
-## 20. Web UI (Razor Pages)
+## 20. Player Dashboard (`/Dashboard`)
 
-### 20.1 Public Pages
+> The player dashboard is the main post-login landing page. It showcases player progress and drives engagement.
+
+### 20.1 Login Streak
+- [ ] First visit: streak = 1, "+25g" bonus displayed
+- [ ] Second visit same day: no duplicate reward, streak unchanged
+- [ ] Next consecutive day: streak increments, correct reward (Day 2: 25g, Day 3: 50g, etc.)
+- [ ] Missed a day: streak resets to 1
+- [ ] Day 7 reward: 200g, next day resets to Day 1
+- [ ] Streak calendar shows 7 circles with claimed/unclaimed states
+
+### 20.2 Player Status Cards
+- [ ] Level with XP progress bar displays correctly
+- [ ] Currency shows current gold balance
+- [ ] Rating shows current Elo rating
+- [ ] Achievement points total shown
+
+### 20.3 Achievement Showcase
+- [ ] Recent unlocks displayed (up to 3)
+- [ ] "Next Up" shows closest achievement to completion with progress bar
+- [ ] Link to API docs for achievements endpoint works
+- [ ] Empty state shown for new player with no progress
+
+### 20.4 Hero Roster
+- [ ] All owned units displayed with class badges and mastery levels
+- [ ] Highest mastery unit has gold highlight/crown
+- [ ] "X of Y heroes" count shown
+- [ ] Affordable unlock prompt shown when player can afford new units
+- [ ] API doc link for unlock endpoint works
+
+### 20.5 Daily Challenges
+- [ ] Active challenges displayed with progress bars
+- [ ] Time remaining countdown shown
+- [ ] Completed challenges have green checkmark + claim API link
+- [ ] Empty state: "New challenges are on the way!"
+
+### 20.6 Guild Hub
+- [ ] If in guild: guild name, tag, role badge, contribution points shown
+- [ ] If guild has active boss: HP bar and attack API link shown
+- [ ] If NOT in guild: promo card with join/create messaging
+- [ ] Free tier sees "Upgrade to Premium" CTA
+
+### 20.7 Battle Status
+- [ ] Battles today count shown (with limit for Free tier)
+- [ ] Win streak with fire icons displayed
+- [ ] First battle bonus reminder shown if haven't battled today
+- [ ] "Queue Battle" CTA links to API docs
+- [ ] Free tier sees upgrade prompt
+
+### 20.8 Suggested Actions
+- [ ] Context-aware action cards appear based on player state
+- [ ] "Fight your first battle" shown if no battles today
+- [ ] "Go Premium" shown for Free tier players
+- [ ] API doc links in each action card work correctly
+
+### 20.9 Navigation
+- [ ] Top nav shows "Dashboard" and "Account" as separate links
+- [ ] Login redirects to `/Dashboard`
+- [ ] Account sidebar shows "Account Overview" (not "Dashboard")
+- [ ] Dark mode toggle works on all dashboard sections
+
+---
+
+## 21. Web UI (Razor Pages)
+
+### 21.1 Public Pages
 - [ ] `GET /` renders homepage
 - [ ] `GET /Privacy` renders privacy page
 - [ ] `GET /Auth/Login` renders login form
 - [ ] `GET /Auth/Register` renders registration form
 
-### 20.2 Account Pages (requires authentication)
-- [ ] `GET /Account` renders account dashboard
+### 21.2 Account Pages (requires authentication)
+- [ ] `GET /Account` renders account overview
 - [ ] `GET /Account/Settings` renders settings form
 - [ ] `GET /Account/Subscription` renders subscription management
 - [ ] `GET /Account/Billing` renders billing information
 - [ ] `GET /Account/ApiKeys` renders API key management
 
-### 20.3 API Documentation
+### 21.3 API Documentation
 - [ ] `GET /swagger` renders Swagger UI with all endpoints
 - [ ] All endpoints include game-specific annotations (tips, examples, difficulty)
 
@@ -398,3 +462,4 @@ A minimal end-to-end flow to verify the system works:
 8. `GET /api/v1/challenges/daily` -> `200 OK`
 9. `GET /api/v1/leaderboard` -> `200 OK`
 10. `GET /api/v1/player/notifications/count` -> `200 OK` (0 unread)
+11. Navigate to `/Dashboard` -> renders player dashboard with all sections
