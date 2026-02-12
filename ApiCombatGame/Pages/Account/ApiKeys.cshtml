@@ -12,7 +12,7 @@
     {
         <div class="md3-alert-error p-4 mb-6">
             <div class="flex items-center">
-                <md-icon style="color: var(--md-sys-color-error); margin-right: 12px;">error</md-icon>
+                <span class="material-symbols-outlined" style="color: var(--md-sys-color-error); margin-right: 12px;">error</span>
                 <p class="text-sm" style="color: var(--md-sys-color-on-error-container);">@Model.ErrorMessage</p>
             </div>
         </div>
@@ -22,7 +22,7 @@
     {
         <div class="md3-alert-warning p-4 mb-8">
             <div class="flex">
-                <md-icon style="color: var(--md-sys-color-error); margin-right: 12px; flex-shrink: 0;">warning</md-icon>
+                <span class="material-symbols-outlined" style="color: var(--md-sys-color-error); margin-right: 12px; flex-shrink: 0;">warning</span>
                 <div class="flex-1">
                     <p class="text-sm font-semibold mb-2" style="color: var(--md-sys-color-on-surface);">
                         Save this API key now! You won't be able to see it again.
@@ -31,10 +31,10 @@
                          style="background: var(--md-sys-color-surface-container-highest); border-radius: var(--md-sys-shape-corner-small); border: 1px solid var(--md-sys-color-outline-variant);">
                         @Model.NewlyCreatedKey
                     </div>
-                    <md-text-button onclick="copyToClipboard('@Model.NewlyCreatedKey')" style="margin-top: 8px;">
-                        <md-icon slot="icon">content_copy</md-icon>
+                    <button class="md3-btn-text" onclick="copyToClipboard('@Model.NewlyCreatedKey')" style="margin-top: 8px;">
+                        <span class="material-symbols-outlined">content_copy</span>
                         Copy to clipboard
-                    </md-text-button>
+                    </button>
                 </div>
             </div>
         </div>
@@ -67,11 +67,11 @@
                     <div class="ml-4">
                         <form method="post" asp-page-handler="Revoke" class="inline">
                             <input type="hidden" name="apiKeyId" value="@apiKey.Id" />
-                            <md-text-button type="submit"
-                                            style="--md-text-button-label-text-color: var(--md-sys-color-error);"
+                            <button type="submit"
+                                            class="md3-btn-text btn-error"
                                             onclick="return confirm('Are you sure you want to revoke this API key? This cannot be undone.')">
                                 Revoke
-                            </md-text-button>
+                            </button>
                         </form>
                     </div>
                 </div>
@@ -81,7 +81,7 @@
         @if (!Model.ApiKeys.Any())
         {
             <div class="md3-card p-8 text-center">
-                <md-icon style="font-size: 3rem; color: var(--md-sys-color-on-surface-variant); display: block; margin: 0 auto 12px;">key_off</md-icon>
+                <span class="material-symbols-outlined" style="font-size: 3rem; color: var(--md-sys-color-on-surface-variant); display: block; margin: 0 auto 12px;">key_off</span>
                 <p style="color: var(--md-sys-color-on-surface-variant);">No API keys yet. Create one to get started!</p>
             </div>
         }
@@ -92,26 +92,22 @@
         <h2 class="text-lg font-semibold mb-4" style="color: var(--md-sys-color-on-surface);">Create New API Key</h2>
         <form method="post" asp-page-handler="Create">
             <div class="mb-4">
-                <md-outlined-text-field
-                    label="Key Name"
-                    name="keyName"
-                    id="keyName"
-                    required
-                    placeholder="e.g., Production, Development, Testing"
-                    class="w-full">
-                </md-outlined-text-field>
+                <div class="md3-input-wrapper">
+                    <label for="keyName">Key Name</label>
+                    <input class="md3-input" id="keyName" name="keyName" type="text" required placeholder="e.g., Production, Development, Testing" />
+                </div>
             </div>
-            <md-filled-button type="submit">
-                <md-icon slot="icon">add</md-icon>
+            <button type="submit" class="md3-btn-filled">
+                <span class="material-symbols-outlined">add</span>
                 Create API Key
-            </md-filled-button>
+            </button>
         </form>
     </div>
 
     <!-- Security Warning -->
     <div class="md3-alert-error mt-8 p-4">
         <div class="flex items-start">
-            <md-icon style="color: var(--md-sys-color-error); margin-right: 12px; flex-shrink: 0;">shield</md-icon>
+            <span class="material-symbols-outlined" style="color: var(--md-sys-color-error); margin-right: 12px; flex-shrink: 0;">shield</span>
             <p class="text-sm" style="color: var(--md-sys-color-on-error-container);">
                 <strong>Security Warning:</strong> Never share your API keys or commit them to version control.
                 Treat them like passwords. If a key is compromised, revoke it immediately and create a new one.

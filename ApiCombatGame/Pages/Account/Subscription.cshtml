@@ -11,7 +11,7 @@
     {
         <div class="md3-alert-success p-4 mb-8">
             <div class="flex items-center">
-                <md-icon style="color: var(--md-sys-color-primary); margin-right: 12px;">check_circle</md-icon>
+                <span class="material-symbols-outlined" style="color: var(--md-sys-color-primary); margin-right: 12px;">check_circle</span>
                 <p class="text-sm" style="color: var(--md-sys-color-on-surface);">Subscription successfully updated! Your new benefits are active now.</p>
             </div>
         </div>
@@ -21,7 +21,7 @@
     {
         <div class="md3-alert-warning p-4 mb-8">
             <div class="flex items-center">
-                <md-icon style="color: var(--md-sys-color-error); margin-right: 12px;">warning</md-icon>
+                <span class="material-symbols-outlined" style="color: var(--md-sys-color-error); margin-right: 12px;">warning</span>
                 <p class="text-sm" style="color: var(--md-sys-color-on-surface);">Your subscription has been scheduled for cancellation at the end of the billing period.</p>
             </div>
         </div>
@@ -43,10 +43,10 @@
             @if (Model.CanCancel)
             {
                 <div>
-                    <md-text-button style="--md-text-button-label-text-color: var(--md-sys-color-error);"
+                    <button class="md3-btn-text btn-error"
                                     onclick="if(confirm('Are you sure you want to cancel? Access continues until end of billing period.')){document.getElementById('cancelForm').submit();}">
                         Cancel Subscription
-                    </md-text-button>
+                    </button>
                     <form id="cancelForm" method="post" asp-page-handler="Cancel" class="hidden"></form>
                 </div>
             }
@@ -64,21 +64,21 @@
             <h3 class="text-2xl font-bold mb-2" style="color: var(--md-sys-color-on-surface);">Free</h3>
             <p class="text-4xl font-bold mb-6" style="color: var(--md-sys-color-on-surface);">$0<span class="text-lg" style="color: var(--md-sys-color-on-surface-variant);">/month</span></p>
             <ul class="space-y-3 mb-6">
-                <li class="flex items-start"><md-icon style="color: var(--md-sys-color-primary); margin-right: 8px; font-size: 20px;">check</md-icon><span style="color: var(--md-sys-color-on-surface);">10 battles per day</span></li>
-                <li class="flex items-start"><md-icon style="color: var(--md-sys-color-primary); margin-right: 8px; font-size: 20px;">check</md-icon><span style="color: var(--md-sys-color-on-surface);">Basic units</span></li>
-                <li class="flex items-start"><md-icon style="color: var(--md-sys-color-primary); margin-right: 8px; font-size: 20px;">check</md-icon><span style="color: var(--md-sys-color-on-surface);">Public leaderboards</span></li>
-                <li class="flex items-start"><md-icon style="color: var(--md-sys-color-primary); margin-right: 8px; font-size: 20px;">check</md-icon><span style="color: var(--md-sys-color-on-surface);">3 team slots</span></li>
+                <li class="flex items-start"><span class="material-symbols-outlined" style="color: var(--md-sys-color-primary); margin-right: 8px; font-size: 20px;">check</span><span style="color: var(--md-sys-color-on-surface);">10 battles per day</span></li>
+                <li class="flex items-start"><span class="material-symbols-outlined" style="color: var(--md-sys-color-primary); margin-right: 8px; font-size: 20px;">check</span><span style="color: var(--md-sys-color-on-surface);">Basic units</span></li>
+                <li class="flex items-start"><span class="material-symbols-outlined" style="color: var(--md-sys-color-primary); margin-right: 8px; font-size: 20px;">check</span><span style="color: var(--md-sys-color-on-surface);">Public leaderboards</span></li>
+                <li class="flex items-start"><span class="material-symbols-outlined" style="color: var(--md-sys-color-primary); margin-right: 8px; font-size: 20px;">check</span><span style="color: var(--md-sys-color-on-surface);">3 team slots</span></li>
             </ul>
             @if (Model.CurrentTier == "Free")
             {
-                <md-filled-tonal-button disabled class="w-full" style="--md-filled-tonal-button-container-color: var(--md-sys-color-secondary-container);">
+                <button class="md3-btn-tonal w-full" disabled>
                     Current Plan
-                </md-filled-tonal-button>
+                </button>
             }
             else
             {
                 <form method="post" asp-page-handler="Downgrade">
-                    <md-outlined-button type="submit" class="w-full">Downgrade to Free</md-outlined-button>
+                    <button type="submit" class="md3-btn-outlined w-full">Downgrade to Free</button>
                 </form>
             }
         </div>
@@ -99,23 +99,23 @@
             <h3 class="text-2xl font-bold mb-2" style="color: var(--md-sys-color-on-surface);">Premium</h3>
             <p class="text-4xl font-bold mb-6" style="color: var(--md-sys-color-on-surface);">$5<span class="text-lg" style="color: var(--md-sys-color-on-surface-variant);">/month</span></p>
             <ul class="space-y-3 mb-6">
-                <li class="flex items-start"><md-icon style="color: var(--md-sys-color-primary); margin-right: 8px; font-size: 20px;">check</md-icon><span class="font-semibold" style="color: var(--md-sys-color-on-surface);">Unlimited battles</span></li>
-                <li class="flex items-start"><md-icon style="color: var(--md-sys-color-primary); margin-right: 8px; font-size: 20px;">check</md-icon><span style="color: var(--md-sys-color-on-surface);">50+ units (all rarities)</span></li>
-                <li class="flex items-start"><md-icon style="color: var(--md-sys-color-primary); margin-right: 8px; font-size: 20px;">check</md-icon><span style="color: var(--md-sys-color-on-surface);">Priority matchmaking</span></li>
-                <li class="flex items-start"><md-icon style="color: var(--md-sys-color-primary); margin-right: 8px; font-size: 20px;">check</md-icon><span style="color: var(--md-sys-color-on-surface);">10 team slots</span></li>
-                <li class="flex items-start"><md-icon style="color: var(--md-sys-color-primary); margin-right: 8px; font-size: 20px;">check</md-icon><span style="color: var(--md-sys-color-on-surface);">Advanced statistics</span></li>
+                <li class="flex items-start"><span class="material-symbols-outlined" style="color: var(--md-sys-color-primary); margin-right: 8px; font-size: 20px;">check</span><span class="font-semibold" style="color: var(--md-sys-color-on-surface);">Unlimited battles</span></li>
+                <li class="flex items-start"><span class="material-symbols-outlined" style="color: var(--md-sys-color-primary); margin-right: 8px; font-size: 20px;">check</span><span style="color: var(--md-sys-color-on-surface);">50+ units (all rarities)</span></li>
+                <li class="flex items-start"><span class="material-symbols-outlined" style="color: var(--md-sys-color-primary); margin-right: 8px; font-size: 20px;">check</span><span style="color: var(--md-sys-color-on-surface);">Priority matchmaking</span></li>
+                <li class="flex items-start"><span class="material-symbols-outlined" style="color: var(--md-sys-color-primary); margin-right: 8px; font-size: 20px;">check</span><span style="color: var(--md-sys-color-on-surface);">10 team slots</span></li>
+                <li class="flex items-start"><span class="material-symbols-outlined" style="color: var(--md-sys-color-primary); margin-right: 8px; font-size: 20px;">check</span><span style="color: var(--md-sys-color-on-surface);">Advanced statistics</span></li>
             </ul>
             @if (Model.CurrentTier == "Premium")
             {
-                <md-filled-tonal-button disabled class="w-full" style="--md-filled-tonal-button-container-color: var(--md-sys-color-secondary-container);">
+                <button class="md3-btn-tonal w-full" disabled>
                     Current Plan
-                </md-filled-tonal-button>
+                </button>
             }
             else
             {
                 <form method="post" asp-page-handler="Upgrade">
                     <input type="hidden" name="tier" value="premium" />
-                    <md-filled-button type="submit" class="w-full">Upgrade to Premium</md-filled-button>
+                    <button type="submit" class="md3-btn-filled w-full">Upgrade to Premium</button>
                 </form>
             }
         </div>
@@ -129,23 +129,23 @@
             <h3 class="text-2xl font-bold mb-2" style="color: var(--md-sys-color-on-surface);">Premium Plus</h3>
             <p class="text-4xl font-bold mb-6" style="color: var(--md-sys-color-on-surface);">$10<span class="text-lg" style="color: var(--md-sys-color-on-surface-variant);">/month</span></p>
             <ul class="space-y-3 mb-6">
-                <li class="flex items-start"><md-icon style="color: var(--md-sys-color-primary); margin-right: 8px; font-size: 20px;">check</md-icon><span class="font-semibold" style="color: var(--md-sys-color-on-surface);">Everything in Premium</span></li>
-                <li class="flex items-start"><md-icon style="color: var(--md-sys-color-primary); margin-right: 8px; font-size: 20px;">check</md-icon><span style="color: var(--md-sys-color-on-surface);">Scripting engine (Lua)</span></li>
-                <li class="flex items-start"><md-icon style="color: var(--md-sys-color-primary); margin-right: 8px; font-size: 20px;">check</md-icon><span style="color: var(--md-sys-color-on-surface);">Advanced analytics</span></li>
-                <li class="flex items-start"><md-icon style="color: var(--md-sys-color-primary); margin-right: 8px; font-size: 20px;">check</md-icon><span style="color: var(--md-sys-color-on-surface);">2x API rate limits</span></li>
-                <li class="flex items-start"><md-icon style="color: var(--md-sys-color-primary); margin-right: 8px; font-size: 20px;">check</md-icon><span style="color: var(--md-sys-color-on-surface);">Monthly coaching session</span></li>
+                <li class="flex items-start"><span class="material-symbols-outlined" style="color: var(--md-sys-color-primary); margin-right: 8px; font-size: 20px;">check</span><span class="font-semibold" style="color: var(--md-sys-color-on-surface);">Everything in Premium</span></li>
+                <li class="flex items-start"><span class="material-symbols-outlined" style="color: var(--md-sys-color-primary); margin-right: 8px; font-size: 20px;">check</span><span style="color: var(--md-sys-color-on-surface);">Scripting engine (Lua)</span></li>
+                <li class="flex items-start"><span class="material-symbols-outlined" style="color: var(--md-sys-color-primary); margin-right: 8px; font-size: 20px;">check</span><span style="color: var(--md-sys-color-on-surface);">Advanced analytics</span></li>
+                <li class="flex items-start"><span class="material-symbols-outlined" style="color: var(--md-sys-color-primary); margin-right: 8px; font-size: 20px;">check</span><span style="color: var(--md-sys-color-on-surface);">2x API rate limits</span></li>
+                <li class="flex items-start"><span class="material-symbols-outlined" style="color: var(--md-sys-color-primary); margin-right: 8px; font-size: 20px;">check</span><span style="color: var(--md-sys-color-on-surface);">Monthly coaching session</span></li>
             </ul>
             @if (Model.CurrentTier == "PremiumPlus")
             {
-                <md-filled-tonal-button disabled class="w-full" style="--md-filled-tonal-button-container-color: var(--md-sys-color-secondary-container);">
+                <button class="md3-btn-tonal w-full" disabled>
                     Current Plan
-                </md-filled-tonal-button>
+                </button>
             }
             else
             {
                 <form method="post" asp-page-handler="Upgrade">
                     <input type="hidden" name="tier" value="premium_plus" />
-                    <md-filled-button type="submit" class="w-full">Upgrade to Premium Plus</md-filled-button>
+                    <button type="submit" class="md3-btn-filled w-full">Upgrade to Premium Plus</button>
                 </form>
             }
         </div>
@@ -156,21 +156,21 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-center text-sm">
             <div>
                 <p class="font-semibold" style="color: var(--md-sys-color-on-surface);">
-                    <md-icon style="vertical-align: middle; margin-right: 4px; font-size: 18px; color: var(--md-sys-color-primary);">lock</md-icon>
+                    <span class="material-symbols-outlined" style="vertical-align: middle; margin-right: 4px; font-size: 18px; color: var(--md-sys-color-primary);">lock</span>
                     Secure Payments
                 </p>
                 <p style="color: var(--md-sys-color-on-surface-variant);">Powered by Stripe</p>
             </div>
             <div>
                 <p class="font-semibold" style="color: var(--md-sys-color-on-surface);">
-                    <md-icon style="vertical-align: middle; margin-right: 4px; font-size: 18px; color: var(--md-sys-color-primary);">cancel</md-icon>
+                    <span class="material-symbols-outlined" style="vertical-align: middle; margin-right: 4px; font-size: 18px; color: var(--md-sys-color-primary);">cancel</span>
                     Cancel Anytime
                 </p>
                 <p style="color: var(--md-sys-color-on-surface-variant);">No questions asked</p>
             </div>
             <div>
                 <p class="font-semibold" style="color: var(--md-sys-color-on-surface);">
-                    <md-icon style="vertical-align: middle; margin-right: 4px; font-size: 18px; color: var(--md-sys-color-primary);">verified</md-icon>
+                    <span class="material-symbols-outlined" style="vertical-align: middle; margin-right: 4px; font-size: 18px; color: var(--md-sys-color-primary);">verified</span>
                     Money-Back Guarantee
                 </p>
                 <p style="color: var(--md-sys-color-on-surface-variant);">First 30 days</p>

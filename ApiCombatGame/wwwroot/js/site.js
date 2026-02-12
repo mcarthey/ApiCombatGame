@@ -1,6 +1,6 @@
-// API Combat Game — Client-side utilities (M3 version)
+// API Combat Game — Client-side utilities (CSS-first M3 version)
 
-// Dark mode toggle (works with <md-icon-button toggle>)
+// Dark mode toggle (works with any element with data-theme-toggle)
 function initThemeToggle() {
     var toggles = document.querySelectorAll('[data-theme-toggle]');
     if (toggles.length === 0) return;
@@ -10,32 +10,39 @@ function initThemeToggle() {
         document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
         localStorage.setItem('theme', isDark ? 'dark' : 'light');
         toggles.forEach(function (t) {
-            if (t.tagName === 'MD-ICON-BUTTON') {
-                t.selected = isDark;
+            var lightIcon = t.querySelector('.icon-light');
+            var darkIcon = t.querySelector('.icon-dark');
+            if (lightIcon && darkIcon) {
+                lightIcon.style.display = isDark ? 'none' : '';
+                darkIcon.style.display = isDark ? '' : 'none';
             }
         });
     }
 
     var isDark = document.documentElement.classList.contains('dark');
+    // Set initial icon state
     toggles.forEach(function (t) {
-        if (t.tagName === 'MD-ICON-BUTTON') {
-            t.selected = isDark;
-            t.addEventListener('input', function () {
-                setTheme(this.selected);
-            });
-        } else {
-            t.addEventListener('click', function () {
-                setTheme(!document.documentElement.classList.contains('dark'));
-            });
+        var lightIcon = t.querySelector('.icon-light');
+        var darkIcon = t.querySelector('.icon-dark');
+        if (lightIcon && darkIcon) {
+            lightIcon.style.display = isDark ? 'none' : '';
+            darkIcon.style.display = isDark ? '' : 'none';
         }
+        t.addEventListener('click', function () {
+            setTheme(!document.documentElement.classList.contains('dark'));
+        });
     });
 }
 
 document.addEventListener('DOMContentLoaded', initThemeToggle);
 
 // Clipboard
-function copyToClipboard(text) {
-    navigator.clipboard.writeText(text).then(function () {
+function copyToClipboard(text, button) {
+    navigator.clipboard.writeText(text.trim ? text.trim() : text).then(function () {
+        if (button) {
+            button.classList.add('copy-done');
+            setTimeout(function () { button.classList.remove('copy-done'); }, 2000);
+        }
         showToast('Copied to clipboard!');
     }).catch(function () {
         var textArea = document.createElement('textarea');
@@ -72,22 +79,7 @@ function showToast(message) {
     }, 2000);
 }
 
-// Confirm action via M3 dialog
+// Confirm action via native dialog
 function confirmAction(message) {
-    return new Promise(function (resolve) {
-        var dialog = document.createElement('md-dialog');
-        dialog.innerHTML =
-            '<div slot="headline">Confirm Action</div>' +
-            '<div slot="content"><p>' + message + '</p></div>' +
-            '<div slot="actions">' +
-            '<md-text-button form="dialog" value="cancel">Cancel</md-text-button>' +
-            '<md-filled-button form="dialog" value="confirm">Confirm</md-filled-button>' +
-            '</div>';
-        dialog.addEventListener('close', function () {
-            resolve(dialog.returnValue === 'confirm');
-            dialog.remove();
-        });
-        document.body.appendChild(dialog);
-        dialog.show();
-    });
+    return Promise.resolve(confirm(message));
 }

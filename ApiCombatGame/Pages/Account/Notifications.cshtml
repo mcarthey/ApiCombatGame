@@ -17,49 +17,29 @@
             @if (Model.UnreadCount > 0)
             {
                 <form method="post" asp-page-handler="MarkAllRead">
-                    <md-text-button type="submit">
-                        <md-icon slot="icon">done_all</md-icon>
+                    <button type="submit" class="md3-btn-text">
+                        <span class="material-symbols-outlined">done_all</span>
                         Mark all as read
-                    </md-text-button>
+                    </button>
                 </form>
             }
-            <a asp-page="/Account/Settings" style="text-decoration: none;">
-                <md-text-button>
-                    <md-icon slot="icon">settings</md-icon>
-                    Preferences
-                </md-text-button>
+            <a asp-page="/Account/Settings" class="md3-btn-text" style="text-decoration: none;">
+                <span class="material-symbols-outlined">settings</span>
+                Preferences
             </a>
         </div>
     </div>
 
     <!-- Filter -->
     <div class="mb-4 flex space-x-2">
-        <a asp-page="/Account/Notifications" asp-route-unreadOnly="false" style="text-decoration: none;">
-            @if (!Model.UnreadOnly)
-            {
-                <md-filled-tonal-button>All</md-filled-tonal-button>
-            }
-            else
-            {
-                <md-outlined-button>All</md-outlined-button>
-            }
-        </a>
-        <a asp-page="/Account/Notifications" asp-route-unreadOnly="true" style="text-decoration: none;">
-            @if (Model.UnreadOnly)
-            {
-                <md-filled-tonal-button>Unread</md-filled-tonal-button>
-            }
-            else
-            {
-                <md-outlined-button>Unread</md-outlined-button>
-            }
-        </a>
+        <a asp-page="/Account/Notifications" asp-route-unreadOnly="false" class="@(!Model.UnreadOnly ? "md3-btn-tonal" : "md3-btn-outlined")" style="text-decoration: none;">All</a>
+        <a asp-page="/Account/Notifications" asp-route-unreadOnly="true" class="@(Model.UnreadOnly ? "md3-btn-tonal" : "md3-btn-outlined")" style="text-decoration: none;">Unread</a>
     </div>
 
     @if (Model.NotificationList.Count == 0)
     {
         <div class="md3-card p-12 text-center">
-            <md-icon style="font-size: 4rem; color: var(--md-sys-color-on-surface-variant); display: block; margin: 0 auto 16px;">notifications_none</md-icon>
+            <span class="material-symbols-outlined" style="font-size: 4rem; color: var(--md-sys-color-on-surface-variant); display: block; margin: 0 auto 16px;">notifications_none</span>
             <p style="color: var(--md-sys-color-on-surface-variant);">No notifications yet.</p>
         </div>
     }
@@ -95,9 +75,9 @@
                     {
                         <form method="post" asp-page-handler="MarkRead" class="ml-3 flex-shrink-0">
                             <input type="hidden" name="notificationId" value="@n.Id" />
-                            <md-icon-button type="submit" title="Mark as read">
-                                <md-icon>check</md-icon>
-                            </md-icon-button>
+                            <button type="submit" class="md3-btn-icon" title="Mark as read">
+                                <span class="material-symbols-outlined">check</span>
+                            </button>
                         </form>
                     }
                 </div>
@@ -109,11 +89,9 @@
             @if (Model.Page > 1)
             {
                 <a asp-page="/Account/Notifications" asp-route-page="@(Model.Page - 1)" asp-route-unreadOnly="@Model.UnreadOnly"
-                   style="text-decoration: none;">
-                    <md-text-button>
-                        <md-icon slot="icon">chevron_left</md-icon>
-                        Previous
-                    </md-text-button>
+                   class="md3-btn-text" style="text-decoration: none;">
+                    <span class="material-symbols-outlined">chevron_left</span>
+                    Previous
                 </a>
             }
             else
@@ -124,11 +102,9 @@
             @if (Model.NotificationList.Count == 20)
             {
                 <a asp-page="/Account/Notifications" asp-route-page="@(Model.Page + 1)" asp-route-unreadOnly="@Model.UnreadOnly"
-                   style="text-decoration: none;">
-                    <md-text-button>
-                        Next
-                        <md-icon slot="icon">chevron_right</md-icon>
-                    </md-text-button>
+                   class="md3-btn-text" style="text-decoration: none;">
+                    Next
+                    <span class="material-symbols-outlined">chevron_right</span>
                 </a>
             }
             else

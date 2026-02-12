@@ -42,13 +42,14 @@
             Grant SuperAdmin access to a player by username. They'll need to log out and back in for changes to take effect.
         </p>
         <form method="post" asp-page-handler="GrantAdminByUsername" class="flex gap-2 items-end">
-            <md-outlined-text-field label="Username" name="username" required style="flex: 1;">
-                <md-icon slot="leading-icon">person</md-icon>
-            </md-outlined-text-field>
-            <md-filled-button type="submit">
-                <md-icon slot="icon">admin_panel_settings</md-icon>
+            <div class="md3-input-wrapper" style="flex: 1;">
+                <label for="username">Username</label>
+                <input class="md3-input" id="username" name="username" required />
+            </div>
+            <button class="md3-btn-filled" type="submit">
+                <span class="material-symbols-outlined">admin_panel_settings</span>
                 Grant Admin
-            </md-filled-button>
+            </button>
         </form>
     </div>
 
@@ -59,10 +60,10 @@
             Reset the entire database. This will delete ALL data and re-seed with defaults. This action cannot be undone.
         </p>
         <form method="post" asp-page-handler="ResetDatabase" onsubmit="return confirm('Are you absolutely sure? This will DELETE ALL DATA and cannot be undone!');">
-            <md-filled-button type="submit" style="--md-filled-button-container-color: var(--md-sys-color-error); --md-filled-button-label-text-color: var(--md-sys-color-on-error);">
-                <md-icon slot="icon">delete_forever</md-icon>
+            <button class="md3-btn-filled" type="submit" style="background: var(--md-sys-color-error); color: var(--md-sys-color-on-error);">
+                <span class="material-symbols-outlined">delete_forever</span>
                 Reset Database
-            </md-filled-button>
+            </button>
         </form>
     </div>
 </div>

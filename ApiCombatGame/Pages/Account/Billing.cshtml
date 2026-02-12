@@ -24,9 +24,7 @@
                     <p class="text-sm mt-1" style="color: var(--md-sys-color-on-surface-variant);">Free plan - no billing</p>
                 }
             </div>
-            <a asp-page="/Account/Subscription" style="color: var(--md-sys-color-primary); text-decoration: none;">
-                <md-text-button>Change plan</md-text-button>
-            </a>
+            <a asp-page="/Account/Subscription" class="md3-btn-text" style="text-decoration: none;">Change plan</a>
         </div>
     </div>
 
@@ -39,10 +37,10 @@
                 Manage your payment methods, view invoices, and update billing information through the Stripe Customer Portal.
             </p>
             <form method="post" asp-page-handler="ManageBilling">
-                <md-filled-button type="submit">
-                    <md-icon slot="icon">open_in_new</md-icon>
+                <button type="submit" class="md3-btn-filled">
+                    <span class="material-symbols-outlined">open_in_new</span>
                     Manage Billing
-                </md-filled-button>
+                </button>
             </form>
         </div>
     }

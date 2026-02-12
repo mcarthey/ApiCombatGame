@@ -99,7 +99,7 @@
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
         <div class="md3-card stat-card">
             <div class="text-sm" style="color: var(--md-sys-color-on-surface-variant);">Level @Model.Dashboard.Level</div>
-            <md-linear-progress value="@(Model.Dashboard.XpProgressPercent / 100.0m)" style="margin-top: 0.5rem;"></md-linear-progress>
+            <div class="md3-progress" style="margin-top: 0.5rem;"><div class="md3-progress-bar" style="width: @(Model.Dashboard.XpProgressPercent)%;"></div></div>
             <div class="text-xs mt-1" style="color: var(--md-sys-color-outline);">
                 @Model.Dashboard.ExperiencePoints / @Model.Dashboard.XpToNextLevel XP
             </div>
@@ -145,7 +145,7 @@
                                  style="border-radius: var(--md-sys-shape-corner-medium);">
                                 <div class="w-8 h-8 flex items-center justify-center mr-3"
                                      style="background: var(--md-sys-color-primary); border-radius: 9999px;">
-                                    <md-icon style="color: var(--md-sys-color-on-primary); font-size: 16px;">@GetCategoryIcon(achievement.Category)</md-icon>
+                                    <span class="material-symbols-outlined" style="color: var(--md-sys-color-on-primary); font-size: 16px;">@GetCategoryIcon(achievement.Category)</span>
                                 </div>
                                 <div>
                                     <div class="font-medium text-sm">@achievement.Name</div>
@@ -167,7 +167,7 @@
                         </div>
                         <span class="text-sm font-bold" style="color: var(--md-sys-color-primary);">@next.ProgressPercent%</span>
                     </div>
-                    <md-linear-progress value="@(next.ProgressPercent / 100.0)"></md-linear-progress>
+                    <div class="md3-progress"><div class="md3-progress-bar" style="width: @(next.ProgressPercent)%;"></div></div>
                     <div class="text-xs mt-1" style="color: var(--md-sys-color-outline);">@next.Progress / @next.RequiredProgress</div>
                 </div>
             }
@@ -211,17 +211,15 @@
                             {
                                 <div class="absolute flex items-center justify-center text-xs"
                                      style="top: -8px; right: -8px; width: 24px; height: 24px; background: #facc15; border-radius: 9999px;">
-                                    <md-icon style="font-size: 14px; color: #713f12;">star</md-icon>
+                                    <span class="material-symbols-outlined" style="font-size: 14px; color: #713f12;">star</span>
                                 </div>
                             }
                             <div class="w-12 h-12 mx-auto flex items-center justify-center mb-2"
                                  style="border-radius: 9999px; background: rgba(0,0,0,0.06);">
-                                <md-icon style="color: var(--hero-accent); font-size: 24px;">@GetClassIcon(hero.ClassName)</md-icon>
+                                <span class="material-symbols-outlined" style="color: var(--hero-accent); font-size: 24px;">@GetClassIcon(hero.ClassName)</span>
                             </div>
                             <div class="font-medium text-sm truncate" style="color: var(--md-sys-color-on-surface);">@hero.Name</div>
-                            <md-chip-set style="justify-content: center; margin-top: 0.25rem;">
-                                <md-assist-chip label="@hero.ClassName" style="--md-assist-chip-container-height: 24px; --md-assist-chip-label-text-size: 0.7rem;"></md-assist-chip>
-                            </md-chip-set>
+                            <span class="md3-chip md3-chip-sm" style="margin-top: 0.25rem;">@hero.ClassName</span>
                             @if (hero.MasteryLevel > 0)
                             {
                                 <div class="mt-1 text-xs font-semibold" style="color: var(--hero-accent);">
@@ -276,7 +274,7 @@
                             <div class="flex items-center">
                                 @if (challenge.IsCompleted)
                                 {
-                                    <md-icon style="color: #22c55e; font-size: 20px; margin-right: 0.5rem;">check_circle</md-icon>
+                                    <span class="material-symbols-outlined" style="color: #22c55e; font-size: 20px; margin-right: 0.5rem;">check_circle</span>
                                 }
                                 <div>
                                     <span class="font-medium text-sm" style="color: var(--md-sys-color-on-surface);">@challenge.Name</span>
@@ -294,8 +292,7 @@
                         </div>
                         <div class="flex items-center gap-3">
                             <div class="flex-1">
-                                <md-linear-progress value="@(challenge.ProgressPercent / 100.0)"
-                                    style="@(challenge.IsCompleted ? "--md-linear-progress-active-indicator-color: #22c55e;" : "")"></md-linear-progress>
+                                <div class="md3-progress"><div class="md3-progress-bar" style="width: @(challenge.ProgressPercent)%;@(challenge.IsCompleted ? " background: #22c55e;" : "")"></div></div>
                             </div>
                             <span class="text-xs w-16 text-right" style="color: var(--md-sys-color-on-surface-variant);">
                                 @challenge.Progress / @challenge.RequiredProgress
@@ -361,13 +358,12 @@
                     <div class="md3-alert md3-alert-error p-4">
                         <div class="flex items-center justify-between mb-2">
                             <div class="flex items-center">
-                                <md-icon style="color: var(--md-sys-color-error); font-size: 20px; margin-right: 0.5rem;">warning</md-icon>
+                                <span class="material-symbols-outlined" style="color: var(--md-sys-color-error); font-size: 20px; margin-right: 0.5rem;">warning</span>
                                 <span class="font-medium">@boss.Name</span>
                             </div>
                             <span class="text-sm font-bold" style="color: var(--md-sys-color-error);">@boss.HpPercent% HP</span>
                         </div>
-                        <md-linear-progress value="@(boss.HpPercent / 100.0)"
-                            style="--md-linear-progress-active-indicator-color: var(--md-sys-color-error); --md-linear-progress-track-color: var(--md-sys-color-error-container);"></md-linear-progress>
+                        <div class="md3-progress"><div class="md3-progress-bar" style="width: @(boss.HpPercent)%; background: var(--md-sys-color-error);"></div></div>
                         <div class="mt-2 text-right">
                             <a href="/swagger/index.html#/GuildBoss/post_api_v1_guild_boss_attempt"
                                class="text-xs font-medium" style="color: var(--md-sys-color-error);">
@@ -380,16 +376,16 @@
             else
             {
                 <div class="text-center py-4">
-                    <md-icon style="font-size: 48px; color: var(--md-sys-color-outline); display: block; margin: 0 auto 0.75rem;">groups</md-icon>
+                    <span class="material-symbols-outlined" style="font-size: 48px; color: var(--md-sys-color-outline); display: block; margin: 0 auto 0.75rem;">groups</span>
                     <h3 class="font-medium mb-1" style="color: var(--md-sys-color-on-surface);">Join a Guild</h3>
                     <p class="text-sm mb-3 max-w-md mx-auto" style="color: var(--md-sys-color-on-surface-variant);">
                         Guilds unlock boss battles, shared treasury, team strategies, and guild chat!
                     </p>
                     @if (Model.Dashboard.Tier == "Free")
                     {
-                        <md-filled-button href="/Account/Subscription">
+                        <a class="md3-btn-filled" href="/Account/Subscription" style="text-decoration: none;">
                             Upgrade to Premium to Create a Guild
-                        </md-filled-button>
+                        </a>
                     }
                     else
                     {
@@ -422,7 +418,7 @@
                         <div class="text-xl font-bold" style="color: var(--md-sys-color-error);">
                             @for (int i = 0; i < Math.Min(Model.Dashboard.WinStreak, 5); i++)
                             {
-                                <md-icon style="font-size: 20px; color: @(i < 3 ? "var(--md-sys-color-tertiary)" : "var(--md-sys-color-error)");">local_fire_department</md-icon>
+                                <span class="material-symbols-outlined" style="font-size: 20px; color: @(i < 3 ? "var(--md-sys-color-tertiary)" : "var(--md-sys-color-error)");">local_fire_department</span>
                             }
                             @if (Model.Dashboard.WinStreak > 5)
                             {
@@ -446,10 +442,10 @@
                         Upgrade for unlimited battles
                     </a>
                 }
-                <md-filled-tonal-button href="/swagger/index.html#/Battle/post_api_v1_battle_queue">
-                    <md-icon slot="icon">swords</md-icon>
+                <a class="md3-btn-tonal" href="/swagger/index.html#/Battle/post_api_v1_battle_queue" style="text-decoration: none;">
+                    <span class="material-symbols-outlined">swords</span>
                     Queue Battle
-                </md-filled-tonal-button>
+                </a>
             </div>
         </div>
     </div>
@@ -486,7 +482,7 @@
                        class="md3-card stat-card block"
                        style="border-left: 4px solid @accentColor;">
                         <div class="flex items-start gap-3">
-                            <md-icon style="color: @accentColor; font-size: 24px;">@iconName</md-icon>
+                            <span class="material-symbols-outlined" style="color: @accentColor; font-size: 24px;">@iconName</span>
                             <div>
                                 <div class="font-medium mb-1" style="color: var(--md-sys-color-on-surface);">@action.Title</div>
                                 <p class="text-sm mb-2" style="color: var(--md-sys-color-on-surface-variant);">@action.Description</p>

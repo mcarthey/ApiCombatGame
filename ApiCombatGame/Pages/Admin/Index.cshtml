@@ -77,21 +77,21 @@
                     var premiumPercent = Model.Data.TotalPlayers > 0 ? (double)Model.Data.PremiumCount / Model.Data.TotalPlayers : 0;
                     var ppPercent = Model.Data.TotalPlayers > 0 ? (double)Model.Data.PremiumPlusCount / Model.Data.TotalPlayers : 0;
                 }
-                <md-linear-progress value="@freePercent" style="--md-linear-progress-active-indicator-color: var(--md-sys-color-outline);"></md-linear-progress>
+                <div class="md3-progress"><div class="md3-progress-bar" style="width: @(freePercent * 100)%; background: var(--md-sys-color-outline);"></div></div>
             </div>
             <div>
                 <div class="flex justify-between text-sm mb-1">
                     <span style="color: var(--md-sys-color-primary);">Premium</span>
                     <span class="font-medium" style="color: var(--md-sys-color-on-surface);">@Model.Data.PremiumCount</span>
                 </div>
-                <md-linear-progress value="@premiumPercent" style="--md-linear-progress-active-indicator-color: var(--md-sys-color-primary);"></md-linear-progress>
+                <div class="md3-progress"><div class="md3-progress-bar" style="width: @(premiumPercent * 100)%; background: var(--md-sys-color-primary);"></div></div>
             </div>
             <div>
                 <div class="flex justify-between text-sm mb-1">
                     <span style="color: var(--md-sys-color-tertiary-container);">Premium+</span>
                     <span class="font-medium" style="color: var(--md-sys-color-on-surface);">@Model.Data.PremiumPlusCount</span>
                 </div>
-                <md-linear-progress value="@ppPercent" style="--md-linear-progress-active-indicator-color: var(--md-sys-color-tertiary-container);"></md-linear-progress>
+                <div class="md3-progress"><div class="md3-progress-bar" style="width: @(ppPercent * 100)%; background: var(--md-sys-color-tertiary-container);"></div></div>
             </div>
         </div>
         <div class="mt-4 pt-4" style="border-top: 1px solid var(--md-sys-color-outline-variant);">
@@ -136,7 +136,7 @@
 <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
     <a href="/Admin/Players" class="md3-card stat-card p-4 flex items-center">
         <div class="p-3 mr-4" style="background: var(--md-sys-color-primary-container); border-radius: var(--md-sys-shape-corner-medium);">
-            <md-icon style="color: var(--md-sys-color-on-primary-container);">group</md-icon>
+            <span class="material-symbols-outlined" style="color: var(--md-sys-color-on-primary-container);">group</span>
         </div>
         <div>
             <div class="font-medium" style="color: var(--md-sys-color-on-surface);">Player Management</div>
@@ -145,7 +145,7 @@
     </a>
     <a href="/Admin/Meta" class="md3-card stat-card p-4 flex items-center">
         <div class="p-3 mr-4" style="background: var(--md-sys-color-secondary-container); border-radius: var(--md-sys-shape-corner-medium);">
-            <md-icon style="color: var(--md-sys-color-on-secondary-container);">bar_chart</md-icon>
+            <span class="material-symbols-outlined" style="color: var(--md-sys-color-on-secondary-container);">bar_chart</span>
         </div>
         <div>
             <div class="font-medium" style="color: var(--md-sys-color-on-surface);">Meta & Balance</div>
@@ -154,7 +154,7 @@
     </a>
     <a href="/Admin/Guilds" class="md3-card stat-card p-4 flex items-center">
         <div class="p-3 mr-4" style="background: var(--md-sys-color-tertiary-container); border-radius: var(--md-sys-shape-corner-medium);">
-            <md-icon style="color: var(--md-sys-color-on-tertiary-container);">shield</md-icon>
+            <span class="material-symbols-outlined" style="color: var(--md-sys-color-on-tertiary-container);">shield</span>
         </div>
         <div>
             <div class="font-medium" style="color: var(--md-sys-color-on-surface);">Guild Analytics</div>
@@ -163,7 +163,7 @@
     </a>
     <a href="/Admin/Technical" class="md3-card stat-card p-4 flex items-center">
         <div class="p-3 mr-4" style="background: var(--md-sys-color-error-container); border-radius: var(--md-sys-shape-corner-medium);">
-            <md-icon style="color: var(--md-sys-color-on-error-container);">settings</md-icon>
+            <span class="material-symbols-outlined" style="color: var(--md-sys-color-on-error-container);">settings</span>
         </div>
         <div>
             <div class="font-medium" style="color: var(--md-sys-color-on-surface);">Technical Health</div>

@@ -24,44 +24,32 @@
 
         <form method="post">
             <div class="mb-4">
-                <md-outlined-text-field
-                    label="Username"
-                    name="Input.Username"
-                    id="Input_Username"
-                    required
-                    value="@Model.Input?.Username"
-                    placeholder="Enter your username"
-                    class="w-full">
-                </md-outlined-text-field>
+                <div class="md3-input-wrapper">
+                    <label for="Input_Username">Username</label>
+                    <input class="md3-input" id="Input_Username" name="Input.Username" type="text" required value="@Model.Input?.Username" placeholder="Enter your username" />
+                </div>
                 <span asp-validation-for="Input.Username" class="field-validation-error"></span>
             </div>
 
             <div class="mb-6">
-                <md-outlined-text-field
-                    label="Password"
-                    type="password"
-                    name="Input.Password"
-                    id="Input_Password"
-                    required
-                    placeholder="Enter your password"
-                    class="w-full">
-                </md-outlined-text-field>
+                <div class="md3-input-wrapper">
+                    <label for="Input_Password">Password</label>
+                    <input class="md3-input" id="Input_Password" name="Input.Password" type="password" required placeholder="Enter your password" />
+                </div>
                 <span asp-validation-for="Input.Password" class="field-validation-error"></span>
             </div>
 
             <div class="mb-4">
                 <label class="flex items-center gap-3">
-                    <md-checkbox name="Input.RememberMe" value="true"
-                                 touch-target="wrapper"
-                                 @(Model.Input?.RememberMe == true ? "checked" : "")>
-                    </md-checkbox>
+                    <input type="checkbox" class="md3-checkbox" name="Input.RememberMe" value="true"
+                                 @(Model.Input?.RememberMe == true ? "checked" : "") />
                     <span class="text-sm" style="color: var(--md-sys-color-on-surface-variant);">Remember me</span>
                 </label>
             </div>
 
-            <md-filled-button type="submit" class="w-full">
+            <button type="submit" class="md3-btn-filled w-full">
                 Login
-            </md-filled-button>
+            </button>
         </form>
 
         <p class="text-center text-sm mt-6" style="color: var(--md-sys-color-on-surface-variant);">

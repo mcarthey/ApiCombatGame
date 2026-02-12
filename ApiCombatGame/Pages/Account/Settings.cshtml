@@ -11,7 +11,7 @@
     {
         <div class="md3-alert-success p-4 mb-6">
             <div class="flex items-center">
-                <md-icon style="color: var(--md-sys-color-primary); margin-right: 12px;">check_circle</md-icon>
+                <span class="material-symbols-outlined" style="color: var(--md-sys-color-primary); margin-right: 12px;">check_circle</span>
                 <p class="text-sm" style="color: var(--md-sys-color-on-surface);">@Model.SuccessMessage</p>
             </div>
         </div>
@@ -21,7 +21,7 @@
     {
         <div class="md3-alert-error p-4 mb-6">
             <div class="flex items-center">
-                <md-icon style="color: var(--md-sys-color-error); margin-right: 12px;">error</md-icon>
+                <span class="material-symbols-outlined" style="color: var(--md-sys-color-error); margin-right: 12px;">error</span>
                 <p class="text-sm" style="color: var(--md-sys-color-on-error-container);">@Model.ErrorMessage</p>
             </div>
         </div>
@@ -35,7 +35,7 @@
                 <span style="color: var(--md-sys-color-on-surface-variant);">Username</span>
                 <span class="font-medium" style="color: var(--md-sys-color-on-surface);">@Model.CurrentUsername</span>
             </div>
-            <md-divider></md-divider>
+            <hr class="md3-divider" />
             <div class="flex justify-between">
                 <span style="color: var(--md-sys-color-on-surface-variant);">Member since</span>
                 <span class="font-medium" style="color: var(--md-sys-color-on-surface);">@Model.MemberSince.ToString("MMMM dd, yyyy")</span>
@@ -48,17 +48,12 @@
         <h2 class="text-lg font-semibold mb-4" style="color: var(--md-sys-color-on-surface);">Email Address</h2>
         <form method="post" asp-page-handler="UpdateEmail">
             <div class="mb-4">
-                <md-outlined-text-field
-                    type="email"
-                    label="Email"
-                    name="Input.Email"
-                    id="email"
-                    value="@Model.Input.Email"
-                    required
-                    class="w-full">
-                </md-outlined-text-field>
+                <div class="md3-input-wrapper">
+                    <label for="email">Email</label>
+                    <input class="md3-input" id="email" name="Input.Email" type="email" value="@Model.Input.Email" required />
+                </div>
             </div>
-            <md-filled-button type="submit">Update Email</md-filled-button>
+            <button type="submit" class="md3-btn-filled">Update Email</button>
         </form>
     </div>
 
@@ -67,27 +62,18 @@
         <h2 class="text-lg font-semibold mb-4" style="color: var(--md-sys-color-on-surface);">Change Password</h2>
         <form method="post" asp-page-handler="ChangePassword">
             <div class="mb-4">
-                <md-outlined-text-field
-                    type="password"
-                    label="Current Password"
-                    name="Input.CurrentPassword"
-                    id="currentPassword"
-                    required
-                    class="w-full">
-                </md-outlined-text-field>
+                <div class="md3-input-wrapper">
+                    <label for="currentPassword">Current Password</label>
+                    <input class="md3-input" id="currentPassword" name="Input.CurrentPassword" type="password" required />
+                </div>
             </div>
             <div class="mb-4">
-                <md-outlined-text-field
-                    type="password"
-                    label="New Password"
-                    name="Input.NewPassword"
-                    id="newPassword"
-                    required
-                    supporting-text="Minimum 8 characters"
-                    class="w-full">
-                </md-outlined-text-field>
+                <div class="md3-input-wrapper">
+                    <label for="newPassword">New Password</label>
+                    <input class="md3-input" id="newPassword" name="Input.NewPassword" type="password" required placeholder="Minimum 8 characters" />
+                </div>
             </div>
-            <md-filled-button type="submit">Change Password</md-filled-button>
+            <button type="submit" class="md3-btn-filled">Change Password</button>
         </form>
     </div>
 
@@ -95,9 +81,7 @@
     <div class="md3-card p-6">
         <div class="flex items-center justify-between mb-4">
             <h2 class="text-lg font-semibold" style="color: var(--md-sys-color-on-surface);">Notification Preferences</h2>
-            <a asp-page="/Account/Notifications" style="text-decoration: none;">
-                <md-text-button>View notifications</md-text-button>
-            </a>
+            <a asp-page="/Account/Notifications" class="md3-btn-text" style="text-decoration: none;">View notifications</a>
         </div>
         <p class="text-sm mb-4" style="color: var(--md-sys-color-on-surface-variant);">Choose which notifications you want to receive. System and Security notifications are always enabled.</p>
         <form method="post" asp-page-handler="UpdateNotificationPreferences">
@@ -107,50 +91,50 @@
                         <span class="text-sm font-medium" style="color: var(--md-sys-color-on-surface);">Battle</span>
                         <p class="text-xs" style="color: var(--md-sys-color-on-surface-variant);">Results, win streaks, rating milestones</p>
                     </div>
-                    <md-checkbox name="battle" value="true" @(Model.NotifPrefs.Battle ? "checked" : "")></md-checkbox>
+                    <input type="checkbox" class="md3-checkbox" name="battle" value="true" @(Model.NotifPrefs.Battle ? "checked" : "") />
                 </label>
-                <md-divider></md-divider>
+                <hr class="md3-divider" />
                 <label class="flex items-center justify-between">
                     <div>
                         <span class="text-sm font-medium" style="color: var(--md-sys-color-on-surface);">Guild</span>
                         <p class="text-xs" style="color: var(--md-sys-color-on-surface-variant);">Invites, promotions, boss events, chat mentions</p>
                     </div>
-                    <md-checkbox name="guild" value="true" @(Model.NotifPrefs.Guild ? "checked" : "")></md-checkbox>
+                    <input type="checkbox" class="md3-checkbox" name="guild" value="true" @(Model.NotifPrefs.Guild ? "checked" : "") />
                 </label>
-                <md-divider></md-divider>
+                <hr class="md3-divider" />
                 <label class="flex items-center justify-between">
                     <div>
                         <span class="text-sm font-medium" style="color: var(--md-sys-color-on-surface);">Progression</span>
                         <p class="text-xs" style="color: var(--md-sys-color-on-surface-variant);">Level ups, achievements, mastery, daily challenges</p>
                     </div>
-                    <md-checkbox name="progression" value="true" @(Model.NotifPrefs.Progression ? "checked" : "")></md-checkbox>
+                    <input type="checkbox" class="md3-checkbox" name="progression" value="true" @(Model.NotifPrefs.Progression ? "checked" : "") />
                 </label>
-                <md-divider></md-divider>
+                <hr class="md3-divider" />
                 <label class="flex items-center justify-between">
                     <div>
                         <span class="text-sm font-medium" style="color: var(--md-sys-color-on-surface);">Marketplace</span>
                         <p class="text-xs" style="color: var(--md-sys-color-on-surface-variant);">Strategy ratings and download milestones</p>
                     </div>
-                    <md-checkbox name="marketplace" value="true" @(Model.NotifPrefs.Marketplace ? "checked" : "")></md-checkbox>
+                    <input type="checkbox" class="md3-checkbox" name="marketplace" value="true" @(Model.NotifPrefs.Marketplace ? "checked" : "") />
                 </label>
-                <md-divider></md-divider>
+                <hr class="md3-divider" />
                 <div class="flex items-center justify-between" style="opacity: 0.6;">
                     <div>
                         <span class="text-sm font-medium" style="color: var(--md-sys-color-on-surface);">System</span>
                         <p class="text-xs" style="color: var(--md-sys-color-on-surface-variant);">Modifier rotations, announcements</p>
                     </div>
-                    <md-checkbox checked disabled></md-checkbox>
+                    <input type="checkbox" class="md3-checkbox" checked disabled />
                 </div>
-                <md-divider></md-divider>
+                <hr class="md3-divider" />
                 <div class="flex items-center justify-between" style="opacity: 0.6;">
                     <div>
                         <span class="text-sm font-medium" style="color: var(--md-sys-color-on-surface);">Security</span>
                         <p class="text-xs" style="color: var(--md-sys-color-on-surface-variant);">API key alerts, password changes, admin actions</p>
                     </div>
-                    <md-checkbox checked disabled></md-checkbox>
+                    <input type="checkbox" class="md3-checkbox" checked disabled />
                 </div>
             </div>
-            <md-filled-button type="submit" style="margin-top: 16px;">Save Preferences</md-filled-button>
+            <button type="submit" class="md3-btn-filled" style="margin-top: 16px;">Save Preferences</button>
         </form>
     </div>
 </div>

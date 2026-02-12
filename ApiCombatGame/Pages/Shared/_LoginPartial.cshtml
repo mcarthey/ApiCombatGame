@@ -6,16 +6,16 @@
         <span class="text-sm" style="color: var(--md-sys-color-on-surface-variant);">
             @User.FindFirstValue(ClaimTypes.Name)
         </span>
-        <md-text-button href="/Dashboard">Dashboard</md-text-button>
+        <a href="/Dashboard" class="md3-btn-text" style="text-decoration: none;">Dashboard</a>
         <form method="post" asp-page="/Auth/Logout" class="inline">
-            <md-text-button type="submit">Logout</md-text-button>
+            <button type="submit" class="md3-btn-text">Logout</button>
         </form>
     </div>
 }
 else
 {
     <div class="flex items-center space-x-2">
-        <md-text-button href="/Auth/Login">Login</md-text-button>
-        <md-filled-button href="/Auth/Register">Sign Up</md-filled-button>
+        <a href="/Auth/Login" class="md3-btn-text" style="text-decoration: none;">Login</a>
+        <a href="/Auth/Register" class="md3-btn-filled" style="text-decoration: none;">Sign Up</a>
     </div>
 }

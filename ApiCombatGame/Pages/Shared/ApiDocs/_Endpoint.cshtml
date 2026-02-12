@@ -39,7 +39,7 @@
         @if (Model.RequiresAuth)
         {
             <span class="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 text-xs" style="background: var(--md-sys-color-surface-container-high); color: var(--md-sys-color-on-surface-variant); border-radius: var(--md-sys-shape-corner-small);">
-                <md-icon style="font-size: 14px; width: 14px; height: 14px;">lock</md-icon>
+                <span class="material-symbols-outlined" style="font-size: 14px; width: 14px; height: 14px;">lock</span>
                 Auth
             </span>
         }
@@ -50,7 +50,7 @@
             </span>
         }
 
-        <md-icon class="shrink-0 transition-transform group-open:rotate-180" style="color: var(--md-sys-color-on-surface-variant); font-size: 18px;">expand_more</md-icon>
+        <span class="material-symbols-outlined shrink-0 transition-transform group-open:rotate-180" style="color: var(--md-sys-color-on-surface-variant); font-size: 18px;">expand_more</span>
     </summary>
 
     <div class="px-5 pb-5 pt-4 space-y-4" style="border-top: 1px solid var(--md-sys-color-outline-variant);">
@@ -72,7 +72,7 @@
                 <div class="flex flex-wrap gap-1.5">
                     @foreach (var prereq in Model.Prerequisites)
                     {
-                        <md-assist-chip label="@prereq"></md-assist-chip>
+                        <span class="md3-chip">@prereq</span>
                     }
                 </div>
             </div>
@@ -181,7 +181,7 @@
                 @foreach (var tip in Model.GameTips)
                 {
                     <div class="md3-alert-info flex gap-3">
-                        <md-icon class="shrink-0 mt-0.5" style="font-size: 18px;">tips_and_updates</md-icon>
+                        <span class="material-symbols-outlined shrink-0 mt-0.5" style="font-size: 18px;">tips_and_updates</span>
                         <span class="text-sm">@tip</span>
                     </div>
                 }

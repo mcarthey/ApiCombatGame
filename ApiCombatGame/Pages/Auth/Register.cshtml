@@ -17,61 +17,40 @@
 
         <form method="post">
             <div class="mb-4">
-                <md-outlined-text-field
-                    label="Username"
-                    name="Input.Username"
-                    id="Input_Username"
-                    required
-                    value="@Model.Input?.Username"
-                    placeholder="Choose a username"
-                    class="w-full">
-                </md-outlined-text-field>
+                <div class="md3-input-wrapper">
+                    <label for="Input_Username">Username</label>
+                    <input class="md3-input" id="Input_Username" name="Input.Username" type="text" required value="@Model.Input?.Username" placeholder="Choose a username" />
+                </div>
                 <span asp-validation-for="Input.Username" class="field-validation-error"></span>
             </div>
 
             <div class="mb-4">
-                <md-outlined-text-field
-                    label="Email"
-                    type="email"
-                    name="Input.Email"
-                    id="Input_Email"
-                    required
-                    value="@Model.Input?.Email"
-                    placeholder="you@@example.com"
-                    class="w-full">
-                </md-outlined-text-field>
+                <div class="md3-input-wrapper">
+                    <label for="Input_Email">Email</label>
+                    <input class="md3-input" id="Input_Email" name="Input.Email" type="email" required value="@Model.Input?.Email" placeholder="you@@example.com" />
+                </div>
                 <span asp-validation-for="Input.Email" class="field-validation-error"></span>
             </div>
 
             <div class="mb-4">
-                <md-outlined-text-field
-                    label="Password"
-                    type="password"
-                    name="Input.Password"
-                    id="Input_Password"
-                    required
-                    placeholder="Minimum 8 characters"
-                    class="w-full">
-                </md-outlined-text-field>
+                <div class="md3-input-wrapper">
+                    <label for="Input_Password">Password</label>
+                    <input class="md3-input" id="Input_Password" name="Input.Password" type="password" required placeholder="Minimum 8 characters" />
+                </div>
                 <span asp-validation-for="Input.Password" class="field-validation-error"></span>
             </div>
 
             <div class="mb-6">
-                <md-outlined-text-field
-                    label="Confirm Password"
-                    type="password"
-                    name="Input.ConfirmPassword"
-                    id="Input_ConfirmPassword"
-                    required
-                    placeholder="Repeat your password"
-                    class="w-full">
-                </md-outlined-text-field>
+                <div class="md3-input-wrapper">
+                    <label for="Input_ConfirmPassword">Confirm Password</label>
+                    <input class="md3-input" id="Input_ConfirmPassword" name="Input.ConfirmPassword" type="password" required placeholder="Repeat your password" />
+                </div>
                 <span asp-validation-for="Input.ConfirmPassword" class="field-validation-error"></span>
             </div>
 
-            <md-filled-button type="submit" class="w-full">
+            <button type="submit" class="md3-btn-filled w-full">
                 Create Account
-            </md-filled-button>
+            </button>
         </form>
 
         <p class="text-center text-sm mt-6" style="color: var(--md-sys-color-on-surface-variant);">

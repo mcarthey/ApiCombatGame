@@ -5,11 +5,11 @@
     {
         <span class="absolute top-2 left-3 text-xs font-medium uppercase tracking-wide" style="color: var(--md-sys-color-on-surface-variant);">@Model.Label</span>
     }
-    <md-icon-button onclick="copyToClipboard(this.parentElement.querySelector('pre').textContent, this)"
-            class="absolute top-1 right-1 opacity-0 group-hover/code:opacity-100 transition-all"
+    <button class="md3-btn-icon absolute top-1 right-1 opacity-0 group-hover/code:opacity-100 transition-all"
+            onclick="copyToClipboard(this.parentElement.querySelector('pre').textContent, this)"
             title="Copy to clipboard">
-        <md-icon class="copy-icon">content_copy</md-icon>
-        <md-icon class="check-icon hidden">check</md-icon>
-    </md-icon-button>
+        <span class="material-symbols-outlined copy-icon">content_copy</span>
+        <span class="material-symbols-outlined check-icon hidden">check</span>
+    </button>
     <pre class="p-4 @(!string.IsNullOrEmpty(Model.Label) ? "pt-8" : "") overflow-x-auto text-sm" style="background: var(--md-sys-color-inverse-surface); color: var(--md-sys-color-inverse-on-surface); border-radius: var(--md-sys-shape-corner-large);"><code class="language-@Model.Language">@Model.Code</code></pre>
 </div>

@@ -23,7 +23,7 @@
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
                 <div class="inline-flex items-center gap-2 px-2.5 py-0.5" style="border-radius: var(--md-sys-shape-corner-large); background: rgba(255,255,255,0.12); color: rgba(255,255,255,0.8); font-size: 0.75rem; font-weight: 500;">
-                    <md-icon style="font-size: 14px; width: 14px; height: 14px; color: inherit;">code</md-icon>
+                    <span class="material-symbols-outlined" style="font-size: 14px; width: 14px; height: 14px; color: inherit;">code</span>
                     v1 &middot; OpenAPI 3.0
                 </div>
                 <h1 class="text-3xl sm:text-4xl font-extrabold mb-2" style="color: var(--md-sys-color-on-primary);">
@@ -34,17 +34,13 @@
                 </p>
             </div>
             <div class="flex gap-3 shrink-0">
-                <a href="#quick-start">
-                    <md-filled-button>
-                        Quick Start
-                        <md-icon slot="icon">arrow_downward</md-icon>
-                    </md-filled-button>
+                <a href="#quick-start" class="md3-btn-filled" style="text-decoration: none;">
+                    <span class="material-symbols-outlined">arrow_downward</span>
+                    Quick Start
                 </a>
-                <a href="/openapi/v1.json" target="_blank">
-                    <md-outlined-button style="--md-outlined-button-outline-color: rgba(255,255,255,0.4); --md-outlined-button-label-text-color: var(--md-sys-color-on-primary);">
-                        <md-icon slot="icon">download</md-icon>
-                        OpenAPI Spec
-                    </md-outlined-button>
+                <a href="/openapi/v1.json" target="_blank" class="md3-btn-outlined" style="text-decoration: none; border-color: rgba(255,255,255,0.4); color: var(--md-sys-color-on-primary);">
+                    <span class="material-symbols-outlined">download</span>
+                    OpenAPI Spec
                 </a>
             </div>
         </div>
@@ -128,12 +124,12 @@
             </div>
             <div class="relative group/code">
                 <span class="absolute top-2 left-3 text-xs font-medium uppercase tracking-wide" style="color: var(--md-sys-color-on-surface-variant);">Example</span>
-                <md-icon-button onclick="copyToClipboard(document.getElementById('auth-example').textContent, this)"
-                        class="absolute top-1 right-1 opacity-0 group-hover/code:opacity-100 transition-all"
+                <button class="md3-btn-icon absolute top-1 right-1 opacity-0 group-hover/code:opacity-100 transition-all"
+                        onclick="copyToClipboard(document.getElementById('auth-example').textContent, this)"
                         title="Copy to clipboard">
-                    <md-icon class="copy-icon">content_copy</md-icon>
-                    <md-icon class="check-icon hidden">check</md-icon>
-                </md-icon-button>
+                    <span class="material-symbols-outlined copy-icon">content_copy</span>
+                    <span class="material-symbols-outlined check-icon hidden">check</span>
+                </button>
                 <pre id="auth-example" class="p-4 pt-8 overflow-x-auto text-sm" style="background: var(--md-sys-color-inverse-surface); color: var(--md-sys-color-inverse-on-surface); border-radius: var(--md-sys-shape-corner-large);"><code><span style="color: var(--md-sys-color-on-surface-variant);"># Register</span>
 curl -X POST /api/v1/auth/register \
   -H "Content-Type: application/json" \
@@ -157,12 +153,10 @@ curl /api/v1/player/profile \
 
                     @* Search filter *@
                     <div class="mb-4">
-                        <md-outlined-text-field id="endpoint-search"
-                                                label="Filter endpoints..."
-                                                type="text"
-                                                style="width: 100%; --md-outlined-text-field-container-shape: var(--md-sys-shape-corner-small);">
-                            <md-icon slot="leading-icon">search</md-icon>
-                        </md-outlined-text-field>
+                        <div class="md3-input-wrapper" style="width: 100%;">
+                            <label for="endpoint-search">Filter endpoints...</label>
+                            <input class="md3-input" id="endpoint-search" type="text" placeholder="Filter endpoints..." />
+                        </div>
                     </div>
 
                     @foreach (var group in Model.TagGroups)
@@ -192,12 +186,12 @@ curl /api/v1/player/profile \
                 <div class="flex items-center justify-between">
                     <h2 class="text-2xl font-bold" style="color: var(--md-sys-color-on-surface);">Endpoints</h2>
                     <div class="flex gap-2">
-                        <md-outlined-button onclick="document.querySelectorAll('#api-reference details').forEach(d => d.open = true)">
+                        <button class="md3-btn-outlined" onclick="document.querySelectorAll('#api-reference details').forEach(d => d.open = true)">
                             Expand All
-                        </md-outlined-button>
-                        <md-outlined-button onclick="document.querySelectorAll('#api-reference details').forEach(d => d.open = false)">
+                        </button>
+                        <button class="md3-btn-outlined" onclick="document.querySelectorAll('#api-reference details').forEach(d => d.open = false)">
                             Collapse All
-                        </md-outlined-button>
+                        </button>
                     </div>
                 </div>
 
@@ -219,7 +213,7 @@ curl /api/v1/player/profile \
                                         <span class="md3-badge-tertiary font-mono text-xs">object</span>
                                         <span class="font-mono text-sm font-semibold" style="color: var(--md-sys-color-on-surface);">@name</span>
                                         <span class="text-xs" style="color: var(--md-sys-color-outline);">@schema.Properties.Count properties</span>
-                                        <md-icon class="ml-auto shrink-0 transition-transform group-open:rotate-180" style="color: var(--md-sys-color-on-surface-variant); font-size: 18px;">expand_more</md-icon>
+                                        <span class="material-symbols-outlined ml-auto shrink-0 transition-transform group-open:rotate-180" style="color: var(--md-sys-color-on-surface-variant); font-size: 18px;">expand_more</span>
                                     </summary>
                                     <div class="px-5 pb-4 pt-3" style="border-top: 1px solid var(--md-sys-color-outline-variant);">
                                         @if (!string.IsNullOrEmpty(schema.Description))
@@ -239,7 +233,7 @@ curl /api/v1/player/profile \
                                         <span class="text-xs px-2 py-0.5 font-mono" style="background: var(--md-sys-color-tertiary-container); color: var(--md-sys-color-on-tertiary-container); border-radius: var(--md-sys-shape-corner-small);">enum</span>
                                         <span class="font-mono text-sm font-semibold" style="color: var(--md-sys-color-on-surface);">@name</span>
                                         <span class="text-xs" style="color: var(--md-sys-color-outline);">@schema.EnumValues!.Count values</span>
-                                        <md-icon class="ml-auto shrink-0 transition-transform group-open:rotate-180" style="color: var(--md-sys-color-on-surface-variant); font-size: 18px;">expand_more</md-icon>
+                                        <span class="material-symbols-outlined ml-auto shrink-0 transition-transform group-open:rotate-180" style="color: var(--md-sys-color-on-surface-variant); font-size: 18px;">expand_more</span>
                                     </summary>
                                     <div class="px-5 pb-4 pt-3" style="border-top: 1px solid var(--md-sys-color-outline-variant);">
                                         <div class="flex flex-wrap gap-2">

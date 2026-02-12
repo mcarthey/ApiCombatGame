@@ -5,8 +5,8 @@
         ? "flex items-center px-4 py-3 text-sm font-medium rounded-lg"
         : "flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors";
     string NavStyle(bool isActive) => isActive
-        ? "background: var(--md-sys-color-primary-container); color: var(--md-sys-color-on-primary-container);"
-        : "color: var(--md-sys-color-on-surface-variant);";
+        ? "background: var(--md-sys-color-primary-container); color: var(--md-sys-color-on-primary-container); text-decoration: none;"
+        : "color: var(--md-sys-color-on-surface-variant); text-decoration: none;";
 }
 <!DOCTYPE html>
 <html lang="en">
@@ -21,32 +21,6 @@
 
     <!-- Material Symbols -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
-
-    <!-- M3 Web Components -->
-    <script type="importmap">
-    {
-        "imports": {
-            "@@material/web/": "https://esm.run/@@material/web/"
-        }
-    }
-    </script>
-    <script type="module">
-        import '@@material/web/button/filled-button.js';
-        import '@@material/web/button/outlined-button.js';
-        import '@@material/web/button/text-button.js';
-        import '@@material/web/button/filled-tonal-button.js';
-        import '@@material/web/iconbutton/icon-button.js';
-        import '@@material/web/icon/icon.js';
-        import '@@material/web/checkbox/checkbox.js';
-        import '@@material/web/textfield/outlined-text-field.js';
-        import '@@material/web/progress/linear-progress.js';
-        import '@@material/web/divider/divider.js';
-        import '@@material/web/dialog/dialog.js';
-        import '@@material/web/chips/chip-set.js';
-        import '@@material/web/chips/assist-chip.js';
-        import '@@material/web/select/outlined-select.js';
-        import '@@material/web/select/select-option.js';
-    </script>
 
     <!-- M3 Theme Tokens -->
     <style>
@@ -141,44 +115,44 @@
         <!-- Sidebar -->
         <aside class="w-64 flex flex-col fixed inset-y-0 left-0 z-30" style="background: var(--md-sys-color-surface-container);">
             <div class="flex items-center justify-center h-16" style="border-bottom: 1px solid var(--md-sys-color-outline-variant);">
-                <a href="/Admin" class="text-xl font-bold" style="color: var(--md-sys-color-on-surface);">Admin Panel</a>
+                <a href="/Admin" class="text-xl font-bold" style="color: var(--md-sys-color-on-surface); text-decoration: none;">Admin Panel</a>
             </div>
             <nav class="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
                 <a href="/Admin" class="@NavClass(currentPath == "/Admin" || currentPath == "/Admin/")" style="@NavStyle(currentPath == "/Admin" || currentPath == "/Admin/")">
-                    <md-icon class="mr-3" style="font-size: 20px;">home</md-icon>
+                    <span class="material-symbols-outlined mr-3" style="font-size: 20px;">home</span>
                     Overview
                 </a>
                 <a href="/Admin/Players" class="@NavClass(currentPath.StartsWith("/Admin/Players") || currentPath.StartsWith("/Admin/PlayerDetail"))" style="@NavStyle(currentPath.StartsWith("/Admin/Players") || currentPath.StartsWith("/Admin/PlayerDetail"))">
-                    <md-icon class="mr-3" style="font-size: 20px;">group</md-icon>
+                    <span class="material-symbols-outlined mr-3" style="font-size: 20px;">group</span>
                     Players
                 </a>
                 <a href="/Admin/Meta" class="@NavClass(currentPath.StartsWith("/Admin/Meta"))" style="@NavStyle(currentPath.StartsWith("/Admin/Meta"))">
-                    <md-icon class="mr-3" style="font-size: 20px;">analytics</md-icon>
+                    <span class="material-symbols-outlined mr-3" style="font-size: 20px;">analytics</span>
                     Meta & Balance
                 </a>
                 <a href="/Admin/Guilds" class="@NavClass(currentPath.StartsWith("/Admin/Guilds"))" style="@NavStyle(currentPath.StartsWith("/Admin/Guilds"))">
-                    <md-icon class="mr-3" style="font-size: 20px;">shield</md-icon>
+                    <span class="material-symbols-outlined mr-3" style="font-size: 20px;">shield</span>
                     Guilds
                 </a>
                 <a href="/Admin/Technical" class="@NavClass(currentPath.StartsWith("/Admin/Technical"))" style="@NavStyle(currentPath.StartsWith("/Admin/Technical"))">
-                    <md-icon class="mr-3" style="font-size: 20px;">settings</md-icon>
+                    <span class="material-symbols-outlined mr-3" style="font-size: 20px;">settings</span>
                     Technical
                 </a>
                 <a href="/Admin/Tools" class="@NavClass(currentPath.StartsWith("/Admin/Tools"))" style="@NavStyle(currentPath.StartsWith("/Admin/Tools"))">
-                    <md-icon class="mr-3" style="font-size: 20px;">tune</md-icon>
+                    <span class="material-symbols-outlined mr-3" style="font-size: 20px;">tune</span>
                     Admin Tools
                 </a>
             </nav>
             <div class="px-3 py-4" style="border-top: 1px solid var(--md-sys-color-outline-variant);">
-                <a href="/" class="flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors" style="color: var(--md-sys-color-on-surface-variant);">
-                    <md-icon class="mr-3" style="font-size: 20px;">arrow_back</md-icon>
+                <a href="/" class="flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors" style="color: var(--md-sys-color-on-surface-variant); text-decoration: none;">
+                    <span class="material-symbols-outlined mr-3" style="font-size: 20px;">arrow_back</span>
                     Back to Site
                 </a>
                 <div class="flex items-center px-4 py-3 mt-1">
-                    <md-icon-button toggle data-theme-toggle aria-label="Toggle dark mode">
-                        <md-icon>dark_mode</md-icon>
-                        <md-icon slot="selected">light_mode</md-icon>
-                    </md-icon-button>
+                    <button class="md3-btn-icon" data-theme-toggle aria-label="Toggle dark mode">
+                        <span class="material-symbols-outlined icon-light">dark_mode</span>
+                        <span class="material-symbols-outlined icon-dark" style="display: none;">light_mode</span>
+                    </button>
                     <span class="text-sm ml-2" style="color: var(--md-sys-color-on-surface-variant);">Toggle Theme</span>
                 </div>
             </div>

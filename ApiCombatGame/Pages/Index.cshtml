@@ -14,12 +14,12 @@
             An API-only strategic combat game for developers. No GUI provided &mdash; build your own client, configure strategies, and compete.
         </p>
         <div class="flex justify-center space-x-4">
-            <md-filled-button href="/Auth/Register">
+            <a class="md3-btn-filled" href="/Auth/Register" style="text-decoration: none;">
                 Get Started Free
-            </md-filled-button>
-            <md-outlined-button href="/api-docs/v1">
+            </a>
+            <a class="md3-btn-outlined" href="/api-docs/v1" style="text-decoration: none;">
                 View API Docs
-            </md-outlined-button>
+            </a>
         </div>
     </div>
 
@@ -85,13 +85,13 @@ curl -X POST /api/v1/battle/queue \
                 <h3 class="text-xl font-bold mb-2" style="color: var(--md-sys-color-on-surface);">Free</h3>
                 <p class="text-3xl font-bold mb-4" style="color: var(--md-sys-color-on-surface);">$0<span class="text-sm" style="color: var(--md-sys-color-on-surface-variant);">/mo</span></p>
                 <ul class="space-y-2 mb-6" style="color: var(--md-sys-color-on-surface-variant);">
-                    <li class="flex items-center"><md-icon style="color: var(--md-sys-color-primary); font-size: 18px; margin-right: 0.5rem;">check</md-icon> 10 battles/day</li>
-                    <li class="flex items-center"><md-icon style="color: var(--md-sys-color-primary); font-size: 18px; margin-right: 0.5rem;">check</md-icon> Basic units</li>
-                    <li class="flex items-center"><md-icon style="color: var(--md-sys-color-primary); font-size: 18px; margin-right: 0.5rem;">check</md-icon> Public leaderboards</li>
+                    <li class="flex items-center"><span class="material-symbols-outlined" style="color: var(--md-sys-color-primary); font-size: 18px; margin-right: 0.5rem;">check</span> 10 battles/day</li>
+                    <li class="flex items-center"><span class="material-symbols-outlined" style="color: var(--md-sys-color-primary); font-size: 18px; margin-right: 0.5rem;">check</span> Basic units</li>
+                    <li class="flex items-center"><span class="material-symbols-outlined" style="color: var(--md-sys-color-primary); font-size: 18px; margin-right: 0.5rem;">check</span> Public leaderboards</li>
                 </ul>
-                <md-outlined-button class="w-full" href="/Auth/Register">
+                <a class="md3-btn-outlined w-full" href="/Auth/Register" style="text-decoration: none;">
                     Get Started
-                </md-outlined-button>
+                </a>
             </div>
             <!-- Premium Tier -->
             <div class="md3-card-elevated relative" style="border: 2px solid var(--md-sys-color-primary);">
@@ -102,28 +102,28 @@ curl -X POST /api/v1/battle/queue \
                 <h3 class="text-xl font-bold mb-2" style="color: var(--md-sys-color-on-surface);">Premium</h3>
                 <p class="text-3xl font-bold mb-4" style="color: var(--md-sys-color-on-surface);">$5<span class="text-sm" style="color: var(--md-sys-color-on-surface-variant);">/mo</span></p>
                 <ul class="space-y-2 mb-6" style="color: var(--md-sys-color-on-surface-variant);">
-                    <li class="flex items-center"><md-icon style="color: var(--md-sys-color-primary); font-size: 18px; margin-right: 0.5rem;">check</md-icon> Unlimited battles</li>
-                    <li class="flex items-center"><md-icon style="color: var(--md-sys-color-primary); font-size: 18px; margin-right: 0.5rem;">check</md-icon> 50+ units</li>
-                    <li class="flex items-center"><md-icon style="color: var(--md-sys-color-primary); font-size: 18px; margin-right: 0.5rem;">check</md-icon> Priority queue</li>
-                    <li class="flex items-center"><md-icon style="color: var(--md-sys-color-primary); font-size: 18px; margin-right: 0.5rem;">check</md-icon> Advanced stats</li>
+                    <li class="flex items-center"><span class="material-symbols-outlined" style="color: var(--md-sys-color-primary); font-size: 18px; margin-right: 0.5rem;">check</span> Unlimited battles</li>
+                    <li class="flex items-center"><span class="material-symbols-outlined" style="color: var(--md-sys-color-primary); font-size: 18px; margin-right: 0.5rem;">check</span> 50+ units</li>
+                    <li class="flex items-center"><span class="material-symbols-outlined" style="color: var(--md-sys-color-primary); font-size: 18px; margin-right: 0.5rem;">check</span> Priority queue</li>
+                    <li class="flex items-center"><span class="material-symbols-outlined" style="color: var(--md-sys-color-primary); font-size: 18px; margin-right: 0.5rem;">check</span> Advanced stats</li>
                 </ul>
-                <md-filled-button class="w-full" href="/Auth/Register">
+                <a class="md3-btn-filled w-full" href="/Auth/Register" style="text-decoration: none;">
                     Start Free Trial
-                </md-filled-button>
+                </a>
             </div>
             <!-- Premium Plus Tier -->
             <div class="md3-card">
                 <h3 class="text-xl font-bold mb-2" style="color: var(--md-sys-color-on-surface);">Premium Plus</h3>
                 <p class="text-3xl font-bold mb-4" style="color: var(--md-sys-color-on-surface);">$10<span class="text-sm" style="color: var(--md-sys-color-on-surface-variant);">/mo</span></p>
                 <ul class="space-y-2 mb-6" style="color: var(--md-sys-color-on-surface-variant);">
-                    <li class="flex items-center"><md-icon style="color: var(--md-sys-color-primary); font-size: 18px; margin-right: 0.5rem;">check</md-icon> Everything in Premium</li>
-                    <li class="flex items-center"><md-icon style="color: var(--md-sys-color-primary); font-size: 18px; margin-right: 0.5rem;">check</md-icon> Scripting engine</li>
-                    <li class="flex items-center"><md-icon style="color: var(--md-sys-color-primary); font-size: 18px; margin-right: 0.5rem;">check</md-icon> Advanced analytics</li>
-                    <li class="flex items-center"><md-icon style="color: var(--md-sys-color-primary); font-size: 18px; margin-right: 0.5rem;">check</md-icon> 2x API rate limits</li>
+                    <li class="flex items-center"><span class="material-symbols-outlined" style="color: var(--md-sys-color-primary); font-size: 18px; margin-right: 0.5rem;">check</span> Everything in Premium</li>
+                    <li class="flex items-center"><span class="material-symbols-outlined" style="color: var(--md-sys-color-primary); font-size: 18px; margin-right: 0.5rem;">check</span> Scripting engine</li>
+                    <li class="flex items-center"><span class="material-symbols-outlined" style="color: var(--md-sys-color-primary); font-size: 18px; margin-right: 0.5rem;">check</span> Advanced analytics</li>
+                    <li class="flex items-center"><span class="material-symbols-outlined" style="color: var(--md-sys-color-primary); font-size: 18px; margin-right: 0.5rem;">check</span> 2x API rate limits</li>
                 </ul>
-                <md-filled-tonal-button class="w-full" href="/Auth/Register">
+                <a class="md3-btn-tonal w-full" href="/Auth/Register" style="text-decoration: none;">
                     Start Free Trial
-                </md-filled-tonal-button>
+                </a>
             </div>
         </div>
     </div>

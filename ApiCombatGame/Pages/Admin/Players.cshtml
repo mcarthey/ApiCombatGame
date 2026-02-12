@@ -9,37 +9,30 @@
 <div class="md3-card p-6 mb-6">
     <form method="get" class="flex flex-wrap gap-4 items-end">
         <div class="flex-1 min-w-[200px]">
-            <md-outlined-text-field label="Search" name="Search" value="@Model.Search" placeholder="Username or email..."
-                                    style="width: 100%;">
-                <md-icon slot="leading-icon">search</md-icon>
-            </md-outlined-text-field>
+            <div class="md3-input-wrapper" style="width: 100%;">
+                <label for="Search">Search</label>
+                <input class="md3-input" id="Search" name="Search" value="@Model.Search" placeholder="Username or email..." />
+            </div>
         </div>
         <div class="min-w-[150px]">
-            <md-outlined-select label="Tier" name="Tier" style="width: 100%;">
-                <md-select-option value="" selected="@(string.IsNullOrEmpty(Model.Tier))">
-                    <div slot="headline">All Tiers</div>
-                </md-select-option>
-                <md-select-option value="Free" selected="@(Model.Tier == "Free")">
-                    <div slot="headline">Free</div>
-                </md-select-option>
-                <md-select-option value="Premium" selected="@(Model.Tier == "Premium")">
-                    <div slot="headline">Premium</div>
-                </md-select-option>
-                <md-select-option value="PremiumPlus" selected="@(Model.Tier == "PremiumPlus")">
-                    <div slot="headline">Premium+</div>
-                </md-select-option>
-            </md-outlined-select>
+            <div class="md3-input-wrapper" style="width: 100%;">
+                <label for="Tier">Tier</label>
+                <select class="md3-select" id="Tier" name="Tier">
+                    <option value="" selected="@(string.IsNullOrEmpty(Model.Tier))">All Tiers</option>
+                    <option value="Free" selected="@(Model.Tier == "Free")">Free</option>
+                    <option value="Premium" selected="@(Model.Tier == "Premium")">Premium</option>
+                    <option value="PremiumPlus" selected="@(Model.Tier == "PremiumPlus")">Premium+</option>
+                </select>
+            </div>
         </div>
-        <md-filled-button type="submit">
-            <md-icon slot="icon">search</md-icon>
+        <button class="md3-btn-filled" type="submit">
+            <span class="material-symbols-outlined">search</span>
             Search
-        </md-filled-button>
+        </button>
         @if (!string.IsNullOrEmpty(Model.Search) || !string.IsNullOrEmpty(Model.Tier))
         {
-            <a href="/Admin/Players">
-                <md-outlined-button type="button">
-                    Clear
-                </md-outlined-button>
+            <a href="/Admin/Players" class="md3-btn-outlined" style="text-decoration: none;">
+                Clear
             </a>
         }
     </form>
@@ -116,8 +109,8 @@
                             @lastActive
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                            <a href="/Admin/PlayerDetail?id=@player.Id">
-                                <md-text-button>View Details</md-text-button>
+                            <a href="/Admin/PlayerDetail?id=@player.Id" class="md3-btn-text" style="text-decoration: none;">
+                                View Details
                             </a>
                         </td>
                     </tr>
@@ -133,29 +126,29 @@
             <div class="flex space-x-2">
                 @if (Model.Data.Page > 1)
                 {
-                    <a href="/Admin/Players?Page=@(Model.Data.Page - 1)&Search=@Model.Search&Tier=@Model.Tier">
-                        <md-outlined-button>Previous</md-outlined-button>
+                    <a href="/Admin/Players?Page=@(Model.Data.Page - 1)&Search=@Model.Search&Tier=@Model.Tier" class="md3-btn-outlined" style="text-decoration: none;">
+                        Previous
                     </a>
                 }
                 @for (var i = Math.Max(1, Model.Data.Page - 2); i <= Math.Min(Model.Data.TotalPages, Model.Data.Page + 2); i++)
                 {
                     @if (i == Model.Data.Page)
                     {
-                        <md-filled-button disabled style="--md-filled-button-disabled-container-color: var(--md-sys-color-primary); --md-filled-button-disabled-label-text-color: var(--md-sys-color-on-primary); --md-filled-button-disabled-container-opacity: 1; --md-filled-button-disabled-label-text-opacity: 1;">
+                        <button class="md3-btn-filled" disabled style="background: var(--md-sys-color-primary); color: var(--md-sys-color-on-primary); opacity: 1;">
                             @i
-                        </md-filled-button>
+                        </button>
                     }
                     else
                     {
-                        <a href="/Admin/Players?Page=@i&Search=@Model.Search&Tier=@Model.Tier">
-                            <md-outlined-button>@i</md-outlined-button>
+                        <a href="/Admin/Players?Page=@i&Search=@Model.Search&Tier=@Model.Tier" class="md3-btn-outlined" style="text-decoration: none;">
+                            @i
                         </a>
                     }
                 }
                 @if (Model.Data.Page < Model.Data.TotalPages)
                 {
-                    <a href="/Admin/Players?Page=@(Model.Data.Page + 1)&Search=@Model.Search&Tier=@Model.Tier">
-                        <md-outlined-button>Next</md-outlined-button>
+                    <a href="/Admin/Players?Page=@(Model.Data.Page + 1)&Search=@Model.Search&Tier=@Model.Tier" class="md3-btn-outlined" style="text-decoration: none;">
+                        Next
                     </a>
                 }
             </div>

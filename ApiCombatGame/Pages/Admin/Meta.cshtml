@@ -14,14 +14,14 @@
     {
         @if (Model.Days == d)
         {
-            <a href="/Admin/Meta?Days=@d">
-                <md-filled-tonal-button>@label</md-filled-tonal-button>
+            <a href="/Admin/Meta?Days=@d" class="md3-btn-tonal" style="text-decoration: none;">
+                @label
             </a>
         }
         else
         {
-            <a href="/Admin/Meta?Days=@d">
-                <md-outlined-button>@label</md-outlined-button>
+            <a href="/Admin/Meta?Days=@d" class="md3-btn-outlined" style="text-decoration: none;">
+                @label
             </a>
         }
     }
@@ -85,7 +85,7 @@
                             </td>
                             <td class="px-6 py-4 w-48">
                                 <div class="relative">
-                                    <md-linear-progress value="@(Math.Min(1.0, stat.WinRate / 100.0))" style="--md-linear-progress-active-indicator-color: @barColor;"></md-linear-progress>
+                                    <div class="md3-progress"><div class="md3-progress-bar" style="width: @(Math.Min(100, stat.WinRate))%; background: @barColor;"></div></div>
                                     <div class="absolute top-0 left-1/2 w-px h-full" style="background: var(--md-sys-color-outline);" title="50% target"></div>
                                 </div>
                             </td>
@@ -108,7 +108,7 @@
         <h3 class="text-lg font-semibold mb-2" style="color: var(--md-sys-color-on-surface);">Active Environmental Modifier</h3>
         <div class="flex items-center gap-4">
             <div class="p-3" style="background: var(--md-sys-color-tertiary-container); border-radius: var(--md-sys-shape-corner-medium);">
-                <md-icon style="color: var(--md-sys-color-on-tertiary-container); font-size: 32px; width: 32px; height: 32px;">bolt</md-icon>
+                <span class="material-symbols-outlined" style="color: var(--md-sys-color-on-tertiary-container); font-size: 32px; width: 32px; height: 32px;">bolt</span>
             </div>
             <div>
                 <div class="font-bold text-lg" style="color: var(--md-sys-color-on-surface);">@Model.Data.CurrentModifier.Name</div>

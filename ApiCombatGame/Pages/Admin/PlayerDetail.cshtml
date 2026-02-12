@@ -9,8 +9,8 @@
 {
     <div class="text-center py-12">
         <p style="color: var(--md-sys-color-on-surface-variant);">Player not found.</p>
-        <a href="/Admin/Players" class="mt-2 inline-block">
-            <md-text-button>Back to Players</md-text-button>
+        <a href="/Admin/Players" class="md3-btn-text mt-2 inline-block" style="text-decoration: none;">
+            Back to Players
         </a>
     </div>
     return;
@@ -25,11 +25,9 @@
 
 <!-- Back Button -->
 <div class="mb-6">
-    <a href="/Admin/Players">
-        <md-text-button>
-            <md-icon slot="icon">arrow_back</md-icon>
-            Back to Players
-        </md-text-button>
+    <a href="/Admin/Players" class="md3-btn-text" style="text-decoration: none;">
+        <span class="material-symbols-outlined">arrow_back</span>
+        Back to Players
     </a>
 </div>
 
@@ -139,30 +137,29 @@
             <!-- Adjust Currency -->
             <form method="post" asp-page-handler="AdjustCurrency" class="flex gap-2 items-end">
                 <input type="hidden" name="playerId" value="@p.Id" />
-                <md-outlined-text-field label="Amount (+/-)" name="amount" type="number" style="flex: 1;">
-                </md-outlined-text-field>
-                <md-filled-button type="submit" style="--md-filled-button-container-color: var(--md-sys-color-primary); --md-filled-button-label-text-color: var(--md-sys-color-on-primary);">
+                <div class="md3-input-wrapper" style="flex: 1;">
+                    <label for="amount">Amount (+/-)</label>
+                    <input class="md3-input" id="amount" name="amount" type="number" />
+                </div>
+                <button class="md3-btn-filled" type="submit">
                     Adjust Gold
-                </md-filled-button>
+                </button>
             </form>
 
             <!-- Set Tier -->
             <form method="post" asp-page-handler="SetTier" class="flex gap-2 items-end">
                 <input type="hidden" name="playerId" value="@p.Id" />
-                <md-outlined-select label="Tier" name="tier" style="flex: 1;">
-                    <md-select-option value="Free" selected="@(p.CurrentTier == "Free")">
-                        <div slot="headline">Free</div>
-                    </md-select-option>
-                    <md-select-option value="Premium" selected="@(p.CurrentTier == "Premium")">
-                        <div slot="headline">Premium</div>
-                    </md-select-option>
-                    <md-select-option value="PremiumPlus" selected="@(p.CurrentTier == "PremiumPlus")">
-                        <div slot="headline">Premium+</div>
-                    </md-select-option>
-                </md-outlined-select>
-                <md-filled-button type="submit">
+                <div class="md3-input-wrapper" style="flex: 1;">
+                    <label for="tier">Tier</label>
+                    <select class="md3-select" id="tier" name="tier">
+                        <option value="Free" selected="@(p.CurrentTier == "Free")">Free</option>
+                        <option value="Premium" selected="@(p.CurrentTier == "Premium")">Premium</option>
+                        <option value="PremiumPlus" selected="@(p.CurrentTier == "PremiumPlus")">Premium+</option>
+                    </select>
+                </div>
+                <button class="md3-btn-filled" type="submit">
                     Set Tier
-                </md-filled-button>
+                </button>
             </form>
 
             <!-- Toggle Admin -->
@@ -171,26 +168,28 @@
                 <input type="hidden" name="makeAdmin" value="@(!p.IsAdmin)" />
                 @if (p.IsAdmin)
                 {
-                    <md-filled-button type="submit" class="w-full" style="--md-filled-button-container-color: var(--md-sys-color-error-container); --md-filled-button-label-text-color: var(--md-sys-color-on-error-container);">
+                    <button class="md3-btn-filled w-full" type="submit" style="background: var(--md-sys-color-error-container); color: var(--md-sys-color-on-error-container);">
                         Remove Admin
-                    </md-filled-button>
+                    </button>
                 }
                 else
                 {
-                    <md-filled-tonal-button type="submit" class="w-full">
+                    <button class="md3-btn-tonal w-full" type="submit">
                         Make Admin
-                    </md-filled-tonal-button>
+                    </button>
                 }
             </form>
 
             <!-- Reset Password -->
             <form method="post" asp-page-handler="ResetPassword" class="flex gap-2 items-end">
                 <input type="hidden" name="playerId" value="@p.Id" />
-                <md-outlined-text-field label="New password (min 8 chars)" name="newPassword" type="password" style="flex: 1;">
-                </md-outlined-text-field>
-                <md-filled-tonal-button type="submit">
+                <div class="md3-input-wrapper" style="flex: 1;">
+                    <label for="newPassword">New password (min 8 chars)</label>
+                    <input class="md3-input" id="newPassword" name="newPassword" type="password" />
+                </div>
+                <button class="md3-btn-tonal" type="submit">
                     Reset Password
-                </md-filled-tonal-button>
+                </button>
             </form>
         </div>
     </div>

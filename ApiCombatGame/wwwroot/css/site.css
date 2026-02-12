@@ -1,10 +1,11 @@
-/* API Combat Game — Material Design 3 Theme */
+/* API Combat Game — Material Design 3 Theme (CSS-first) */
 
 /* ─── Body ─── */
 body {
     background-color: var(--md-sys-color-surface);
     color: var(--md-sys-color-on-surface);
     transition: background-color 0.2s, color 0.2s;
+    font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
 }
 
 /* ─── Cards ─── */
@@ -40,24 +41,36 @@ body {
     background: var(--md-sys-color-error-container);
     color: var(--md-sys-color-on-error-container);
     border-color: var(--md-sys-color-error);
+    border-radius: var(--md-sys-shape-corner-medium);
+    padding: 1rem;
+    border-left: 4px solid var(--md-sys-color-error);
 }
 
 .md3-alert-success {
     background: color-mix(in srgb, #22c55e 10%, var(--md-sys-color-surface));
     color: var(--md-sys-color-on-surface);
     border-color: #22c55e;
+    border-radius: var(--md-sys-shape-corner-medium);
+    padding: 1rem;
+    border-left: 4px solid #22c55e;
 }
 
 .md3-alert-warning {
     background: var(--md-sys-color-tertiary-container);
     color: var(--md-sys-color-on-tertiary-container);
     border-color: var(--md-sys-color-tertiary);
+    border-radius: var(--md-sys-shape-corner-medium);
+    padding: 1rem;
+    border-left: 4px solid var(--md-sys-color-tertiary);
 }
 
 .md3-alert-info {
     background: var(--md-sys-color-primary-container);
     color: var(--md-sys-color-on-primary-container);
     border-color: var(--md-sys-color-primary);
+    border-radius: var(--md-sys-shape-corner-medium);
+    padding: 1rem;
+    border-left: 4px solid var(--md-sys-color-primary);
 }
 
 /* ─── Tables ─── */
@@ -120,6 +133,302 @@ body {
     color: var(--md-sys-color-on-error-container);
 }
 
+/* ─── Buttons ─── */
+.md3-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    line-height: 1.25rem;
+    padding: 0.625rem 1.5rem;
+    border-radius: var(--md-sys-shape-corner-small);
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    transition: box-shadow 0.15s, background-color 0.15s, opacity 0.15s;
+    white-space: nowrap;
+    font-family: inherit;
+}
+
+.md3-btn:disabled {
+    opacity: 0.38;
+    cursor: default;
+    pointer-events: none;
+}
+
+.md3-btn-filled {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    line-height: 1.25rem;
+    padding: 0.625rem 1.5rem;
+    border-radius: var(--md-sys-shape-corner-small);
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    transition: box-shadow 0.15s, background-color 0.15s, opacity 0.15s;
+    white-space: nowrap;
+    font-family: inherit;
+    background: var(--md-sys-color-primary);
+    color: var(--md-sys-color-on-primary);
+}
+
+.md3-btn-filled:hover { box-shadow: var(--md-sys-elevation-1); }
+.md3-btn-filled:active { box-shadow: none; }
+.md3-btn-filled:disabled { opacity: 0.38; cursor: default; pointer-events: none; }
+
+.md3-btn-filled.btn-error {
+    background: var(--md-sys-color-error);
+    color: var(--md-sys-color-on-error);
+}
+
+.md3-btn-filled.btn-error-soft {
+    background: var(--md-sys-color-error-container);
+    color: var(--md-sys-color-on-error-container);
+}
+
+.md3-btn-outlined {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    line-height: 1.25rem;
+    padding: 0.625rem 1.5rem;
+    border-radius: var(--md-sys-shape-corner-small);
+    cursor: pointer;
+    text-decoration: none;
+    transition: background-color 0.15s, opacity 0.15s;
+    white-space: nowrap;
+    font-family: inherit;
+    background: transparent;
+    color: var(--md-sys-color-primary);
+    border: 1px solid var(--md-sys-color-outline);
+}
+
+.md3-btn-outlined:hover { background: color-mix(in srgb, var(--md-sys-color-primary) 8%, transparent); }
+.md3-btn-outlined:disabled { opacity: 0.38; cursor: default; pointer-events: none; }
+
+.md3-btn-text {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    line-height: 1.25rem;
+    padding: 0.625rem 0.75rem;
+    border-radius: var(--md-sys-shape-corner-small);
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background-color 0.15s, opacity 0.15s;
+    white-space: nowrap;
+    font-family: inherit;
+    background: transparent;
+    color: var(--md-sys-color-primary);
+}
+
+.md3-btn-text:hover { background: color-mix(in srgb, var(--md-sys-color-primary) 8%, transparent); }
+.md3-btn-text:disabled { opacity: 0.38; cursor: default; pointer-events: none; }
+.md3-btn-text.btn-error { color: var(--md-sys-color-error); }
+.md3-btn-text.btn-error:hover { background: color-mix(in srgb, var(--md-sys-color-error) 8%, transparent); }
+
+.md3-btn-tonal {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    line-height: 1.25rem;
+    padding: 0.625rem 1.5rem;
+    border-radius: var(--md-sys-shape-corner-small);
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    transition: box-shadow 0.15s, background-color 0.15s, opacity 0.15s;
+    white-space: nowrap;
+    font-family: inherit;
+    background: var(--md-sys-color-secondary-container);
+    color: var(--md-sys-color-on-secondary-container);
+}
+
+.md3-btn-tonal:hover { box-shadow: var(--md-sys-elevation-1); }
+.md3-btn-tonal:disabled { opacity: 0.38; cursor: default; pointer-events: none; }
+
+.md3-btn-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    background: transparent;
+    color: var(--md-sys-color-on-surface-variant);
+    transition: background-color 0.15s;
+    padding: 0;
+    font-family: inherit;
+}
+
+.md3-btn-icon:hover { background: color-mix(in srgb, var(--md-sys-color-on-surface-variant) 8%, transparent); }
+
+/* Full-width button override */
+.md3-btn-filled.w-full,
+.md3-btn-outlined.w-full,
+.md3-btn-text.w-full,
+.md3-btn-tonal.w-full { width: 100%; }
+
+/* ─── Material Symbols icon sizing ─── */
+.material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    vertical-align: middle;
+}
+
+.icon-sm { font-size: 18px; }
+.icon-xs { font-size: 14px; width: 14px; height: 14px; }
+.icon-lg { font-size: 32px; width: 32px; height: 32px; }
+.icon-xl { font-size: 48px; }
+
+/* ─── Form Inputs ─── */
+.md3-input {
+    display: block;
+    width: 100%;
+    padding: 0.875rem 1rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    color: var(--md-sys-color-on-surface);
+    background: transparent;
+    border: 1px solid var(--md-sys-color-outline);
+    border-radius: var(--md-sys-shape-corner-small);
+    outline: none;
+    transition: border-color 0.15s;
+    font-family: inherit;
+}
+
+.md3-input:focus {
+    border-color: var(--md-sys-color-primary);
+    border-width: 2px;
+    padding: calc(0.875rem - 1px) calc(1rem - 1px);
+}
+
+.md3-input::placeholder { color: var(--md-sys-color-on-surface-variant); }
+
+.md3-input-wrapper {
+    position: relative;
+}
+
+.md3-input-wrapper label {
+    position: absolute;
+    top: -0.5rem;
+    left: 0.75rem;
+    padding: 0 0.25rem;
+    font-size: 0.75rem;
+    color: var(--md-sys-color-on-surface-variant);
+    background: var(--md-sys-color-surface-container-low);
+    z-index: 1;
+}
+
+.md3-input-wrapper:focus-within label {
+    color: var(--md-sys-color-primary);
+}
+
+/* Ensure label bg matches card background */
+.md3-card .md3-input-wrapper label,
+.md3-card-elevated .md3-input-wrapper label {
+    background: var(--md-sys-color-surface-container-low);
+}
+
+/* ─── Select ─── */
+.md3-select {
+    display: block;
+    width: 100%;
+    padding: 0.875rem 2.5rem 0.875rem 1rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    color: var(--md-sys-color-on-surface);
+    background-color: transparent;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath fill='%2379747e' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.5rem center;
+    background-size: 1.5rem;
+    border: 1px solid var(--md-sys-color-outline);
+    border-radius: var(--md-sys-shape-corner-small);
+    outline: none;
+    appearance: none;
+    -webkit-appearance: none;
+    font-family: inherit;
+    cursor: pointer;
+}
+
+.md3-select:focus {
+    border-color: var(--md-sys-color-primary);
+    border-width: 2px;
+    padding: calc(0.875rem - 1px) calc(2.5rem - 1px) calc(0.875rem - 1px) calc(1rem - 1px);
+}
+
+/* ─── Checkbox ─── */
+.md3-checkbox {
+    width: 1.125rem;
+    height: 1.125rem;
+    accent-color: var(--md-sys-color-primary);
+    cursor: pointer;
+}
+
+/* ─── Progress Bar ─── */
+.md3-progress {
+    display: block;
+    width: 100%;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--md-sys-color-surface-container-highest);
+    overflow: hidden;
+    position: relative;
+}
+
+.md3-progress-bar {
+    height: 100%;
+    border-radius: 2px;
+    background: var(--md-sys-color-primary);
+    transition: width 0.3s ease;
+    min-width: 0;
+}
+
+/* ─── Chips ─── */
+.md3-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: var(--md-sys-shape-corner-small);
+    border: 1px solid var(--md-sys-color-outline);
+    font-size: 0.75rem;
+    color: var(--md-sys-color-on-surface);
+    background: transparent;
+    white-space: nowrap;
+}
+
+.md3-chip-sm {
+    padding: 0.125rem 0.5rem;
+    font-size: 0.7rem;
+    height: 24px;
+}
+
+/* ─── Divider ─── */
+.md3-divider {
+    border: none;
+    border-top: 1px solid var(--md-sys-color-outline-variant);
+    margin: 0;
+}
+
 /* ─── Hero class colors ─── */
 .hero-warrior { --hero-accent: #dc2626; --hero-bg: color-mix(in srgb, #dc2626 12%, var(--md-sys-color-surface)); }
 .hero-mage { --hero-accent: #7c3aed; --hero-bg: color-mix(in srgb, #7c3aed 12%, var(--md-sys-color-surface)); }
@@ -145,10 +454,6 @@ body {
     margin-top: 0.25rem;
 }
 
-.input-validation-error {
-    --md-outlined-text-field-error-focus-outline-color: var(--md-sys-color-error);
-}
-
 /* ─── Code blocks ─── */
 pre code {
     font-family: 'Fira Code', 'Cascadia Code', 'JetBrains Mono', monospace;
@@ -164,38 +469,6 @@ main {
 @keyframes fadeIn {
     from { opacity: 0.8; }
     to { opacity: 1; }
-}
-
-/* ─── FOUC prevention: hide M3 web components until registered ─── */
-md-filled-button:not(:defined),
-md-outlined-button:not(:defined),
-md-text-button:not(:defined),
-md-filled-tonal-button:not(:defined),
-md-icon-button:not(:defined),
-md-outlined-text-field:not(:defined),
-md-checkbox:not(:defined),
-md-linear-progress:not(:defined),
-md-dialog:not(:defined),
-md-outlined-select:not(:defined),
-md-list:not(:defined),
-md-list-item:not(:defined),
-md-chip-set:not(:defined),
-md-assist-chip:not(:defined),
-md-switch:not(:defined) {
-    opacity: 0;
-    transition: opacity 0.15s;
-}
-
-/* ─── M3 component width overrides ─── */
-md-outlined-text-field.w-full,
-md-filled-text-field.w-full {
-    width: 100%;
-}
-
-md-filled-button.w-full,
-md-outlined-button.w-full {
-    width: 100%;
-    --md-filled-button-container-shape: var(--md-sys-shape-corner-small);
 }
 
 /* ─── Notification badge ─── */
