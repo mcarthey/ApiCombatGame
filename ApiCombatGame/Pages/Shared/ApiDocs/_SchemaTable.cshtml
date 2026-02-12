@@ -1,52 +1,52 @@
 @model SchemaInfo
 
-<div class="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
-    <table class="w-full text-sm">
-        <thead class="bg-gray-50 dark:bg-gray-900/50">
+<div class="overflow-hidden" style="border-radius: var(--md-sys-shape-corner-medium);">
+    <table class="md3-table w-full text-sm">
+        <thead>
             <tr>
-                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Property</th>
-                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Type</th>
-                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Description</th>
+                <th class="px-4 py-2 text-left text-xs font-medium uppercase">Property</th>
+                <th class="px-4 py-2 text-left text-xs font-medium uppercase">Type</th>
+                <th class="px-4 py-2 text-left text-xs font-medium uppercase">Description</th>
             </tr>
         </thead>
-        <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+        <tbody>
             @foreach (var prop in Model.Properties)
             {
                 <tr>
-                    <td class="px-4 py-2.5 font-mono text-xs text-gray-800 dark:text-gray-200">
+                    <td class="px-4 py-2.5 font-mono text-xs">
                         @prop.Name
                         @if (prop.Required)
                         {
-                            <span class="text-red-500 ml-0.5">*</span>
+                            <span class="ml-0.5" style="color: var(--md-sys-color-error);">*</span>
                         }
                     </td>
                     <td class="px-4 py-2.5">
-                        <span class="text-xs px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 font-mono">@prop.Type</span>
+                        <span class="text-xs px-1.5 py-0.5 font-mono" style="background: var(--md-sys-color-surface-container-high); color: var(--md-sys-color-on-surface); border-radius: var(--md-sys-shape-corner-small);">@prop.Type</span>
                         @if (prop.Format != null)
                         {
-                            <span class="text-xs text-gray-400 ml-1">(@prop.Format)</span>
+                            <span class="text-xs ml-1" style="color: var(--md-sys-color-outline);">(@prop.Format)</span>
                         }
                         @if (prop.EnumValues?.Any() == true)
                         {
                             <div class="mt-1 flex flex-wrap gap-1">
                                 @foreach (var val in prop.EnumValues)
                                 {
-                                    <span class="text-xs px-1.5 py-0.5 rounded bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400 font-mono">@val</span>
+                                    <span class="text-xs px-1.5 py-0.5 font-mono" style="background: var(--md-sys-color-tertiary-container); color: var(--md-sys-color-on-tertiary-container); border-radius: var(--md-sys-shape-corner-small);">@val</span>
                                 }
                             </div>
                         }
                     </td>
-                    <td class="px-4 py-2.5 text-xs text-gray-600 dark:text-gray-400">
+                    <td class="px-4 py-2.5 text-xs" style="color: var(--md-sys-color-on-surface-variant);">
                         @prop.Description
                         @if (prop.MinLength.HasValue || prop.MaxLength.HasValue)
                         {
-                            <span class="text-gray-400">
+                            <span style="color: var(--md-sys-color-outline);">
                                 (@(prop.MinLength.HasValue ? $"min: {prop.MinLength}" : "")@(prop.MinLength.HasValue && prop.MaxLength.HasValue ? ", " : "")@(prop.MaxLength.HasValue ? $"max: {prop.MaxLength}" : "") chars)
                             </span>
                         }
                         @if (prop.Minimum.HasValue || prop.Maximum.HasValue)
                         {
-                            <span class="text-gray-400">
+                            <span style="color: var(--md-sys-color-outline);">
                                 (range: @(prop.Minimum?.ToString() ?? "...")-@(prop.Maximum?.ToString() ?? "..."))
                             </span>
                         }

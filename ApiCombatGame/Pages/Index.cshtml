@@ -7,58 +7,63 @@
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <!-- Hero Section -->
     <div class="text-center py-16">
-        <h1 class="text-5xl font-extrabold text-gray-900 dark:text-white mb-4">
-            Battle with <span class="text-blue-600 dark:text-blue-400">Code</span>
+        <h1 class="text-5xl font-extrabold mb-4" style="color: var(--md-sys-color-on-surface);">
+            Battle with <span style="color: var(--md-sys-color-primary);">Code</span>
         </h1>
-        <p class="text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-2xl mx-auto">
+        <p class="text-xl mb-8 max-w-2xl mx-auto" style="color: var(--md-sys-color-on-surface-variant);">
             An API-only strategic combat game for developers. No GUI provided &mdash; build your own client, configure strategies, and compete.
         </p>
         <div class="flex justify-center space-x-4">
-            <a asp-page="/Auth/Register" class="px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
+            <md-filled-button href="/Auth/Register">
                 Get Started Free
-            </a>
-            <a href="/api-docs/v1" class="px-8 py-3 border border-gray-300 dark:border-gray-600 text-base font-medium rounded-md text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700">
+            </md-filled-button>
+            <md-outlined-button href="/api-docs/v1">
                 View API Docs
-            </a>
+            </md-outlined-button>
         </div>
     </div>
 
     <!-- How It Works -->
-    <div class="py-16 border-t dark:border-gray-700">
-        <h2 class="text-3xl font-bold text-center mb-12">How It Works</h2>
+    <div class="py-16" style="border-top: 1px solid var(--md-sys-color-outline-variant);">
+        <h2 class="text-3xl font-bold text-center mb-12" style="color: var(--md-sys-color-on-surface);">How It Works</h2>
         <div class="grid md:grid-cols-3 gap-8">
             <div class="text-center p-6">
-                <div class="w-16 h-16 bg-blue-100 dark:bg-blue-900/40 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <span class="text-2xl">1</span>
+                <div class="w-16 h-16 flex items-center justify-center mx-auto mb-4"
+                     style="background: var(--md-sys-color-primary-container); border-radius: 9999px;">
+                    <span class="text-2xl font-bold" style="color: var(--md-sys-color-on-primary-container);">1</span>
                 </div>
-                <h3 class="text-xl font-semibold mb-2">Register &amp; Get API Key</h3>
-                <p class="text-gray-600 dark:text-gray-400">Create an account, grab your API key, and start making requests</p>
+                <h3 class="text-xl font-semibold mb-2" style="color: var(--md-sys-color-on-surface);">Register &amp; Get API Key</h3>
+                <p style="color: var(--md-sys-color-on-surface-variant);">Create an account, grab your API key, and start making requests</p>
             </div>
             <div class="text-center p-6">
-                <div class="w-16 h-16 bg-blue-100 dark:bg-blue-900/40 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <span class="text-2xl">2</span>
+                <div class="w-16 h-16 flex items-center justify-center mx-auto mb-4"
+                     style="background: var(--md-sys-color-primary-container); border-radius: 9999px;">
+                    <span class="text-2xl font-bold" style="color: var(--md-sys-color-on-primary-container);">2</span>
                 </div>
-                <h3 class="text-xl font-semibold mb-2">Build Your Team</h3>
-                <p class="text-gray-600 dark:text-gray-400">Unlock units, configure teams, and design battle strategies via JSON</p>
+                <h3 class="text-xl font-semibold mb-2" style="color: var(--md-sys-color-on-surface);">Build Your Team</h3>
+                <p style="color: var(--md-sys-color-on-surface-variant);">Unlock units, configure teams, and design battle strategies via JSON</p>
             </div>
             <div class="text-center p-6">
-                <div class="w-16 h-16 bg-blue-100 dark:bg-blue-900/40 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <span class="text-2xl">3</span>
+                <div class="w-16 h-16 flex items-center justify-center mx-auto mb-4"
+                     style="background: var(--md-sys-color-primary-container); border-radius: 9999px;">
+                    <span class="text-2xl font-bold" style="color: var(--md-sys-color-on-primary-container);">3</span>
                 </div>
-                <h3 class="text-xl font-semibold mb-2">Compete &amp; Climb</h3>
-                <p class="text-gray-600 dark:text-gray-400">Queue battles, earn rewards, and climb the ELO leaderboard</p>
+                <h3 class="text-xl font-semibold mb-2" style="color: var(--md-sys-color-on-surface);">Compete &amp; Climb</h3>
+                <p style="color: var(--md-sys-color-on-surface-variant);">Queue battles, earn rewards, and climb the ELO leaderboard</p>
             </div>
         </div>
     </div>
 
     <!-- Sample Code -->
-    <div class="py-16 bg-gray-900 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 rounded-lg">
-        <h2 class="text-3xl font-bold text-white text-center mb-8">Quick Start</h2>
+    <div class="py-16 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8"
+         style="background: var(--md-sys-color-surface-container-highest); border-radius: var(--md-sys-shape-corner-large);">
+        <h2 class="text-3xl font-bold text-center mb-8" style="color: var(--md-sys-color-on-surface);">Quick Start</h2>
         <div class="max-w-3xl mx-auto">
-            <pre class="bg-gray-800 text-gray-100 p-6 rounded-lg overflow-x-auto text-sm"><code># Register and get your token
+            <pre class="p-6 overflow-x-auto text-sm"
+                 style="background: #1e1e1e; color: #d4d4d4; border-radius: var(--md-sys-shape-corner-medium);"><code># Register and get your token
 curl -X POST /api/v1/auth/register \
   -H "Content-Type: application/json" \
-  -d '{"username":"warrior1","email":"w@test.com","password":"SecurePass123!"}'
+  -d '{"username":"warrior1","email":"w@@test.com","password":"SecurePass123!"}'
 
 # View your roster
 curl /api/v1/player/roster -H "Authorization: Bearer YOUR_TOKEN"
@@ -72,49 +77,53 @@ curl -X POST /api/v1/battle/queue \
     </div>
 
     <!-- Pricing -->
-    <div class="py-16 border-t dark:border-gray-700">
-        <h2 class="text-3xl font-bold text-center mb-12">Pricing</h2>
+    <div class="py-16" style="border-top: 1px solid var(--md-sys-color-outline-variant);">
+        <h2 class="text-3xl font-bold text-center mb-12" style="color: var(--md-sys-color-on-surface);">Pricing</h2>
         <div class="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            <div class="border dark:border-gray-700 rounded-lg p-6 bg-white dark:bg-gray-800">
-                <h3 class="text-xl font-bold mb-2">Free</h3>
-                <p class="text-3xl font-bold mb-4">$0<span class="text-sm text-gray-600 dark:text-gray-400">/mo</span></p>
-                <ul class="space-y-2 mb-6 text-gray-600 dark:text-gray-300">
-                    <li class="flex items-center"><span class="text-green-500 mr-2">&#10003;</span> 10 battles/day</li>
-                    <li class="flex items-center"><span class="text-green-500 mr-2">&#10003;</span> Basic units</li>
-                    <li class="flex items-center"><span class="text-green-500 mr-2">&#10003;</span> Public leaderboards</li>
+            <!-- Free Tier -->
+            <div class="md3-card">
+                <h3 class="text-xl font-bold mb-2" style="color: var(--md-sys-color-on-surface);">Free</h3>
+                <p class="text-3xl font-bold mb-4" style="color: var(--md-sys-color-on-surface);">$0<span class="text-sm" style="color: var(--md-sys-color-on-surface-variant);">/mo</span></p>
+                <ul class="space-y-2 mb-6" style="color: var(--md-sys-color-on-surface-variant);">
+                    <li class="flex items-center"><md-icon style="color: var(--md-sys-color-primary); font-size: 18px; margin-right: 0.5rem;">check</md-icon> 10 battles/day</li>
+                    <li class="flex items-center"><md-icon style="color: var(--md-sys-color-primary); font-size: 18px; margin-right: 0.5rem;">check</md-icon> Basic units</li>
+                    <li class="flex items-center"><md-icon style="color: var(--md-sys-color-primary); font-size: 18px; margin-right: 0.5rem;">check</md-icon> Public leaderboards</li>
                 </ul>
-                <a asp-page="/Auth/Register" class="block text-center w-full bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 py-2 rounded hover:bg-gray-300 dark:hover:bg-gray-600">
+                <md-outlined-button class="w-full" href="/Auth/Register">
                     Get Started
-                </a>
+                </md-outlined-button>
             </div>
-            <div class="border-2 border-blue-500 rounded-lg p-6 bg-white dark:bg-gray-800 relative">
-                <div class="absolute top-0 right-0 bg-blue-500 text-white px-3 py-1 text-sm rounded-bl-lg">
+            <!-- Premium Tier -->
+            <div class="md3-card-elevated relative" style="border: 2px solid var(--md-sys-color-primary);">
+                <div class="absolute top-0 right-0 px-3 py-1 text-sm"
+                     style="background: var(--md-sys-color-primary); color: var(--md-sys-color-on-primary); border-radius: 0 var(--md-sys-shape-corner-large) 0 var(--md-sys-shape-corner-medium);">
                     Popular
                 </div>
-                <h3 class="text-xl font-bold mb-2">Premium</h3>
-                <p class="text-3xl font-bold mb-4">$5<span class="text-sm text-gray-600 dark:text-gray-400">/mo</span></p>
-                <ul class="space-y-2 mb-6 text-gray-600 dark:text-gray-300">
-                    <li class="flex items-center"><span class="text-green-500 mr-2">&#10003;</span> Unlimited battles</li>
-                    <li class="flex items-center"><span class="text-green-500 mr-2">&#10003;</span> 50+ units</li>
-                    <li class="flex items-center"><span class="text-green-500 mr-2">&#10003;</span> Priority queue</li>
-                    <li class="flex items-center"><span class="text-green-500 mr-2">&#10003;</span> Advanced stats</li>
+                <h3 class="text-xl font-bold mb-2" style="color: var(--md-sys-color-on-surface);">Premium</h3>
+                <p class="text-3xl font-bold mb-4" style="color: var(--md-sys-color-on-surface);">$5<span class="text-sm" style="color: var(--md-sys-color-on-surface-variant);">/mo</span></p>
+                <ul class="space-y-2 mb-6" style="color: var(--md-sys-color-on-surface-variant);">
+                    <li class="flex items-center"><md-icon style="color: var(--md-sys-color-primary); font-size: 18px; margin-right: 0.5rem;">check</md-icon> Unlimited battles</li>
+                    <li class="flex items-center"><md-icon style="color: var(--md-sys-color-primary); font-size: 18px; margin-right: 0.5rem;">check</md-icon> 50+ units</li>
+                    <li class="flex items-center"><md-icon style="color: var(--md-sys-color-primary); font-size: 18px; margin-right: 0.5rem;">check</md-icon> Priority queue</li>
+                    <li class="flex items-center"><md-icon style="color: var(--md-sys-color-primary); font-size: 18px; margin-right: 0.5rem;">check</md-icon> Advanced stats</li>
                 </ul>
-                <a asp-page="/Auth/Register" class="block text-center w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">
+                <md-filled-button class="w-full" href="/Auth/Register">
                     Start Free Trial
-                </a>
+                </md-filled-button>
             </div>
-            <div class="border dark:border-gray-700 rounded-lg p-6 bg-white dark:bg-gray-800">
-                <h3 class="text-xl font-bold mb-2">Premium Plus</h3>
-                <p class="text-3xl font-bold mb-4">$10<span class="text-sm text-gray-600 dark:text-gray-400">/mo</span></p>
-                <ul class="space-y-2 mb-6 text-gray-600 dark:text-gray-300">
-                    <li class="flex items-center"><span class="text-green-500 mr-2">&#10003;</span> Everything in Premium</li>
-                    <li class="flex items-center"><span class="text-green-500 mr-2">&#10003;</span> Scripting engine</li>
-                    <li class="flex items-center"><span class="text-green-500 mr-2">&#10003;</span> Advanced analytics</li>
-                    <li class="flex items-center"><span class="text-green-500 mr-2">&#10003;</span> 2x API rate limits</li>
+            <!-- Premium Plus Tier -->
+            <div class="md3-card">
+                <h3 class="text-xl font-bold mb-2" style="color: var(--md-sys-color-on-surface);">Premium Plus</h3>
+                <p class="text-3xl font-bold mb-4" style="color: var(--md-sys-color-on-surface);">$10<span class="text-sm" style="color: var(--md-sys-color-on-surface-variant);">/mo</span></p>
+                <ul class="space-y-2 mb-6" style="color: var(--md-sys-color-on-surface-variant);">
+                    <li class="flex items-center"><md-icon style="color: var(--md-sys-color-primary); font-size: 18px; margin-right: 0.5rem;">check</md-icon> Everything in Premium</li>
+                    <li class="flex items-center"><md-icon style="color: var(--md-sys-color-primary); font-size: 18px; margin-right: 0.5rem;">check</md-icon> Scripting engine</li>
+                    <li class="flex items-center"><md-icon style="color: var(--md-sys-color-primary); font-size: 18px; margin-right: 0.5rem;">check</md-icon> Advanced analytics</li>
+                    <li class="flex items-center"><md-icon style="color: var(--md-sys-color-primary); font-size: 18px; margin-right: 0.5rem;">check</md-icon> 2x API rate limits</li>
                 </ul>
-                <a asp-page="/Auth/Register" class="block text-center w-full bg-gray-700 dark:bg-gray-600 text-white py-2 rounded hover:bg-gray-800 dark:hover:bg-gray-500">
+                <md-filled-tonal-button class="w-full" href="/Auth/Register">
                     Start Free Trial
-                </a>
+                </md-filled-tonal-button>
             </div>
         </div>
     </div>

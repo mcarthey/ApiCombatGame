@@ -1,82 +1,78 @@
 @model EndpointInfo
 
 @{
-    var methodColors = new Dictionary<string, (string bg, string text, string darkBg)>
+    var methodColors = new Dictionary<string, (string bg, string text)>
     {
-        ["GET"] = ("bg-emerald-100", "text-emerald-700", "dark:bg-emerald-900/30 dark:text-emerald-400"),
-        ["POST"] = ("bg-blue-100", "text-blue-700", "dark:bg-blue-900/30 dark:text-blue-400"),
-        ["PUT"] = ("bg-amber-100", "text-amber-700", "dark:bg-amber-900/30 dark:text-amber-400"),
-        ["DELETE"] = ("bg-red-100", "text-red-700", "dark:bg-red-900/30 dark:text-red-400"),
-        ["PATCH"] = ("bg-purple-100", "text-purple-700", "dark:bg-purple-900/30 dark:text-purple-400")
+        ["GET"] = ("var(--md-sys-color-primary-container)", "var(--md-sys-color-on-primary-container)"),
+        ["POST"] = ("var(--md-sys-color-secondary-container)", "var(--md-sys-color-on-secondary-container)"),
+        ["PUT"] = ("var(--md-sys-color-tertiary-container)", "var(--md-sys-color-on-tertiary-container)"),
+        ["DELETE"] = ("var(--md-sys-color-error-container)", "var(--md-sys-color-on-error-container)"),
+        ["PATCH"] = ("var(--md-sys-color-tertiary-container)", "var(--md-sys-color-on-tertiary-container)")
     };
 
-    var difficultyConfig = new Dictionary<string, (string label, string color, string dot)>
+    var difficultyConfig = new Dictionary<string, (string label, string color)>
     {
-        ["beginner"] = ("Beginner", "text-emerald-600 dark:text-emerald-400", "bg-emerald-500"),
-        ["intermediate"] = ("Intermediate", "text-amber-600 dark:text-amber-400", "bg-amber-500"),
-        ["advanced"] = ("Advanced", "text-red-600 dark:text-red-400", "bg-red-500")
+        ["beginner"] = ("Beginner", "var(--md-sys-color-primary)"),
+        ["intermediate"] = ("Intermediate", "var(--md-sys-color-tertiary-container)"),
+        ["advanced"] = ("Advanced", "var(--md-sys-color-error)")
     };
 
-    var (bg, text, darkBg) = methodColors.GetValueOrDefault(Model.Method, ("bg-gray-100", "text-gray-700", "dark:bg-gray-800 dark:text-gray-400"));
+    var (bg, text) = methodColors.GetValueOrDefault(Model.Method, ("var(--md-sys-color-surface-container-high)", "var(--md-sys-color-on-surface)"));
     var anchorId = $"{Model.Method.ToLower()}-{Model.Path.TrimStart('/').Replace("/", "-").Replace("{", "").Replace("}", "")}";
 }
 
-<details id="@anchorId" class="group bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden transition-shadow hover:shadow-md">
+<details id="@anchorId" class="group md3-card overflow-hidden stat-card">
     <summary class="flex items-center gap-3 px-5 py-4 cursor-pointer select-none list-none [&::-webkit-details-marker]:hidden">
-        <span class="inline-flex items-center justify-center px-2.5 py-1 rounded text-xs font-bold tracking-wider min-w-[4rem] @bg @text @darkBg">
+        <span class="inline-flex items-center justify-center px-2.5 py-1 text-xs font-bold tracking-wider min-w-[4rem]" style="background: @bg; color: @text; border-radius: var(--md-sys-shape-corner-small);">
             @Model.Method
         </span>
-        <code class="text-sm font-mono text-gray-800 dark:text-gray-200 flex-1">@Model.Path</code>
+        <code class="text-sm font-mono flex-1" style="color: var(--md-sys-color-on-surface);">@Model.Path</code>
 
         @if (!string.IsNullOrEmpty(Model.Difficulty) && difficultyConfig.TryGetValue(Model.Difficulty, out var diff))
         {
-            <span class="hidden sm:inline-flex items-center gap-1.5 text-xs @diff.color">
-                <span class="w-1.5 h-1.5 rounded-full @diff.dot"></span>
+            <span class="hidden sm:inline-flex items-center gap-1.5 text-xs" style="color: @diff.color;">
+                <span class="w-1.5 h-1.5" style="border-radius: 50%; background: @diff.color;"></span>
                 @diff.label
             </span>
         }
 
         @if (Model.RequiresAuth)
         {
-            <span class="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400">
-                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+            <span class="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 text-xs" style="background: var(--md-sys-color-surface-container-high); color: var(--md-sys-color-on-surface-variant); border-radius: var(--md-sys-shape-corner-small);">
+                <md-icon style="font-size: 14px; width: 14px; height: 14px;">lock</md-icon>
                 Auth
             </span>
         }
         else
         {
-            <span class="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400">
+            <span class="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 text-xs" style="background: var(--md-sys-color-primary-container); color: var(--md-sys-color-on-primary-container); border-radius: var(--md-sys-shape-corner-small);">
                 Public
             </span>
         }
 
-        <svg class="w-4 h-4 text-gray-400 transition-transform group-open:rotate-180 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-        </svg>
+        <md-icon class="shrink-0 transition-transform group-open:rotate-180" style="color: var(--md-sys-color-on-surface-variant); font-size: 18px;">expand_more</md-icon>
     </summary>
 
-    <div class="px-5 pb-5 border-t border-gray-100 dark:border-gray-700 pt-4 space-y-4">
+    <div class="px-5 pb-5 pt-4 space-y-4" style="border-top: 1px solid var(--md-sys-color-outline-variant);">
         @if (!string.IsNullOrEmpty(Model.Summary))
         {
-            <p class="text-gray-700 dark:text-gray-300">@Model.Summary</p>
+            <p style="color: var(--md-sys-color-on-surface);">@Model.Summary</p>
         }
 
         @if (!string.IsNullOrEmpty(Model.Description) && Model.Description != Model.Summary)
         {
-            <p class="text-sm text-gray-500 dark:text-gray-400">@Model.Description</p>
+            <p class="text-sm" style="color: var(--md-sys-color-on-surface-variant);">@Model.Description</p>
         }
 
         @* Prerequisites *@
         @if (Model.Prerequisites.Any())
         {
             <div class="flex items-start gap-2 text-sm">
-                <span class="text-gray-500 dark:text-gray-400 font-medium shrink-0 mt-0.5">Prerequisites:</span>
+                <span class="font-medium shrink-0 mt-0.5" style="color: var(--md-sys-color-on-surface-variant);">Prerequisites:</span>
                 <div class="flex flex-wrap gap-1.5">
                     @foreach (var prereq in Model.Prerequisites)
                     {
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300">
-                            @prereq
-                        </span>
+                        <md-assist-chip label="@prereq"></md-assist-chip>
                     }
                 </div>
             </div>
@@ -86,37 +82,37 @@
         @if (Model.Parameters.Any())
         {
             <div>
-                <h4 class="text-sm font-semibold text-gray-900 dark:text-white mb-2">Parameters</h4>
-                <div class="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
-                    <table class="w-full text-sm">
-                        <thead class="bg-gray-50 dark:bg-gray-900/50">
+                <h4 class="text-sm font-semibold mb-2" style="color: var(--md-sys-color-on-surface);">Parameters</h4>
+                <div class="overflow-hidden" style="border-radius: var(--md-sys-shape-corner-medium);">
+                    <table class="md3-table w-full text-sm">
+                        <thead>
                             <tr>
-                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Name</th>
-                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">In</th>
-                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Type</th>
-                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Description</th>
+                                <th class="px-4 py-2 text-left text-xs font-medium uppercase">Name</th>
+                                <th class="px-4 py-2 text-left text-xs font-medium uppercase">In</th>
+                                <th class="px-4 py-2 text-left text-xs font-medium uppercase">Type</th>
+                                <th class="px-4 py-2 text-left text-xs font-medium uppercase">Description</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                        <tbody>
                             @foreach (var param in Model.Parameters)
                             {
                                 <tr>
-                                    <td class="px-4 py-2 font-mono text-xs text-gray-800 dark:text-gray-200">
+                                    <td class="px-4 py-2 font-mono text-xs">
                                         @param.Name
                                         @if (param.Required)
                                         {
-                                            <span class="text-red-500">*</span>
+                                            <span style="color: var(--md-sys-color-error);">*</span>
                                         }
                                     </td>
-                                    <td class="px-4 py-2 text-xs text-gray-500 dark:text-gray-400">@param.In</td>
+                                    <td class="px-4 py-2 text-xs" style="color: var(--md-sys-color-on-surface-variant);">@param.In</td>
                                     <td class="px-4 py-2">
-                                        <span class="text-xs px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 font-mono">@param.Type</span>
+                                        <span class="text-xs px-1.5 py-0.5 font-mono" style="background: var(--md-sys-color-surface-container-high); color: var(--md-sys-color-on-surface); border-radius: var(--md-sys-shape-corner-small);">@param.Type</span>
                                     </td>
-                                    <td class="px-4 py-2 text-xs text-gray-600 dark:text-gray-400">
+                                    <td class="px-4 py-2 text-xs" style="color: var(--md-sys-color-on-surface-variant);">
                                         @param.Description
                                         @if (param.Default != null)
                                         {
-                                            <span class="text-gray-400">(default: @param.Default)</span>
+                                            <span style="color: var(--md-sys-color-outline);">(default: @param.Default)</span>
                                         }
                                     </td>
                                 </tr>
@@ -131,7 +127,7 @@
         @if (Model.RequestBody?.Properties?.Any() == true)
         {
             <div>
-                <h4 class="text-sm font-semibold text-gray-900 dark:text-white mb-2">Request Body</h4>
+                <h4 class="text-sm font-semibold mb-2" style="color: var(--md-sys-color-on-surface);">Request Body</h4>
                 <partial name="ApiDocs/_SchemaTable" model="Model.RequestBody" />
             </div>
         }
@@ -140,16 +136,16 @@
         @if (Model.Responses.Any())
         {
             <div>
-                <h4 class="text-sm font-semibold text-gray-900 dark:text-white mb-2">Responses</h4>
+                <h4 class="text-sm font-semibold mb-2" style="color: var(--md-sys-color-on-surface);">Responses</h4>
                 <div class="space-y-1.5">
                     @foreach (var (code, response) in Model.Responses)
                     {
-                        var codeColor = code.StartsWith("2") ? "text-emerald-600 dark:text-emerald-400" :
-                                        code.StartsWith("4") ? "text-amber-600 dark:text-amber-400" :
-                                        code.StartsWith("5") ? "text-red-600 dark:text-red-400" : "text-gray-600";
+                        var codeColor = code.StartsWith("2") ? "var(--md-sys-color-primary)" :
+                                        code.StartsWith("4") ? "var(--md-sys-color-tertiary-container)" :
+                                        code.StartsWith("5") ? "var(--md-sys-color-error)" : "var(--md-sys-color-on-surface-variant)";
                         <div class="flex items-start gap-3 text-sm">
-                            <code class="font-mono font-bold @codeColor min-w-[2.5rem]">@code</code>
-                            <span class="text-gray-600 dark:text-gray-400">@response.Description</span>
+                            <code class="font-mono font-bold min-w-[2.5rem]" style="color: @codeColor;">@code</code>
+                            <span style="color: var(--md-sys-color-on-surface-variant);">@response.Description</span>
                         </div>
                     }
                 </div>
@@ -160,11 +156,11 @@
         @if (Model.Examples.Any())
         {
             <div>
-                <h4 class="text-sm font-semibold text-gray-900 dark:text-white mb-2">Examples</h4>
+                <h4 class="text-sm font-semibold mb-2" style="color: var(--md-sys-color-on-surface);">Examples</h4>
                 @foreach (var example in Model.Examples)
                 {
                     <div class="space-y-2">
-                        <span class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">@example.Name</span>
+                        <span class="text-xs font-medium uppercase tracking-wide" style="color: var(--md-sys-color-on-surface-variant);">@example.Name</span>
                         @if (example.Request != null)
                         {
                             <partial name="ApiDocs/_CodeBlock" model="@(new CodeBlockModel { Label = "Request", Code = example.Request, Language = "json" })" />
@@ -184,11 +180,9 @@
             <div class="space-y-2">
                 @foreach (var tip in Model.GameTips)
                 {
-                    <div class="flex gap-3 p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800/30">
-                        <svg class="w-4 h-4 text-blue-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
-                        </svg>
-                        <span class="text-sm text-blue-800 dark:text-blue-200">@tip</span>
+                    <div class="md3-alert-info flex gap-3">
+                        <md-icon class="shrink-0 mt-0.5" style="font-size: 18px;">tips_and_updates</md-icon>
+                        <span class="text-sm">@tip</span>
                     </div>
                 }
             </div>

@@ -5,45 +5,46 @@
 }
 
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <h1 class="text-3xl font-bold mb-8">Dashboard</h1>
+    <h1 class="text-3xl font-bold mb-8" style="color: var(--md-sys-color-on-surface);">Dashboard</h1>
 
     <!-- Stats Overview -->
     <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-            <div class="text-sm text-gray-600 dark:text-gray-400 mb-1">Battles Today</div>
-            <div class="text-3xl font-bold">
+        <div class="md3-card p-6">
+            <div class="text-sm mb-1" style="color: var(--md-sys-color-on-surface-variant);">Battles Today</div>
+            <div class="text-3xl font-bold" style="color: var(--md-sys-color-on-surface);">
                 @Model.Dashboard.BattlesToday / @(Model.Dashboard.DailyLimit == -1 ? "Unlimited" : Model.Dashboard.DailyLimit.ToString())
             </div>
-            <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+            <div class="text-xs mt-1" style="color: var(--md-sys-color-on-surface-variant);">
                 @Model.Dashboard.CurrentTier tier
             </div>
         </div>
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-            <div class="text-sm text-gray-600 dark:text-gray-400 mb-1">Win Rate</div>
-            <div class="text-3xl font-bold">@Model.Dashboard.WinRate%</div>
-            <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">All time</div>
+        <div class="md3-card p-6">
+            <div class="text-sm mb-1" style="color: var(--md-sys-color-on-surface-variant);">Win Rate</div>
+            <div class="text-3xl font-bold" style="color: var(--md-sys-color-on-surface);">@Model.Dashboard.WinRate%</div>
+            <div class="text-xs mt-1" style="color: var(--md-sys-color-on-surface-variant);">All time</div>
         </div>
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-            <div class="text-sm text-gray-600 dark:text-gray-400 mb-1">Ranking</div>
-            <div class="text-3xl font-bold">#@Model.Dashboard.GlobalRank</div>
-            <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">Global leaderboard</div>
+        <div class="md3-card p-6">
+            <div class="text-sm mb-1" style="color: var(--md-sys-color-on-surface-variant);">Ranking</div>
+            <div class="text-3xl font-bold" style="color: var(--md-sys-color-on-surface);">#@Model.Dashboard.GlobalRank</div>
+            <div class="text-xs mt-1" style="color: var(--md-sys-color-on-surface-variant);">Global leaderboard</div>
         </div>
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-            <div class="text-sm text-gray-600 dark:text-gray-400 mb-1">Rating</div>
-            <div class="text-3xl font-bold">@Model.Dashboard.Rating</div>
-            <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">Currency: @Model.Dashboard.Currency</div>
+        <div class="md3-card p-6">
+            <div class="text-sm mb-1" style="color: var(--md-sys-color-on-surface-variant);">Rating</div>
+            <div class="text-3xl font-bold" style="color: var(--md-sys-color-on-surface);">@Model.Dashboard.Rating</div>
+            <div class="text-xs mt-1" style="color: var(--md-sys-color-on-surface-variant);">Currency: @Model.Dashboard.Currency</div>
         </div>
     </div>
 
     <!-- Upgrade Banner (Free tier only) -->
     @if (Model.Dashboard.CurrentTier == "Free")
     {
-        <div class="bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-400 p-4 mb-8">
+        <div class="md3-alert-info p-4 mb-8">
             <div class="flex">
-                <div class="ml-3 flex-1">
-                    <p class="text-sm text-blue-700 dark:text-blue-300">
+                <md-icon style="color: var(--md-sys-color-primary); margin-right: 12px;">info</md-icon>
+                <div class="flex-1">
+                    <p class="text-sm" style="color: var(--md-sys-color-on-surface);">
                         You've used <strong>@Model.Dashboard.BattlesToday of @Model.Dashboard.DailyLimit</strong> battles today.
-                        <a asp-page="/Account/Subscription" class="font-medium underline">Upgrade to Premium</a> for unlimited battles.
+                        <a asp-page="/Account/Subscription" style="color: var(--md-sys-color-primary); text-decoration: underline; font-weight: 500;">Upgrade to Premium</a> for unlimited battles.
                     </p>
                 </div>
             </div>
@@ -52,46 +53,64 @@
 
     <!-- Quick Actions -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <a asp-page="/Account/ApiKeys" class="block bg-white dark:bg-gray-800 rounded-lg shadow p-6 hover:shadow-md transition">
-            <div class="text-lg font-semibold mb-2">API Keys</div>
-            <p class="text-sm text-gray-600 dark:text-gray-400">Manage your API keys and access tokens</p>
+        <a asp-page="/Account/ApiKeys" class="block md3-card p-6" style="text-decoration: none; transition: box-shadow 0.2s;">
+            <div class="text-lg font-semibold mb-2" style="color: var(--md-sys-color-on-surface);">
+                <md-icon style="vertical-align: middle; margin-right: 8px; color: var(--md-sys-color-primary);">key</md-icon>
+                API Keys
+            </div>
+            <p class="text-sm" style="color: var(--md-sys-color-on-surface-variant);">Manage your API keys and access tokens</p>
         </a>
-        <a asp-page="/Account/Subscription" class="block bg-white dark:bg-gray-800 rounded-lg shadow p-6 hover:shadow-md transition">
-            <div class="text-lg font-semibold mb-2">Subscription</div>
-            <p class="text-sm text-gray-600 dark:text-gray-400">Upgrade or manage your plan</p>
+        <a asp-page="/Account/Subscription" class="block md3-card p-6" style="text-decoration: none; transition: box-shadow 0.2s;">
+            <div class="text-lg font-semibold mb-2" style="color: var(--md-sys-color-on-surface);">
+                <md-icon style="vertical-align: middle; margin-right: 8px; color: var(--md-sys-color-primary);">card_membership</md-icon>
+                Subscription
+            </div>
+            <p class="text-sm" style="color: var(--md-sys-color-on-surface-variant);">Upgrade or manage your plan</p>
         </a>
-        <a href="/api-docs/v1" class="block bg-white dark:bg-gray-800 rounded-lg shadow p-6 hover:shadow-md transition">
-            <div class="text-lg font-semibold mb-2">API Docs</div>
-            <p class="text-sm text-gray-600 dark:text-gray-400">View the complete API reference</p>
+        <a href="/api-docs/v1" class="block md3-card p-6" style="text-decoration: none; transition: box-shadow 0.2s;">
+            <div class="text-lg font-semibold mb-2" style="color: var(--md-sys-color-on-surface);">
+                <md-icon style="vertical-align: middle; margin-right: 8px; color: var(--md-sys-color-primary);">description</md-icon>
+                API Docs
+            </div>
+            <p class="text-sm" style="color: var(--md-sys-color-on-surface-variant);">View the complete API reference</p>
         </a>
     </div>
 
     <!-- Recent Activity -->
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow">
-        <div class="px-6 py-4 border-b dark:border-gray-700">
-            <h2 class="text-lg font-semibold">Recent Battles</h2>
+    <div class="md3-card">
+        <div class="px-6 py-4" style="border-bottom: 1px solid var(--md-sys-color-outline-variant);">
+            <h2 class="text-lg font-semibold" style="color: var(--md-sys-color-on-surface);">Recent Battles</h2>
         </div>
-        <div class="divide-y dark:divide-gray-700">
+        <div>
             @if (Model.Dashboard.RecentBattles.Any())
             {
                 @foreach (var battle in Model.Dashboard.RecentBattles)
                 {
-                    <div class="px-6 py-4 flex items-center justify-between">
+                    <div class="px-6 py-4 flex items-center justify-between" style="border-bottom: 1px solid var(--md-sys-color-outline-variant);">
                         <div>
-                            <div class="font-medium">vs @battle.OpponentName</div>
-                            <div class="text-sm text-gray-500 dark:text-gray-400">@battle.CompletedAt.ToString("MMM dd, yyyy HH:mm")</div>
+                            <div class="font-medium" style="color: var(--md-sys-color-on-surface);">vs @battle.OpponentName</div>
+                            <div class="text-sm" style="color: var(--md-sys-color-on-surface-variant);">@battle.CompletedAt.ToString("MMM dd, yyyy HH:mm")</div>
                         </div>
                         <div class="flex items-center space-x-3">
-                            <span class="text-sm @(battle.RatingChange >= 0 ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400")">
-                                @(battle.RatingChange >= 0 ? "+" : "")@battle.RatingChange
-                            </span>
-                            @if (battle.IsWin)
+                            @if (battle.RatingChange >= 0)
                             {
-                                <span class="px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 text-sm font-medium rounded">Won</span>
+                                <span class="text-sm" style="color: var(--md-sys-color-primary);">
+                                    +@battle.RatingChange
+                                </span>
                             }
                             else
                             {
-                                <span class="px-3 py-1 bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300 text-sm font-medium rounded">Lost</span>
+                                <span class="text-sm" style="color: var(--md-sys-color-error);">
+                                    @battle.RatingChange
+                                </span>
+                            }
+                            @if (battle.IsWin)
+                            {
+                                <span class="md3-badge-primary text-sm font-medium">Won</span>
+                            }
+                            else
+                            {
+                                <span class="md3-badge-error text-sm font-medium">Lost</span>
                             }
                         </div>
                     </div>
@@ -99,7 +118,7 @@
             }
             else
             {
-                <div class="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
+                <div class="px-6 py-8 text-center" style="color: var(--md-sys-color-on-surface-variant);">
                     No battles yet. Queue your first battle via the API!
                 </div>
             }

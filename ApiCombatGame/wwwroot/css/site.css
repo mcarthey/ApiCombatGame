@@ -1,58 +1,162 @@
-/* Custom styles for API Combat Game web UI */
+/* API Combat Game — Material Design 3 Theme */
 
-/* Override default form styling */
-input[type="text"],
-input[type="email"],
-input[type="password"] {
-    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+/* ─── Body ─── */
+body {
+    background-color: var(--md-sys-color-surface);
+    color: var(--md-sys-color-on-surface);
+    transition: background-color 0.2s, color 0.2s;
 }
 
-input[type="text"]:focus,
-input[type="email"]:focus,
-input[type="password"]:focus {
-    outline: none;
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+/* ─── Cards ─── */
+.md3-card {
+    background: var(--md-sys-color-surface-container-low);
+    border-radius: var(--md-sys-shape-corner-large);
+    box-shadow: var(--md-sys-elevation-1);
+    padding: 1.5rem;
 }
 
-/* Dark mode form inputs */
-.dark input[type="text"],
-.dark input[type="email"],
-.dark input[type="password"] {
-    background-color: #374151;
-    border-color: #4b5563;
-    color: #f3f4f6;
+.md3-card-elevated {
+    background: var(--md-sys-color-surface-container-low);
+    border-radius: var(--md-sys-shape-corner-large);
+    box-shadow: var(--md-sys-elevation-2);
+    padding: 1.5rem;
 }
 
-.dark input[type="text"]::placeholder,
-.dark input[type="email"]::placeholder,
-.dark input[type="password"]::placeholder {
-    color: #9ca3af;
+.md3-card-outlined {
+    background: var(--md-sys-color-surface);
+    border-radius: var(--md-sys-shape-corner-large);
+    border: 1px solid var(--md-sys-color-outline-variant);
+    padding: 1.5rem;
 }
 
-/* Validation error styling */
+/* ─── Alerts ─── */
+.md3-alert {
+    border-radius: var(--md-sys-shape-corner-medium);
+    padding: 1rem;
+    border-left: 4px solid;
+}
+
+.md3-alert-error {
+    background: var(--md-sys-color-error-container);
+    color: var(--md-sys-color-on-error-container);
+    border-color: var(--md-sys-color-error);
+}
+
+.md3-alert-success {
+    background: color-mix(in srgb, #22c55e 10%, var(--md-sys-color-surface));
+    color: var(--md-sys-color-on-surface);
+    border-color: #22c55e;
+}
+
+.md3-alert-warning {
+    background: var(--md-sys-color-tertiary-container);
+    color: var(--md-sys-color-on-tertiary-container);
+    border-color: var(--md-sys-color-tertiary);
+}
+
+.md3-alert-info {
+    background: var(--md-sys-color-primary-container);
+    color: var(--md-sys-color-on-primary-container);
+    border-color: var(--md-sys-color-primary);
+}
+
+/* ─── Tables ─── */
+.md3-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.md3-table thead {
+    background: var(--md-sys-color-surface-container-highest);
+}
+
+.md3-table th {
+    padding: 0.75rem 1.5rem;
+    text-align: left;
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--md-sys-color-on-surface-variant);
+}
+
+.md3-table td {
+    padding: 0.75rem 1.5rem;
+    border-bottom: 1px solid var(--md-sys-color-outline-variant);
+    color: var(--md-sys-color-on-surface);
+}
+
+.md3-table tbody tr:hover {
+    background: var(--md-sys-color-surface-container);
+}
+
+/* ─── Badges ─── */
+.md3-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.125rem 0.625rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.md3-badge-primary {
+    background: var(--md-sys-color-primary-container);
+    color: var(--md-sys-color-on-primary-container);
+}
+
+.md3-badge-secondary {
+    background: var(--md-sys-color-secondary-container);
+    color: var(--md-sys-color-on-secondary-container);
+}
+
+.md3-badge-tertiary {
+    background: var(--md-sys-color-tertiary-container);
+    color: var(--md-sys-color-on-tertiary-container);
+}
+
+.md3-badge-error {
+    background: var(--md-sys-color-error-container);
+    color: var(--md-sys-color-on-error-container);
+}
+
+/* ─── Hero class colors ─── */
+.hero-warrior { --hero-accent: #dc2626; --hero-bg: color-mix(in srgb, #dc2626 12%, var(--md-sys-color-surface)); }
+.hero-mage { --hero-accent: #7c3aed; --hero-bg: color-mix(in srgb, #7c3aed 12%, var(--md-sys-color-surface)); }
+.hero-tank { --hero-accent: #2563eb; --hero-bg: color-mix(in srgb, #2563eb 12%, var(--md-sys-color-surface)); }
+.hero-healer { --hero-accent: #059669; --hero-bg: color-mix(in srgb, #059669 12%, var(--md-sys-color-surface)); }
+.hero-assassin { --hero-accent: #d97706; --hero-bg: color-mix(in srgb, #d97706 12%, var(--md-sys-color-surface)); }
+.hero-ranger { --hero-accent: #0d9488; --hero-bg: color-mix(in srgb, #0d9488 12%, var(--md-sys-color-surface)); }
+.hero-default { --hero-accent: var(--md-sys-color-primary); --hero-bg: var(--md-sys-color-primary-container); }
+
+/* ─── Stat card hover ─── */
+.stat-card {
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--md-sys-elevation-3);
+}
+
+/* ─── Validation ─── */
 .field-validation-error {
-    color: #dc2626;
+    color: var(--md-sys-color-error);
     font-size: 0.875rem;
     margin-top: 0.25rem;
 }
 
-.dark .field-validation-error {
-    color: #f87171;
-}
-
 .input-validation-error {
-    border-color: #dc2626 !important;
+    --md-outlined-text-field-error-focus-outline-color: var(--md-sys-color-error);
 }
 
-/* Code block styling for landing page */
+/* ─── Code blocks ─── */
 pre code {
     font-family: 'Fira Code', 'Cascadia Code', 'JetBrains Mono', monospace;
     font-size: 0.875rem;
     line-height: 1.5;
 }
 
-/* Smooth page transitions */
+/* ─── Page transition ─── */
 main {
     animation: fadeIn 0.2s ease-in;
 }
@@ -60,4 +164,76 @@ main {
 @keyframes fadeIn {
     from { opacity: 0.8; }
     to { opacity: 1; }
+}
+
+/* ─── FOUC prevention: hide M3 web components until registered ─── */
+md-filled-button:not(:defined),
+md-outlined-button:not(:defined),
+md-text-button:not(:defined),
+md-filled-tonal-button:not(:defined),
+md-icon-button:not(:defined),
+md-outlined-text-field:not(:defined),
+md-checkbox:not(:defined),
+md-linear-progress:not(:defined),
+md-dialog:not(:defined),
+md-outlined-select:not(:defined),
+md-list:not(:defined),
+md-list-item:not(:defined),
+md-chip-set:not(:defined),
+md-assist-chip:not(:defined),
+md-switch:not(:defined) {
+    opacity: 0;
+    transition: opacity 0.15s;
+}
+
+/* ─── M3 component width overrides ─── */
+md-outlined-text-field.w-full,
+md-filled-text-field.w-full {
+    width: 100%;
+}
+
+md-filled-button.w-full,
+md-outlined-button.w-full {
+    width: 100%;
+    --md-filled-button-container-shape: var(--md-sys-shape-corner-small);
+}
+
+/* ─── Notification badge ─── */
+.notification-badge {
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 4px;
+    font-size: 0.625rem;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--md-sys-color-on-error);
+    background: var(--md-sys-color-error);
+    border-radius: 9999px;
+}
+
+/* ─── Navigation active state ─── */
+.nav-link-active {
+    color: var(--md-sys-color-primary);
+    border-bottom: 2px solid var(--md-sys-color-primary);
+}
+
+.nav-link-inactive {
+    color: var(--md-sys-color-on-surface-variant);
+    border-bottom: 2px solid transparent;
+}
+
+.nav-link-inactive:hover {
+    color: var(--md-sys-color-on-surface);
+    border-bottom-color: var(--md-sys-color-outline-variant);
+}
+
+/* ─── Scrollbar ─── */
+html {
+    scroll-behavior: smooth;
 }

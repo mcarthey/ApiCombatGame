@@ -1,35 +1,43 @@
-// API Combat Game - Client-side utilities
+// API Combat Game — Client-side utilities (M3 version)
 
-// Dark mode toggle
+// Dark mode toggle (works with <md-icon-button toggle>)
 function initThemeToggle() {
-    var toggle = document.getElementById('theme-toggle');
-    var sun = document.getElementById('icon-sun');
-    var moon = document.getElementById('icon-moon');
+    var toggles = document.querySelectorAll('[data-theme-toggle]');
+    if (toggles.length === 0) return;
 
-    if (!toggle || !sun || !moon) return;
-
-    function updateIcons(isDark) {
-        sun.classList.toggle('hidden', !isDark);
-        moon.classList.toggle('hidden', isDark);
-    }
-
-    function toggleTheme() {
-        var isDark = document.documentElement.classList.toggle('dark');
+    function setTheme(isDark) {
+        document.documentElement.classList.toggle('dark', isDark);
+        document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
         localStorage.setItem('theme', isDark ? 'dark' : 'light');
-        updateIcons(isDark);
+        toggles.forEach(function (t) {
+            if (t.tagName === 'MD-ICON-BUTTON') {
+                t.selected = isDark;
+            }
+        });
     }
 
-    updateIcons(document.documentElement.classList.contains('dark'));
-    toggle.addEventListener('click', toggleTheme);
+    var isDark = document.documentElement.classList.contains('dark');
+    toggles.forEach(function (t) {
+        if (t.tagName === 'MD-ICON-BUTTON') {
+            t.selected = isDark;
+            t.addEventListener('input', function () {
+                setTheme(this.selected);
+            });
+        } else {
+            t.addEventListener('click', function () {
+                setTheme(!document.documentElement.classList.contains('dark'));
+            });
+        }
+    });
 }
 
 document.addEventListener('DOMContentLoaded', initThemeToggle);
 
+// Clipboard
 function copyToClipboard(text) {
     navigator.clipboard.writeText(text).then(function () {
         showToast('Copied to clipboard!');
     }).catch(function () {
-        // Fallback for older browsers
         var textArea = document.createElement('textarea');
         textArea.value = text;
         textArea.style.position = 'fixed';
@@ -42,9 +50,19 @@ function copyToClipboard(text) {
     });
 }
 
+// Toast notification (M3-styled)
 function showToast(message) {
     var toast = document.createElement('div');
-    toast.className = 'fixed bottom-4 right-4 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 px-4 py-2 rounded-lg shadow-lg text-sm z-50';
+    toast.style.cssText = [
+        'position:fixed', 'bottom:1.5rem', 'right:1.5rem',
+        'padding:0.75rem 1.25rem',
+        'border-radius:var(--md-sys-shape-corner-small, 8px)',
+        'background:var(--md-sys-color-inverse-surface, #313033)',
+        'color:var(--md-sys-color-inverse-on-surface, #f4eff4)',
+        'font-size:0.875rem',
+        'box-shadow:var(--md-sys-elevation-3, 0 4px 8px 3px rgba(0,0,0,0.15))',
+        'z-index:50'
+    ].join(';');
     toast.textContent = message;
     document.body.appendChild(toast);
     setTimeout(function () {
@@ -54,6 +72,22 @@ function showToast(message) {
     }, 2000);
 }
 
+// Confirm action via M3 dialog
 function confirmAction(message) {
-    return confirm(message);
+    return new Promise(function (resolve) {
+        var dialog = document.createElement('md-dialog');
+        dialog.innerHTML =
+            '<div slot="headline">Confirm Action</div>' +
+            '<div slot="content"><p>' + message + '</p></div>' +
+            '<div slot="actions">' +
+            '<md-text-button form="dialog" value="cancel">Cancel</md-text-button>' +
+            '<md-filled-button form="dialog" value="confirm">Confirm</md-filled-button>' +
+            '</div>';
+        dialog.addEventListener('close', function () {
+            resolve(dialog.returnValue === 'confirm');
+            dialog.remove();
+        });
+        document.body.appendChild(dialog);
+        dialog.show();
+    });
 }

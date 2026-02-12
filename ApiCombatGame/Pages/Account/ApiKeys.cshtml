@@ -5,30 +5,36 @@
 }
 
 <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-    <h1 class="text-3xl font-bold mb-2">API Keys</h1>
-    <p class="text-gray-600 dark:text-gray-400 mb-8">Use these keys to authenticate with the Combat API. Keep them secret!</p>
+    <h1 class="text-3xl font-bold mb-2" style="color: var(--md-sys-color-on-surface);">API Keys</h1>
+    <p class="mb-8" style="color: var(--md-sys-color-on-surface-variant);">Use these keys to authenticate with the Combat API. Keep them secret!</p>
 
     @if (!string.IsNullOrEmpty(Model.ErrorMessage))
     {
-        <div class="bg-red-50 dark:bg-red-900/20 border-l-4 border-red-400 p-4 mb-6">
-            <p class="text-sm text-red-700 dark:text-red-400">@Model.ErrorMessage</p>
+        <div class="md3-alert-error p-4 mb-6">
+            <div class="flex items-center">
+                <md-icon style="color: var(--md-sys-color-error); margin-right: 12px;">error</md-icon>
+                <p class="text-sm" style="color: var(--md-sys-color-on-error-container);">@Model.ErrorMessage</p>
+            </div>
         </div>
     }
 
     @if (!string.IsNullOrEmpty(Model.NewlyCreatedKey))
     {
-        <div class="bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-400 p-4 mb-8">
+        <div class="md3-alert-warning p-4 mb-8">
             <div class="flex">
-                <div class="ml-3 flex-1">
-                    <p class="text-sm text-yellow-700 dark:text-yellow-300 font-semibold mb-2">
+                <md-icon style="color: var(--md-sys-color-error); margin-right: 12px; flex-shrink: 0;">warning</md-icon>
+                <div class="flex-1">
+                    <p class="text-sm font-semibold mb-2" style="color: var(--md-sys-color-on-surface);">
                         Save this API key now! You won't be able to see it again.
                     </p>
-                    <div class="bg-white dark:bg-gray-700 rounded p-3 font-mono text-sm break-all border border-yellow-200 dark:border-yellow-700">
+                    <div class="p-3 font-mono text-sm break-all"
+                         style="background: var(--md-sys-color-surface-container-highest); border-radius: var(--md-sys-shape-corner-small); border: 1px solid var(--md-sys-color-outline-variant);">
                         @Model.NewlyCreatedKey
                     </div>
-                    <button onclick="copyToClipboard('@Model.NewlyCreatedKey')" class="mt-2 text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300">
+                    <md-text-button onclick="copyToClipboard('@Model.NewlyCreatedKey')" style="margin-top: 8px;">
+                        <md-icon slot="icon">content_copy</md-icon>
                         Copy to clipboard
-                    </button>
+                    </md-text-button>
                 </div>
             </div>
         </div>
@@ -38,12 +44,12 @@
     <div class="space-y-4 mb-8">
         @foreach (var apiKey in Model.ApiKeys)
         {
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <div class="md3-card p-6">
                 <div class="flex items-start justify-between">
                     <div class="flex-1">
-                        <h3 class="text-lg font-semibold mb-1">@apiKey.Name</h3>
-                        <div class="font-mono text-sm text-gray-600 dark:text-gray-400 mb-2">@(apiKey.KeyPrefix)...</div>
-                        <div class="text-sm text-gray-500 dark:text-gray-400 space-y-1">
+                        <h3 class="text-lg font-semibold mb-1" style="color: var(--md-sys-color-on-surface);">@apiKey.Name</h3>
+                        <div class="font-mono text-sm mb-2" style="color: var(--md-sys-color-on-surface-variant);">@(apiKey.KeyPrefix)...</div>
+                        <div class="text-sm space-y-1" style="color: var(--md-sys-color-on-surface-variant);">
                             <div>Created: @apiKey.CreatedAt.ToString("MMM dd, yyyy")</div>
                             <div>
                                 Last used:
@@ -61,10 +67,11 @@
                     <div class="ml-4">
                         <form method="post" asp-page-handler="Revoke" class="inline">
                             <input type="hidden" name="apiKeyId" value="@apiKey.Id" />
-                            <button type="submit" onclick="return confirm('Are you sure you want to revoke this API key? This cannot be undone.')"
-                                    class="text-sm text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300">
+                            <md-text-button type="submit"
+                                            style="--md-text-button-label-text-color: var(--md-sys-color-error);"
+                                            onclick="return confirm('Are you sure you want to revoke this API key? This cannot be undone.')">
                                 Revoke
-                            </button>
+                            </md-text-button>
                         </form>
                     </div>
                 </div>
@@ -73,33 +80,42 @@
 
         @if (!Model.ApiKeys.Any())
         {
-            <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-8 text-center">
-                <p class="text-gray-600 dark:text-gray-400">No API keys yet. Create one to get started!</p>
+            <div class="md3-card p-8 text-center">
+                <md-icon style="font-size: 3rem; color: var(--md-sys-color-on-surface-variant); display: block; margin: 0 auto 12px;">key_off</md-icon>
+                <p style="color: var(--md-sys-color-on-surface-variant);">No API keys yet. Create one to get started!</p>
             </div>
         }
     </div>
 
     <!-- Create New Key -->
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-        <h2 class="text-lg font-semibold mb-4">Create New API Key</h2>
+    <div class="md3-card p-6">
+        <h2 class="text-lg font-semibold mb-4" style="color: var(--md-sys-color-on-surface);">Create New API Key</h2>
         <form method="post" asp-page-handler="Create">
             <div class="mb-4">
-                <label for="keyName" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Key Name</label>
-                <input type="text" id="keyName" name="keyName" required
-                       placeholder="e.g., Production, Development, Testing"
-                       class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                <md-outlined-text-field
+                    label="Key Name"
+                    name="keyName"
+                    id="keyName"
+                    required
+                    placeholder="e.g., Production, Development, Testing"
+                    class="w-full">
+                </md-outlined-text-field>
             </div>
-            <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+            <md-filled-button type="submit">
+                <md-icon slot="icon">add</md-icon>
                 Create API Key
-            </button>
+            </md-filled-button>
         </form>
     </div>
 
     <!-- Security Warning -->
-    <div class="mt-8 bg-red-50 dark:bg-red-900/20 border-l-4 border-red-400 p-4">
-        <p class="text-sm text-red-700 dark:text-red-400">
-            <strong>Security Warning:</strong> Never share your API keys or commit them to version control.
-            Treat them like passwords. If a key is compromised, revoke it immediately and create a new one.
-        </p>
+    <div class="md3-alert-error mt-8 p-4">
+        <div class="flex items-start">
+            <md-icon style="color: var(--md-sys-color-error); margin-right: 12px; flex-shrink: 0;">shield</md-icon>
+            <p class="text-sm" style="color: var(--md-sys-color-on-error-container);">
+                <strong>Security Warning:</strong> Never share your API keys or commit them to version control.
+                Treat them like passwords. If a key is compromised, revoke it immediately and create a new one.
+            </p>
+        </div>
     </div>
 </div>

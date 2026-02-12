@@ -6,116 +6,116 @@
 }
 
 <!-- Battle Pipeline -->
-<div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border dark:border-gray-700 mb-6">
-    <h3 class="text-lg font-semibold mb-4">Battle Pipeline</h3>
+<div class="md3-card p-6 mb-6">
+    <h3 class="text-lg font-semibold mb-4" style="color: var(--md-sys-color-on-surface);">Battle Pipeline</h3>
     <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
-        <div class="text-center p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
-            <div class="text-2xl font-bold text-yellow-600 dark:text-yellow-400">@Model.Data.QueuedBattles</div>
-            <div class="text-sm text-gray-600 dark:text-gray-400 mt-1">Queued</div>
+        <div class="text-center p-4" style="background: var(--md-sys-color-tertiary-container); border-radius: var(--md-sys-shape-corner-medium);">
+            <div class="text-2xl font-bold" style="color: var(--md-sys-color-on-tertiary-container);">@Model.Data.QueuedBattles</div>
+            <div class="text-sm mt-1" style="color: var(--md-sys-color-on-tertiary-container);">Queued</div>
         </div>
-        <div class="text-center p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-            <div class="text-2xl font-bold text-blue-600 dark:text-blue-400">@Model.Data.MatchedBattles</div>
-            <div class="text-sm text-gray-600 dark:text-gray-400 mt-1">Matched</div>
+        <div class="text-center p-4" style="background: var(--md-sys-color-primary-container); border-radius: var(--md-sys-shape-corner-medium);">
+            <div class="text-2xl font-bold" style="color: var(--md-sys-color-on-primary-container);">@Model.Data.MatchedBattles</div>
+            <div class="text-sm mt-1" style="color: var(--md-sys-color-on-primary-container);">Matched</div>
         </div>
-        <div class="text-center p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
-            <div class="text-2xl font-bold text-green-600 dark:text-green-400">@Model.Data.CompletedBattlesToday</div>
-            <div class="text-sm text-gray-600 dark:text-gray-400 mt-1">Completed Today</div>
+        <div class="text-center p-4" style="background: var(--md-sys-color-secondary-container); border-radius: var(--md-sys-shape-corner-medium);">
+            <div class="text-2xl font-bold" style="color: var(--md-sys-color-on-secondary-container);">@Model.Data.CompletedBattlesToday</div>
+            <div class="text-sm mt-1" style="color: var(--md-sys-color-on-secondary-container);">Completed Today</div>
         </div>
-        <div class="text-center p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-            <div class="text-2xl font-bold">@Model.Data.CompletedBattles.ToString("N0")</div>
-            <div class="text-sm text-gray-600 dark:text-gray-400 mt-1">Total Completed</div>
+        <div class="text-center p-4" style="background: var(--md-sys-color-surface-container-high); border-radius: var(--md-sys-shape-corner-medium);">
+            <div class="text-2xl font-bold" style="color: var(--md-sys-color-on-surface);">@Model.Data.CompletedBattles.ToString("N0")</div>
+            <div class="text-sm mt-1" style="color: var(--md-sys-color-on-surface-variant);">Total Completed</div>
         </div>
-        <div class="text-center p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-            <div class="text-2xl font-bold">@Model.Data.TotalBattles.ToString("N0")</div>
-            <div class="text-sm text-gray-600 dark:text-gray-400 mt-1">Total All Time</div>
+        <div class="text-center p-4" style="background: var(--md-sys-color-surface-container-high); border-radius: var(--md-sys-shape-corner-medium);">
+            <div class="text-2xl font-bold" style="color: var(--md-sys-color-on-surface);">@Model.Data.TotalBattles.ToString("N0")</div>
+            <div class="text-sm mt-1" style="color: var(--md-sys-color-on-surface-variant);">Total All Time</div>
         </div>
     </div>
 </div>
 
 <!-- Database Entity Counts -->
-<div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border dark:border-gray-700 mb-6">
-    <h3 class="text-lg font-semibold mb-4">Database Overview</h3>
+<div class="md3-card p-6 mb-6">
+    <h3 class="text-lg font-semibold mb-4" style="color: var(--md-sys-color-on-surface);">Database Overview</h3>
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div class="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-            <div class="text-2xl font-bold">@Model.Data.TotalPlayers.ToString("N0")</div>
-            <div class="text-sm text-gray-600 dark:text-gray-400 mt-1">Players</div>
+        <div class="p-4" style="background: var(--md-sys-color-surface-container-high); border-radius: var(--md-sys-shape-corner-medium);">
+            <div class="text-2xl font-bold" style="color: var(--md-sys-color-on-surface);">@Model.Data.TotalPlayers.ToString("N0")</div>
+            <div class="text-sm mt-1" style="color: var(--md-sys-color-on-surface-variant);">Players</div>
         </div>
-        <div class="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-            <div class="text-2xl font-bold">@Model.Data.TotalUnits.ToString("N0")</div>
-            <div class="text-sm text-gray-600 dark:text-gray-400 mt-1">Player Units</div>
+        <div class="p-4" style="background: var(--md-sys-color-surface-container-high); border-radius: var(--md-sys-shape-corner-medium);">
+            <div class="text-2xl font-bold" style="color: var(--md-sys-color-on-surface);">@Model.Data.TotalUnits.ToString("N0")</div>
+            <div class="text-sm mt-1" style="color: var(--md-sys-color-on-surface-variant);">Player Units</div>
         </div>
-        <div class="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-            <div class="text-2xl font-bold">@Model.Data.TotalTeams.ToString("N0")</div>
-            <div class="text-sm text-gray-600 dark:text-gray-400 mt-1">Teams</div>
+        <div class="p-4" style="background: var(--md-sys-color-surface-container-high); border-radius: var(--md-sys-shape-corner-medium);">
+            <div class="text-2xl font-bold" style="color: var(--md-sys-color-on-surface);">@Model.Data.TotalTeams.ToString("N0")</div>
+            <div class="text-sm mt-1" style="color: var(--md-sys-color-on-surface-variant);">Teams</div>
         </div>
-        <div class="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-            <div class="text-2xl font-bold">@Model.Data.TotalGuilds.ToString("N0")</div>
-            <div class="text-sm text-gray-600 dark:text-gray-400 mt-1">Guilds</div>
+        <div class="p-4" style="background: var(--md-sys-color-surface-container-high); border-radius: var(--md-sys-shape-corner-medium);">
+            <div class="text-2xl font-bold" style="color: var(--md-sys-color-on-surface);">@Model.Data.TotalGuilds.ToString("N0")</div>
+            <div class="text-sm mt-1" style="color: var(--md-sys-color-on-surface-variant);">Guilds</div>
         </div>
-        <div class="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-            <div class="text-2xl font-bold">@Model.Data.TotalStrategies.ToString("N0")</div>
-            <div class="text-sm text-gray-600 dark:text-gray-400 mt-1">Marketplace Strategies</div>
+        <div class="p-4" style="background: var(--md-sys-color-surface-container-high); border-radius: var(--md-sys-shape-corner-medium);">
+            <div class="text-2xl font-bold" style="color: var(--md-sys-color-on-surface);">@Model.Data.TotalStrategies.ToString("N0")</div>
+            <div class="text-sm mt-1" style="color: var(--md-sys-color-on-surface-variant);">Marketplace Strategies</div>
         </div>
-        <div class="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-            <div class="text-2xl font-bold">@Model.Data.TotalChallenges.ToString("N0")</div>
-            <div class="text-sm text-gray-600 dark:text-gray-400 mt-1">Daily Challenges</div>
+        <div class="p-4" style="background: var(--md-sys-color-surface-container-high); border-radius: var(--md-sys-shape-corner-medium);">
+            <div class="text-2xl font-bold" style="color: var(--md-sys-color-on-surface);">@Model.Data.TotalChallenges.ToString("N0")</div>
+            <div class="text-sm mt-1" style="color: var(--md-sys-color-on-surface-variant);">Daily Challenges</div>
         </div>
-        <div class="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-            <div class="text-2xl font-bold">@Model.Data.TotalAchievementUnlocks.ToString("N0")</div>
-            <div class="text-sm text-gray-600 dark:text-gray-400 mt-1">Achievement Unlocks</div>
+        <div class="p-4" style="background: var(--md-sys-color-surface-container-high); border-radius: var(--md-sys-shape-corner-medium);">
+            <div class="text-2xl font-bold" style="color: var(--md-sys-color-on-surface);">@Model.Data.TotalAchievementUnlocks.ToString("N0")</div>
+            <div class="text-sm mt-1" style="color: var(--md-sys-color-on-surface-variant);">Achievement Unlocks</div>
         </div>
-        <div class="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-            <div class="text-2xl font-bold">@Model.Data.TotalBattles.ToString("N0")</div>
-            <div class="text-sm text-gray-600 dark:text-gray-400 mt-1">Total Battles</div>
+        <div class="p-4" style="background: var(--md-sys-color-surface-container-high); border-radius: var(--md-sys-shape-corner-medium);">
+            <div class="text-2xl font-bold" style="color: var(--md-sys-color-on-surface);">@Model.Data.TotalBattles.ToString("N0")</div>
+            <div class="text-sm mt-1" style="color: var(--md-sys-color-on-surface-variant);">Total Battles</div>
         </div>
     </div>
 </div>
 
 <!-- Background Jobs Status -->
-<div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border dark:border-gray-700">
-    <h3 class="text-lg font-semibold mb-4">Background Jobs</h3>
+<div class="md3-card p-6">
+    <h3 class="text-lg font-semibold mb-4" style="color: var(--md-sys-color-on-surface);">Background Jobs</h3>
     <div class="space-y-3">
-        <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+        <div class="flex items-center justify-between p-3" style="background: var(--md-sys-color-surface-container-high); border-radius: var(--md-sys-shape-corner-medium);">
             <div class="flex items-center">
-                <span class="w-2 h-2 bg-green-500 rounded-full mr-3"></span>
-                <span class="font-medium">BackgroundBattleProcessor</span>
+                <md-icon class="mr-3" style="color: var(--md-sys-color-primary); font-size: 12px; width: 12px; height: 12px;">radio_button_checked</md-icon>
+                <span class="font-medium" style="color: var(--md-sys-color-on-surface);">BackgroundBattleProcessor</span>
             </div>
-            <span class="text-sm text-gray-500 dark:text-gray-400">Continuous (every 5s)</span>
+            <span class="text-sm" style="color: var(--md-sys-color-on-surface-variant);">Continuous (every 5s)</span>
         </div>
-        <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+        <div class="flex items-center justify-between p-3" style="background: var(--md-sys-color-surface-container-high); border-radius: var(--md-sys-shape-corner-medium);">
             <div class="flex items-center">
-                <span class="w-2 h-2 bg-green-500 rounded-full mr-3"></span>
-                <span class="font-medium">WeeklyModifierRotationJob</span>
+                <md-icon class="mr-3" style="color: var(--md-sys-color-primary); font-size: 12px; width: 12px; height: 12px;">radio_button_checked</md-icon>
+                <span class="font-medium" style="color: var(--md-sys-color-on-surface);">WeeklyModifierRotationJob</span>
             </div>
-            <span class="text-sm text-gray-500 dark:text-gray-400">Weekly (Mondays)</span>
+            <span class="text-sm" style="color: var(--md-sys-color-on-surface-variant);">Weekly (Mondays)</span>
         </div>
-        <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+        <div class="flex items-center justify-between p-3" style="background: var(--md-sys-color-surface-container-high); border-radius: var(--md-sys-shape-corner-medium);">
             <div class="flex items-center">
-                <span class="w-2 h-2 bg-green-500 rounded-full mr-3"></span>
-                <span class="font-medium">DailyChallengeGenerationJob</span>
+                <md-icon class="mr-3" style="color: var(--md-sys-color-primary); font-size: 12px; width: 12px; height: 12px;">radio_button_checked</md-icon>
+                <span class="font-medium" style="color: var(--md-sys-color-on-surface);">DailyChallengeGenerationJob</span>
             </div>
-            <span class="text-sm text-gray-500 dark:text-gray-400">Daily (midnight UTC)</span>
+            <span class="text-sm" style="color: var(--md-sys-color-on-surface-variant);">Daily (midnight UTC)</span>
         </div>
-        <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+        <div class="flex items-center justify-between p-3" style="background: var(--md-sys-color-surface-container-high); border-radius: var(--md-sys-shape-corner-medium);">
             <div class="flex items-center">
-                <span class="w-2 h-2 bg-green-500 rounded-full mr-3"></span>
-                <span class="font-medium">StrategyDecayJob</span>
+                <md-icon class="mr-3" style="color: var(--md-sys-color-primary); font-size: 12px; width: 12px; height: 12px;">radio_button_checked</md-icon>
+                <span class="font-medium" style="color: var(--md-sys-color-on-surface);">StrategyDecayJob</span>
             </div>
-            <span class="text-sm text-gray-500 dark:text-gray-400">Daily</span>
+            <span class="text-sm" style="color: var(--md-sys-color-on-surface-variant);">Daily</span>
         </div>
-        <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+        <div class="flex items-center justify-between p-3" style="background: var(--md-sys-color-surface-container-high); border-radius: var(--md-sys-shape-corner-medium);">
             <div class="flex items-center">
-                <span class="w-2 h-2 bg-green-500 rounded-full mr-3"></span>
-                <span class="font-medium">GuildBossSpawnJob</span>
+                <md-icon class="mr-3" style="color: var(--md-sys-color-primary); font-size: 12px; width: 12px; height: 12px;">radio_button_checked</md-icon>
+                <span class="font-medium" style="color: var(--md-sys-color-on-surface);">GuildBossSpawnJob</span>
             </div>
-            <span class="text-sm text-gray-500 dark:text-gray-400">Weekly (Mondays)</span>
+            <span class="text-sm" style="color: var(--md-sys-color-on-surface-variant);">Weekly (Mondays)</span>
         </div>
-        <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+        <div class="flex items-center justify-between p-3" style="background: var(--md-sys-color-surface-container-high); border-radius: var(--md-sys-shape-corner-medium);">
             <div class="flex items-center">
-                <span class="w-2 h-2 bg-green-500 rounded-full mr-3"></span>
-                <span class="font-medium">GuildInviteExpiryJob</span>
+                <md-icon class="mr-3" style="color: var(--md-sys-color-primary); font-size: 12px; width: 12px; height: 12px;">radio_button_checked</md-icon>
+                <span class="font-medium" style="color: var(--md-sys-color-on-surface);">GuildInviteExpiryJob</span>
             </div>
-            <span class="text-sm text-gray-500 dark:text-gray-400">Daily</span>
+            <span class="text-sm" style="color: var(--md-sys-color-on-surface-variant);">Daily</span>
         </div>
     </div>
 </div>

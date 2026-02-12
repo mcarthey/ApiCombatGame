@@ -2,26 +2,20 @@
 
 @if (User.Identity?.IsAuthenticated == true)
 {
-    <div class="flex items-center space-x-4">
-        <span class="text-sm text-gray-700 dark:text-gray-300">
+    <div class="flex items-center space-x-2">
+        <span class="text-sm" style="color: var(--md-sys-color-on-surface-variant);">
             @User.FindFirstValue(ClaimTypes.Name)
         </span>
-        <a asp-page="/Dashboard" class="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300">Dashboard</a>
+        <md-text-button href="/Dashboard">Dashboard</md-text-button>
         <form method="post" asp-page="/Auth/Logout" class="inline">
-            <button type="submit" class="text-sm text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
-                Logout
-            </button>
+            <md-text-button type="submit">Logout</md-text-button>
         </form>
     </div>
 }
 else
 {
-    <div class="flex items-center space-x-4">
-        <a asp-page="/Auth/Login" class="text-sm text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
-            Login
-        </a>
-        <a asp-page="/Auth/Register" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
-            Sign Up
-        </a>
+    <div class="flex items-center space-x-2">
+        <md-text-button href="/Auth/Login">Login</md-text-button>
+        <md-filled-button href="/Auth/Register">Sign Up</md-filled-button>
     </div>
 }

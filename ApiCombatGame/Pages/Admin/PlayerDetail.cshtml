@@ -8,204 +8,228 @@
 @if (Model.PlayerData == null)
 {
     <div class="text-center py-12">
-        <p class="text-gray-500 dark:text-gray-400">Player not found.</p>
-        <a href="/Admin/Players" class="text-blue-600 dark:text-blue-400 hover:underline mt-2 inline-block">Back to Players</a>
+        <p style="color: var(--md-sys-color-on-surface-variant);">Player not found.</p>
+        <a href="/Admin/Players" class="mt-2 inline-block">
+            <md-text-button>Back to Players</md-text-button>
+        </a>
     </div>
     return;
 }
 
 @if (!string.IsNullOrEmpty(Model.SuccessMessage))
 {
-    <div class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-300 px-4 py-3 rounded-lg mb-6">
+    <div class="md3-alert-success mb-6">
         @Model.SuccessMessage
     </div>
 }
 
 <!-- Back Button -->
 <div class="mb-6">
-    <a href="/Admin/Players" class="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white flex items-center">
-        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
-        Back to Players
+    <a href="/Admin/Players">
+        <md-text-button>
+            <md-icon slot="icon">arrow_back</md-icon>
+            Back to Players
+        </md-text-button>
     </a>
 </div>
 
 @{ var p = Model.PlayerData; }
 
 <!-- Player Header -->
-<div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border dark:border-gray-700 mb-6">
+<div class="md3-card p-6 mb-6">
     <div class="flex justify-between items-start">
         <div>
-            <h2 class="text-2xl font-bold">
+            <h2 class="text-2xl font-bold" style="color: var(--md-sys-color-on-surface);">
                 @p.Username
                 @if (p.IsAdmin)
                 {
-                    <span class="ml-2 px-2 py-1 bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300 text-xs rounded-full">@p.AdminRole</span>
+                    <span class="md3-badge-error ml-2">@p.AdminRole</span>
                 }
             </h2>
-            <p class="text-gray-500 dark:text-gray-400 mt-1">@p.Email</p>
-            <p class="text-sm text-gray-400 dark:text-gray-500 mt-1">ID: @p.Id</p>
+            <p class="mt-1" style="color: var(--md-sys-color-on-surface-variant);">@p.Email</p>
+            <p class="text-sm mt-1" style="color: var(--md-sys-color-outline);">ID: @p.Id</p>
         </div>
         <div>
             @{
-                var tierColor = p.CurrentTier switch
+                var tierBadge = p.CurrentTier switch
                 {
-                    "Premium" => "bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 border-blue-200 dark:border-blue-800",
-                    "PremiumPlus" => "bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300 border-purple-200 dark:border-purple-800",
-                    _ => "bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300 border-gray-200 dark:border-gray-600"
+                    "Premium" => "md3-badge-primary",
+                    "PremiumPlus" => "md3-badge-tertiary",
+                    _ => "md3-badge-secondary"
                 };
             }
-            <span class="px-3 py-1 text-sm font-medium rounded-full border @tierColor">@p.CurrentTier</span>
+            <span class="@tierBadge text-sm px-3 py-1">@p.CurrentTier</span>
         </div>
     </div>
 </div>
 
 <!-- Stats Grid -->
 <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-6">
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 border dark:border-gray-700 text-center">
-        <div class="text-2xl font-bold">@p.Level</div>
-        <div class="text-xs text-gray-500 dark:text-gray-400">Level</div>
+    <div class="md3-card p-4 text-center stat-card">
+        <div class="text-2xl font-bold" style="color: var(--md-sys-color-on-surface);">@p.Level</div>
+        <div class="text-xs" style="color: var(--md-sys-color-on-surface-variant);">Level</div>
     </div>
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 border dark:border-gray-700 text-center">
-        <div class="text-2xl font-bold">@p.Rating</div>
-        <div class="text-xs text-gray-500 dark:text-gray-400">Rating</div>
+    <div class="md3-card p-4 text-center stat-card">
+        <div class="text-2xl font-bold" style="color: var(--md-sys-color-on-surface);">@p.Rating</div>
+        <div class="text-xs" style="color: var(--md-sys-color-on-surface-variant);">Rating</div>
     </div>
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 border dark:border-gray-700 text-center">
-        <div class="text-2xl font-bold">@p.Currency.ToString("N0")</div>
-        <div class="text-xs text-gray-500 dark:text-gray-400">Currency</div>
+    <div class="md3-card p-4 text-center stat-card">
+        <div class="text-2xl font-bold" style="color: var(--md-sys-color-on-surface);">@p.Currency.ToString("N0")</div>
+        <div class="text-xs" style="color: var(--md-sys-color-on-surface-variant);">Currency</div>
     </div>
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 border dark:border-gray-700 text-center">
-        <div class="text-2xl font-bold">@p.TotalBattles</div>
-        <div class="text-xs text-gray-500 dark:text-gray-400">Battles</div>
+    <div class="md3-card p-4 text-center stat-card">
+        <div class="text-2xl font-bold" style="color: var(--md-sys-color-on-surface);">@p.TotalBattles</div>
+        <div class="text-xs" style="color: var(--md-sys-color-on-surface-variant);">Battles</div>
     </div>
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 border dark:border-gray-700 text-center">
-        <div class="text-2xl font-bold @(p.WinRate >= 55 ? "text-green-600 dark:text-green-400" : p.WinRate <= 45 ? "text-red-600 dark:text-red-400" : "")">@p.WinRate%</div>
-        <div class="text-xs text-gray-500 dark:text-gray-400">Win Rate</div>
+    <div class="md3-card p-4 text-center stat-card">
+        <div class="text-2xl font-bold" style="color: @(p.WinRate >= 55 ? "var(--md-sys-color-primary)" : p.WinRate <= 45 ? "var(--md-sys-color-error)" : "var(--md-sys-color-on-surface)");">@p.WinRate%</div>
+        <div class="text-xs" style="color: var(--md-sys-color-on-surface-variant);">Win Rate</div>
     </div>
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 border dark:border-gray-700 text-center">
-        <div class="text-2xl font-bold">@p.WinStreak</div>
-        <div class="text-xs text-gray-500 dark:text-gray-400">Win Streak</div>
+    <div class="md3-card p-4 text-center stat-card">
+        <div class="text-2xl font-bold" style="color: var(--md-sys-color-on-surface);">@p.WinStreak</div>
+        <div class="text-xs" style="color: var(--md-sys-color-on-surface-variant);">Win Streak</div>
     </div>
 </div>
 
 <!-- Details Grid -->
 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
     <!-- Player Info -->
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border dark:border-gray-700">
-        <h3 class="text-lg font-semibold mb-4">Player Info</h3>
+    <div class="md3-card p-6">
+        <h3 class="text-lg font-semibold mb-4" style="color: var(--md-sys-color-on-surface);">Player Info</h3>
         <dl class="space-y-3">
             <div class="flex justify-between">
-                <dt class="text-gray-500 dark:text-gray-400">XP</dt>
-                <dd class="font-medium">@p.ExperiencePoints.ToString("N0")</dd>
+                <dt style="color: var(--md-sys-color-on-surface-variant);">XP</dt>
+                <dd class="font-medium" style="color: var(--md-sys-color-on-surface);">@p.ExperiencePoints.ToString("N0")</dd>
             </div>
             <div class="flex justify-between">
-                <dt class="text-gray-500 dark:text-gray-400">Units Owned</dt>
-                <dd class="font-medium">@p.UnitsOwned</dd>
+                <dt style="color: var(--md-sys-color-on-surface-variant);">Units Owned</dt>
+                <dd class="font-medium" style="color: var(--md-sys-color-on-surface);">@p.UnitsOwned</dd>
             </div>
             <div class="flex justify-between">
-                <dt class="text-gray-500 dark:text-gray-400">Teams</dt>
-                <dd class="font-medium">@p.TeamsConfigured</dd>
+                <dt style="color: var(--md-sys-color-on-surface-variant);">Teams</dt>
+                <dd class="font-medium" style="color: var(--md-sys-color-on-surface);">@p.TeamsConfigured</dd>
             </div>
             <div class="flex justify-between">
-                <dt class="text-gray-500 dark:text-gray-400">Achievements</dt>
-                <dd class="font-medium">@p.AchievementsUnlocked</dd>
+                <dt style="color: var(--md-sys-color-on-surface-variant);">Achievements</dt>
+                <dd class="font-medium" style="color: var(--md-sys-color-on-surface);">@p.AchievementsUnlocked</dd>
             </div>
             <div class="flex justify-between">
-                <dt class="text-gray-500 dark:text-gray-400">Guild</dt>
-                <dd class="font-medium">@(p.GuildName ?? "None") @(p.GuildRole != null ? $"({p.GuildRole})" : "")</dd>
+                <dt style="color: var(--md-sys-color-on-surface-variant);">Guild</dt>
+                <dd class="font-medium" style="color: var(--md-sys-color-on-surface);">@(p.GuildName ?? "None") @(p.GuildRole != null ? $"({p.GuildRole})" : "")</dd>
             </div>
             <div class="flex justify-between">
-                <dt class="text-gray-500 dark:text-gray-400">Subscription</dt>
-                <dd class="font-medium">@(p.SubscriptionStatus ?? "None")</dd>
+                <dt style="color: var(--md-sys-color-on-surface-variant);">Subscription</dt>
+                <dd class="font-medium" style="color: var(--md-sys-color-on-surface);">@(p.SubscriptionStatus ?? "None")</dd>
             </div>
             <div class="flex justify-between">
-                <dt class="text-gray-500 dark:text-gray-400">Joined</dt>
-                <dd class="font-medium">@p.CreatedAt.ToString("MMM dd, yyyy")</dd>
+                <dt style="color: var(--md-sys-color-on-surface-variant);">Joined</dt>
+                <dd class="font-medium" style="color: var(--md-sys-color-on-surface);">@p.CreatedAt.ToString("MMM dd, yyyy")</dd>
             </div>
             <div class="flex justify-between">
-                <dt class="text-gray-500 dark:text-gray-400">Last Login</dt>
-                <dd class="font-medium">@p.LastLoginAt.ToString("MMM dd, yyyy HH:mm") UTC</dd>
+                <dt style="color: var(--md-sys-color-on-surface-variant);">Last Login</dt>
+                <dd class="font-medium" style="color: var(--md-sys-color-on-surface);">@p.LastLoginAt.ToString("MMM dd, yyyy HH:mm") UTC</dd>
             </div>
         </dl>
     </div>
 
     <!-- Admin Actions -->
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border dark:border-gray-700">
-        <h3 class="text-lg font-semibold mb-4">Admin Actions</h3>
+    <div class="md3-card p-6">
+        <h3 class="text-lg font-semibold mb-4" style="color: var(--md-sys-color-on-surface);">Admin Actions</h3>
         <div class="space-y-4">
             <!-- Adjust Currency -->
-            <form method="post" asp-page-handler="AdjustCurrency" class="flex gap-2">
+            <form method="post" asp-page-handler="AdjustCurrency" class="flex gap-2 items-end">
                 <input type="hidden" name="playerId" value="@p.Id" />
-                <input type="number" name="amount" placeholder="Amount (+/-)"
-                       class="flex-1 rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm px-3 py-2 text-sm" />
-                <button type="submit" class="px-4 py-2 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 transition">
+                <md-outlined-text-field label="Amount (+/-)" name="amount" type="number" style="flex: 1;">
+                </md-outlined-text-field>
+                <md-filled-button type="submit" style="--md-filled-button-container-color: var(--md-sys-color-primary); --md-filled-button-label-text-color: var(--md-sys-color-on-primary);">
                     Adjust Gold
-                </button>
+                </md-filled-button>
             </form>
 
             <!-- Set Tier -->
-            <form method="post" asp-page-handler="SetTier" class="flex gap-2">
+            <form method="post" asp-page-handler="SetTier" class="flex gap-2 items-end">
                 <input type="hidden" name="playerId" value="@p.Id" />
-                <select name="tier" class="flex-1 rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm px-3 py-2 text-sm">
-                    <option value="Free" selected="@(p.CurrentTier == "Free")">Free</option>
-                    <option value="Premium" selected="@(p.CurrentTier == "Premium")">Premium</option>
-                    <option value="PremiumPlus" selected="@(p.CurrentTier == "PremiumPlus")">Premium+</option>
-                </select>
-                <button type="submit" class="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition">
+                <md-outlined-select label="Tier" name="tier" style="flex: 1;">
+                    <md-select-option value="Free" selected="@(p.CurrentTier == "Free")">
+                        <div slot="headline">Free</div>
+                    </md-select-option>
+                    <md-select-option value="Premium" selected="@(p.CurrentTier == "Premium")">
+                        <div slot="headline">Premium</div>
+                    </md-select-option>
+                    <md-select-option value="PremiumPlus" selected="@(p.CurrentTier == "PremiumPlus")">
+                        <div slot="headline">Premium+</div>
+                    </md-select-option>
+                </md-outlined-select>
+                <md-filled-button type="submit">
                     Set Tier
-                </button>
+                </md-filled-button>
             </form>
 
             <!-- Toggle Admin -->
             <form method="post" asp-page-handler="ToggleAdmin" class="flex gap-2">
                 <input type="hidden" name="playerId" value="@p.Id" />
                 <input type="hidden" name="makeAdmin" value="@(!p.IsAdmin)" />
-                <button type="submit" class="w-full px-4 py-2 text-sm rounded-lg transition @(p.IsAdmin ? "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 hover:bg-red-200 dark:hover:bg-red-900/50" : "bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300 hover:bg-yellow-200 dark:hover:bg-yellow-900/50")">
-                    @(p.IsAdmin ? "Remove Admin" : "Make Admin")
-                </button>
+                @if (p.IsAdmin)
+                {
+                    <md-filled-button type="submit" class="w-full" style="--md-filled-button-container-color: var(--md-sys-color-error-container); --md-filled-button-label-text-color: var(--md-sys-color-on-error-container);">
+                        Remove Admin
+                    </md-filled-button>
+                }
+                else
+                {
+                    <md-filled-tonal-button type="submit" class="w-full">
+                        Make Admin
+                    </md-filled-tonal-button>
+                }
             </form>
 
             <!-- Reset Password -->
-            <form method="post" asp-page-handler="ResetPassword" class="flex gap-2">
+            <form method="post" asp-page-handler="ResetPassword" class="flex gap-2 items-end">
                 <input type="hidden" name="playerId" value="@p.Id" />
-                <input type="password" name="newPassword" placeholder="New password (min 8 chars)"
-                       class="flex-1 rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm px-3 py-2 text-sm" />
-                <button type="submit" class="px-4 py-2 bg-orange-600 text-white text-sm rounded-lg hover:bg-orange-700 transition">
+                <md-outlined-text-field label="New password (min 8 chars)" name="newPassword" type="password" style="flex: 1;">
+                </md-outlined-text-field>
+                <md-filled-tonal-button type="submit">
                     Reset Password
-                </button>
+                </md-filled-tonal-button>
             </form>
         </div>
     </div>
 </div>
 
 <!-- Recent Battles -->
-<div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border dark:border-gray-700 overflow-hidden">
-    <div class="px-6 py-4 border-b dark:border-gray-700">
-        <h3 class="text-lg font-semibold">Recent Battles (@p.Wins W - @(p.TotalBattles - p.Wins) L)</h3>
+<div class="md3-card overflow-hidden">
+    <div class="px-6 py-4" style="border-bottom: 1px solid var(--md-sys-color-outline-variant);">
+        <h3 class="text-lg font-semibold" style="color: var(--md-sys-color-on-surface);">Recent Battles (@p.Wins W - @(p.TotalBattles - p.Wins) L)</h3>
     </div>
-    <div class="divide-y dark:divide-gray-700">
+    <div>
         @if (p.RecentBattles.Any())
         {
             @foreach (var battle in p.RecentBattles)
             {
-                <div class="px-6 py-3 flex items-center justify-between">
+                <div class="px-6 py-3 flex items-center justify-between" style="border-bottom: 1px solid var(--md-sys-color-outline-variant);">
                     <div>
-                        <span class="font-medium">vs @battle.OpponentName</span>
-                        <span class="text-sm text-gray-500 dark:text-gray-400 ml-2">@battle.CompletedAt.ToString("MMM dd, HH:mm")</span>
+                        <span class="font-medium" style="color: var(--md-sys-color-on-surface);">vs @battle.OpponentName</span>
+                        <span class="text-sm ml-2" style="color: var(--md-sys-color-on-surface-variant);">@battle.CompletedAt.ToString("MMM dd, HH:mm")</span>
                     </div>
                     <div class="flex items-center space-x-3">
-                        <span class="text-sm @(battle.RatingChange >= 0 ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400")">
+                        <span class="text-sm" style="color: @(battle.RatingChange >= 0 ? "var(--md-sys-color-primary)" : "var(--md-sys-color-error)");">
                             @(battle.RatingChange >= 0 ? "+" : "")@battle.RatingChange
                         </span>
-                        <span class="px-2 py-1 text-xs font-medium rounded @(battle.IsWin ? "bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300" : "bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300")">
-                            @(battle.IsWin ? "Won" : "Lost")
-                        </span>
+                        @if (battle.IsWin)
+                        {
+                            <span class="md3-badge-primary">Won</span>
+                        }
+                        else
+                        {
+                            <span class="md3-badge-error">Lost</span>
+                        }
                     </div>
                 </div>
             }
         }
         else
         {
-            <div class="px-6 py-8 text-center text-gray-500 dark:text-gray-400">No battles recorded.</div>
+            <div class="px-6 py-8 text-center" style="color: var(--md-sys-color-on-surface-variant);">No battles recorded.</div>
         }
     </div>
 </div>

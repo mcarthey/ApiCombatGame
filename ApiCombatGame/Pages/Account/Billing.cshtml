@@ -5,50 +5,53 @@
 }
 
 <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-    <h1 class="text-3xl font-bold mb-8">Billing</h1>
+    <h1 class="text-3xl font-bold mb-8" style="color: var(--md-sys-color-on-surface);">Billing</h1>
 
     <!-- Current Plan Summary -->
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-8">
-        <h2 class="text-lg font-semibold mb-4">Current Plan</h2>
+    <div class="md3-card p-6 mb-8">
+        <h2 class="text-lg font-semibold mb-4" style="color: var(--md-sys-color-on-surface);">Current Plan</h2>
         <div class="flex items-center justify-between">
             <div>
-                <p class="text-2xl font-bold text-blue-600 dark:text-blue-400">@Model.Billing.CurrentTier</p>
+                <p class="text-2xl font-bold" style="color: var(--md-sys-color-primary);">@Model.Billing.CurrentTier</p>
                 @if (Model.Billing.NextBillingDate.HasValue)
                 {
-                    <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                    <p class="text-sm mt-1" style="color: var(--md-sys-color-on-surface-variant);">
                         $@Model.Billing.MonthlyAmount/month &middot; Next billing: @Model.Billing.NextBillingDate.Value.ToString("MMMM dd, yyyy")
                     </p>
                 }
                 else
                 {
-                    <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Free plan - no billing</p>
+                    <p class="text-sm mt-1" style="color: var(--md-sys-color-on-surface-variant);">Free plan - no billing</p>
                 }
             </div>
-            <a asp-page="/Account/Subscription" class="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300">Change plan</a>
+            <a asp-page="/Account/Subscription" style="color: var(--md-sys-color-primary); text-decoration: none;">
+                <md-text-button>Change plan</md-text-button>
+            </a>
         </div>
     </div>
 
     @if (Model.Billing.CurrentTier != "Free")
     {
         <!-- Manage via Stripe Portal -->
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-8">
-            <h2 class="text-lg font-semibold mb-4">Payment Method</h2>
-            <p class="text-gray-600 dark:text-gray-400 mb-4">
+        <div class="md3-card p-6 mb-8">
+            <h2 class="text-lg font-semibold mb-4" style="color: var(--md-sys-color-on-surface);">Payment Method</h2>
+            <p class="mb-4" style="color: var(--md-sys-color-on-surface-variant);">
                 Manage your payment methods, view invoices, and update billing information through the Stripe Customer Portal.
             </p>
             <form method="post" asp-page-handler="ManageBilling">
-                <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+                <md-filled-button type="submit">
+                    <md-icon slot="icon">open_in_new</md-icon>
                     Manage Billing
-                </button>
+                </md-filled-button>
             </form>
         </div>
     }
 
     <!-- Billing Info -->
-    <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-6">
-        <h2 class="text-lg font-semibold mb-4">Billing Information</h2>
-        <div class="space-y-3 text-sm text-gray-600 dark:text-gray-400">
-            <p>All payments are securely processed by <strong class="text-gray-900 dark:text-white">Stripe</strong>.</p>
+    <div class="md3-card p-6">
+        <h2 class="text-lg font-semibold mb-4" style="color: var(--md-sys-color-on-surface);">Billing Information</h2>
+        <div class="space-y-3 text-sm" style="color: var(--md-sys-color-on-surface-variant);">
+            <p>All payments are securely processed by <strong style="color: var(--md-sys-color-on-surface);">Stripe</strong>.</p>
             <p>We do not store your credit card information on our servers.</p>
             <p>Invoices and receipts are available through the Stripe Customer Portal.</p>
             <p>For billing questions, contact support.</p>

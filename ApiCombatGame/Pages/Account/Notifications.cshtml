@@ -7,46 +7,60 @@
 <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="flex items-center justify-between mb-6">
         <div>
-            <h1 class="text-3xl font-bold">Notifications</h1>
+            <h1 class="text-3xl font-bold" style="color: var(--md-sys-color-on-surface);">Notifications</h1>
             @if (Model.UnreadCount > 0)
             {
-                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">@Model.UnreadCount unread</p>
+                <p class="text-sm mt-1" style="color: var(--md-sys-color-on-surface-variant);">@Model.UnreadCount unread</p>
             }
         </div>
         <div class="flex items-center space-x-3">
             @if (Model.UnreadCount > 0)
             {
                 <form method="post" asp-page-handler="MarkAllRead">
-                    <button type="submit" class="text-sm text-blue-600 dark:text-blue-400 hover:underline">
+                    <md-text-button type="submit">
+                        <md-icon slot="icon">done_all</md-icon>
                         Mark all as read
-                    </button>
+                    </md-text-button>
                 </form>
             }
-            <a asp-page="/Account/Settings" class="text-sm text-gray-500 dark:text-gray-400 hover:underline">
-                Preferences
+            <a asp-page="/Account/Settings" style="text-decoration: none;">
+                <md-text-button>
+                    <md-icon slot="icon">settings</md-icon>
+                    Preferences
+                </md-text-button>
             </a>
         </div>
     </div>
 
     <!-- Filter -->
-    <div class="mb-4 flex space-x-4 text-sm">
-        <a asp-page="/Account/Notifications" asp-route-unreadOnly="false"
-           class="@(Model.UnreadOnly ? "text-gray-500 dark:text-gray-400" : "text-blue-600 dark:text-blue-400 font-medium")">
-            All
+    <div class="mb-4 flex space-x-2">
+        <a asp-page="/Account/Notifications" asp-route-unreadOnly="false" style="text-decoration: none;">
+            @if (!Model.UnreadOnly)
+            {
+                <md-filled-tonal-button>All</md-filled-tonal-button>
+            }
+            else
+            {
+                <md-outlined-button>All</md-outlined-button>
+            }
         </a>
-        <a asp-page="/Account/Notifications" asp-route-unreadOnly="true"
-           class="@(Model.UnreadOnly ? "text-blue-600 dark:text-blue-400 font-medium" : "text-gray-500 dark:text-gray-400")">
-            Unread
+        <a asp-page="/Account/Notifications" asp-route-unreadOnly="true" style="text-decoration: none;">
+            @if (Model.UnreadOnly)
+            {
+                <md-filled-tonal-button>Unread</md-filled-tonal-button>
+            }
+            else
+            {
+                <md-outlined-button>Unread</md-outlined-button>
+            }
         </a>
     </div>
 
     @if (Model.NotificationList.Count == 0)
     {
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-12 text-center">
-            <svg class="w-16 h-16 mx-auto text-gray-300 dark:text-gray-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-            </svg>
-            <p class="text-gray-500 dark:text-gray-400">No notifications yet.</p>
+        <div class="md3-card p-12 text-center">
+            <md-icon style="font-size: 4rem; color: var(--md-sys-color-on-surface-variant); display: block; margin: 0 auto 16px;">notifications_none</md-icon>
+            <p style="color: var(--md-sys-color-on-surface-variant);">No notifications yet.</p>
         </div>
     }
     else
@@ -54,38 +68,36 @@
         <div class="space-y-2">
             @foreach (var n in Model.NotificationList)
             {
-                var bgClass = n.IsRead ? "bg-white dark:bg-gray-800" : "bg-blue-50 dark:bg-gray-750 border-l-4 border-blue-500";
-                var categoryColor = n.Category switch {
-                    ApiCombatGame.Models.Enums.NotificationCategory.Battle => "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400",
-                    ApiCombatGame.Models.Enums.NotificationCategory.Guild => "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400",
-                    ApiCombatGame.Models.Enums.NotificationCategory.Progression => "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400",
-                    ApiCombatGame.Models.Enums.NotificationCategory.Marketplace => "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400",
-                    ApiCombatGame.Models.Enums.NotificationCategory.Security => "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400",
-                    _ => "bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300"
+                var badgeClass = n.Category switch {
+                    ApiCombatGame.Models.Enums.NotificationCategory.Battle => "md3-badge-error",
+                    ApiCombatGame.Models.Enums.NotificationCategory.Guild => "md3-badge-tertiary",
+                    ApiCombatGame.Models.Enums.NotificationCategory.Progression => "md3-badge-primary",
+                    ApiCombatGame.Models.Enums.NotificationCategory.Marketplace => "md3-badge-secondary",
+                    ApiCombatGame.Models.Enums.NotificationCategory.Security => "md3-badge-error",
+                    _ => "md3-badge-secondary"
                 };
 
-                <div class="@bgClass rounded-lg shadow p-4 flex items-start justify-between">
+                <div class="md3-card p-4 flex items-start justify-between"
+                     style="@(!n.IsRead ? "border-left: 3px solid var(--md-sys-color-primary);" : "")">
                     <div class="flex-1 min-w-0">
                         <div class="flex items-center space-x-2 mb-1">
-                            <span class="@categoryColor text-xs font-medium px-2 py-0.5 rounded-full">@n.Category</span>
+                            <span class="@badgeClass text-xs font-medium">@n.Category</span>
                             @if (!n.IsRead)
                             {
-                                <span class="w-2 h-2 bg-blue-500 rounded-full"></span>
+                                <span style="width: 8px; height: 8px; border-radius: 50%; background: var(--md-sys-color-primary); display: inline-block;"></span>
                             }
                         </div>
-                        <h3 class="text-sm font-semibold">@n.Title</h3>
-                        <p class="text-sm text-gray-600 dark:text-gray-400 mt-0.5">@n.Message</p>
-                        <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">@n.CreatedAt.ToString("MMM dd, yyyy h:mm tt") UTC</p>
+                        <h3 class="text-sm font-semibold" style="color: var(--md-sys-color-on-surface);">@n.Title</h3>
+                        <p class="text-sm mt-0.5" style="color: var(--md-sys-color-on-surface-variant);">@n.Message</p>
+                        <p class="text-xs mt-1" style="color: var(--md-sys-color-outline);">@n.CreatedAt.ToString("MMM dd, yyyy h:mm tt") UTC</p>
                     </div>
                     @if (!n.IsRead)
                     {
                         <form method="post" asp-page-handler="MarkRead" class="ml-3 flex-shrink-0">
                             <input type="hidden" name="notificationId" value="@n.Id" />
-                            <button type="submit" class="text-xs text-gray-400 hover:text-blue-500" title="Mark as read">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                                </svg>
-                            </button>
+                            <md-icon-button type="submit" title="Mark as read">
+                                <md-icon>check</md-icon>
+                            </md-icon-button>
                         </form>
                     }
                 </div>
@@ -97,17 +109,27 @@
             @if (Model.Page > 1)
             {
                 <a asp-page="/Account/Notifications" asp-route-page="@(Model.Page - 1)" asp-route-unreadOnly="@Model.UnreadOnly"
-                   class="text-sm text-blue-600 dark:text-blue-400 hover:underline">Previous</a>
+                   style="text-decoration: none;">
+                    <md-text-button>
+                        <md-icon slot="icon">chevron_left</md-icon>
+                        Previous
+                    </md-text-button>
+                </a>
             }
             else
             {
                 <span></span>
             }
-            <span class="text-sm text-gray-500 dark:text-gray-400">Page @Model.Page</span>
+            <span class="text-sm" style="color: var(--md-sys-color-on-surface-variant);">Page @Model.Page</span>
             @if (Model.NotificationList.Count == 20)
             {
                 <a asp-page="/Account/Notifications" asp-route-page="@(Model.Page + 1)" asp-route-unreadOnly="@Model.UnreadOnly"
-                   class="text-sm text-blue-600 dark:text-blue-400 hover:underline">Next</a>
+                   style="text-decoration: none;">
+                    <md-text-button>
+                        Next
+                        <md-icon slot="icon">chevron_right</md-icon>
+                    </md-text-button>
+                </a>
             }
             else
             {

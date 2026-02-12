@@ -2,8 +2,11 @@
     Layout = null;
     var currentPath = ViewContext.HttpContext.Request.Path.Value ?? "/Admin";
     string NavClass(bool isActive) => isActive
-        ? "flex items-center px-4 py-3 text-sm font-medium text-white bg-gray-900 dark:bg-gray-700 rounded-lg"
-        : "flex items-center px-4 py-3 text-sm font-medium text-gray-300 hover:text-white hover:bg-gray-700 dark:hover:bg-gray-600 rounded-lg transition-colors";
+        ? "flex items-center px-4 py-3 text-sm font-medium rounded-lg"
+        : "flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors";
+    string NavStyle(bool isActive) => isActive
+        ? "background: var(--md-sys-color-primary-container); color: var(--md-sys-color-on-primary-container);"
+        : "color: var(--md-sys-color-on-surface-variant);";
 }
 <!DOCTYPE html>
 <html lang="en">
@@ -11,77 +14,186 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - Admin Dashboard</title>
+
+    <!-- Tailwind (layout utilities only) -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = { darkMode: 'class' }
+    <script>tailwind.config = { darkMode: 'class' }</script>
+
+    <!-- Material Symbols -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+
+    <!-- M3 Web Components -->
+    <script type="importmap">
+    {
+        "imports": {
+            "@@material/web/": "https://esm.run/@@material/web/"
+        }
+    }
     </script>
+    <script type="module">
+        import '@@material/web/button/filled-button.js';
+        import '@@material/web/button/outlined-button.js';
+        import '@@material/web/button/text-button.js';
+        import '@@material/web/button/filled-tonal-button.js';
+        import '@@material/web/iconbutton/icon-button.js';
+        import '@@material/web/icon/icon.js';
+        import '@@material/web/checkbox/checkbox.js';
+        import '@@material/web/textfield/outlined-text-field.js';
+        import '@@material/web/progress/linear-progress.js';
+        import '@@material/web/divider/divider.js';
+        import '@@material/web/dialog/dialog.js';
+        import '@@material/web/chips/chip-set.js';
+        import '@@material/web/chips/assist-chip.js';
+        import '@@material/web/select/outlined-select.js';
+        import '@@material/web/select/select-option.js';
+    </script>
+
+    <!-- M3 Theme Tokens -->
+    <style>
+        :root {
+            --md-sys-color-primary: #2563eb;
+            --md-sys-color-on-primary: #ffffff;
+            --md-sys-color-primary-container: #dbeafe;
+            --md-sys-color-on-primary-container: #1e3a5f;
+            --md-sys-color-secondary: #625b71;
+            --md-sys-color-on-secondary: #ffffff;
+            --md-sys-color-secondary-container: #e8def8;
+            --md-sys-color-on-secondary-container: #1d192b;
+            --md-sys-color-tertiary: #7d5260;
+            --md-sys-color-on-tertiary: #ffffff;
+            --md-sys-color-tertiary-container: #ffd8e4;
+            --md-sys-color-on-tertiary-container: #31111d;
+            --md-sys-color-error: #dc2626;
+            --md-sys-color-on-error: #ffffff;
+            --md-sys-color-error-container: #fef2f2;
+            --md-sys-color-on-error-container: #410002;
+            --md-sys-color-surface: #fefbff;
+            --md-sys-color-on-surface: #1c1b1f;
+            --md-sys-color-surface-variant: #e7e0ec;
+            --md-sys-color-on-surface-variant: #49454f;
+            --md-sys-color-surface-container-lowest: #ffffff;
+            --md-sys-color-surface-container-low: #f7f2fa;
+            --md-sys-color-surface-container: #f3edf7;
+            --md-sys-color-surface-container-high: #ece6f0;
+            --md-sys-color-surface-container-highest: #e6e0e9;
+            --md-sys-color-outline: #79747e;
+            --md-sys-color-outline-variant: #cac4d0;
+            --md-sys-color-inverse-surface: #313033;
+            --md-sys-color-inverse-on-surface: #f4eff4;
+            --md-sys-color-inverse-primary: #a5c8ff;
+            --md-sys-shape-corner-small: 8px;
+            --md-sys-shape-corner-medium: 12px;
+            --md-sys-shape-corner-large: 16px;
+            --md-sys-shape-corner-extra-large: 28px;
+            --md-sys-elevation-1: 0 1px 2px rgba(0,0,0,0.3), 0 1px 3px 1px rgba(0,0,0,0.15);
+            --md-sys-elevation-2: 0 1px 2px rgba(0,0,0,0.3), 0 2px 6px 2px rgba(0,0,0,0.15);
+            --md-sys-elevation-3: 0 4px 8px 3px rgba(0,0,0,0.15), 0 1px 3px rgba(0,0,0,0.3);
+            color-scheme: light;
+        }
+        .dark {
+            --md-sys-color-primary: #93b4f8;
+            --md-sys-color-on-primary: #0a305f;
+            --md-sys-color-primary-container: #1e4a87;
+            --md-sys-color-on-primary-container: #dbeafe;
+            --md-sys-color-secondary: #ccc2dc;
+            --md-sys-color-on-secondary: #332d41;
+            --md-sys-color-secondary-container: #4a4458;
+            --md-sys-color-on-secondary-container: #e8def8;
+            --md-sys-color-tertiary: #efb8c8;
+            --md-sys-color-on-tertiary: #492532;
+            --md-sys-color-tertiary-container: #633b48;
+            --md-sys-color-on-tertiary-container: #ffd8e4;
+            --md-sys-color-error: #f87171;
+            --md-sys-color-on-error: #601410;
+            --md-sys-color-error-container: #8c1d18;
+            --md-sys-color-on-error-container: #ffdad6;
+            --md-sys-color-surface: #1c1b1f;
+            --md-sys-color-on-surface: #e6e1e5;
+            --md-sys-color-surface-variant: #49454f;
+            --md-sys-color-on-surface-variant: #cac4d0;
+            --md-sys-color-surface-container-lowest: #0f0e11;
+            --md-sys-color-surface-container-low: #1d1b20;
+            --md-sys-color-surface-container: #211f26;
+            --md-sys-color-surface-container-high: #2b2930;
+            --md-sys-color-surface-container-highest: #36343b;
+            --md-sys-color-outline: #938f99;
+            --md-sys-color-outline-variant: #49454f;
+            --md-sys-color-inverse-surface: #e6e1e5;
+            --md-sys-color-inverse-on-surface: #313033;
+            --md-sys-color-inverse-primary: #2563eb;
+            color-scheme: dark;
+        }
+    </style>
+
     <script>
         (function() {
             if (localStorage.getItem('theme') === 'dark') {
                 document.documentElement.classList.add('dark');
+                document.documentElement.setAttribute('data-theme', 'dark');
             }
         })();
     </script>
-    <style>
-        .stat-card { transition: transform 0.15s ease; }
-        .stat-card:hover { transform: translateY(-2px); }
-    </style>
+
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 </head>
-<body class="bg-gray-100 dark:bg-gray-900 min-h-screen text-gray-900 dark:text-gray-100">
+<body class="min-h-screen" style="background: var(--md-sys-color-surface); color: var(--md-sys-color-on-surface);">
     <div class="flex min-h-screen">
         <!-- Sidebar -->
-        <aside class="w-64 bg-gray-800 dark:bg-gray-950 flex flex-col fixed inset-y-0 left-0 z-30">
-            <div class="flex items-center justify-center h-16 border-b border-gray-700">
-                <a href="/Admin" class="text-xl font-bold text-white">Admin Panel</a>
+        <aside class="w-64 flex flex-col fixed inset-y-0 left-0 z-30" style="background: var(--md-sys-color-surface-container);">
+            <div class="flex items-center justify-center h-16" style="border-bottom: 1px solid var(--md-sys-color-outline-variant);">
+                <a href="/Admin" class="text-xl font-bold" style="color: var(--md-sys-color-on-surface);">Admin Panel</a>
             </div>
             <nav class="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
-                <a href="/Admin" class="@NavClass(currentPath == "/Admin" || currentPath == "/Admin/")">
-                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+                <a href="/Admin" class="@NavClass(currentPath == "/Admin" || currentPath == "/Admin/")" style="@NavStyle(currentPath == "/Admin" || currentPath == "/Admin/")">
+                    <md-icon class="mr-3" style="font-size: 20px;">home</md-icon>
                     Overview
                 </a>
-                <a href="/Admin/Players" class="@NavClass(currentPath.StartsWith("/Admin/Players") || currentPath.StartsWith("/Admin/PlayerDetail"))">
-                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+                <a href="/Admin/Players" class="@NavClass(currentPath.StartsWith("/Admin/Players") || currentPath.StartsWith("/Admin/PlayerDetail"))" style="@NavStyle(currentPath.StartsWith("/Admin/Players") || currentPath.StartsWith("/Admin/PlayerDetail"))">
+                    <md-icon class="mr-3" style="font-size: 20px;">group</md-icon>
                     Players
                 </a>
-                <a href="/Admin/Meta" class="@NavClass(currentPath.StartsWith("/Admin/Meta"))">
-                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                <a href="/Admin/Meta" class="@NavClass(currentPath.StartsWith("/Admin/Meta"))" style="@NavStyle(currentPath.StartsWith("/Admin/Meta"))">
+                    <md-icon class="mr-3" style="font-size: 20px;">analytics</md-icon>
                     Meta & Balance
                 </a>
-                <a href="/Admin/Guilds" class="@NavClass(currentPath.StartsWith("/Admin/Guilds"))">
-                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                <a href="/Admin/Guilds" class="@NavClass(currentPath.StartsWith("/Admin/Guilds"))" style="@NavStyle(currentPath.StartsWith("/Admin/Guilds"))">
+                    <md-icon class="mr-3" style="font-size: 20px;">shield</md-icon>
                     Guilds
                 </a>
-                <a href="/Admin/Technical" class="@NavClass(currentPath.StartsWith("/Admin/Technical"))">
-                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                <a href="/Admin/Technical" class="@NavClass(currentPath.StartsWith("/Admin/Technical"))" style="@NavStyle(currentPath.StartsWith("/Admin/Technical"))">
+                    <md-icon class="mr-3" style="font-size: 20px;">settings</md-icon>
                     Technical
                 </a>
-                <a href="/Admin/Tools" class="@NavClass(currentPath.StartsWith("/Admin/Tools"))">
-                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
+                <a href="/Admin/Tools" class="@NavClass(currentPath.StartsWith("/Admin/Tools"))" style="@NavStyle(currentPath.StartsWith("/Admin/Tools"))">
+                    <md-icon class="mr-3" style="font-size: 20px;">tune</md-icon>
                     Admin Tools
                 </a>
             </nav>
-            <div class="px-3 py-4 border-t border-gray-700">
-                <a href="/" class="flex items-center px-4 py-3 text-sm font-medium text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-colors">
-                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 17l-5-5m0 0l5-5m-5 5h12"/></svg>
+            <div class="px-3 py-4" style="border-top: 1px solid var(--md-sys-color-outline-variant);">
+                <a href="/" class="flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors" style="color: var(--md-sys-color-on-surface-variant);">
+                    <md-icon class="mr-3" style="font-size: 20px;">arrow_back</md-icon>
                     Back to Site
                 </a>
-                <button id="admin-theme-toggle" class="flex items-center w-full px-4 py-3 text-sm font-medium text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-colors mt-1">
-                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
-                    Toggle Theme
-                </button>
+                <div class="flex items-center px-4 py-3 mt-1">
+                    <md-icon-button toggle data-theme-toggle aria-label="Toggle dark mode">
+                        <md-icon>dark_mode</md-icon>
+                        <md-icon slot="selected">light_mode</md-icon>
+                    </md-icon-button>
+                    <span class="text-sm ml-2" style="color: var(--md-sys-color-on-surface-variant);">Toggle Theme</span>
+                </div>
             </div>
         </aside>
 
         <!-- Main Content -->
         <div class="flex-1 ml-64">
             <!-- Top Bar -->
-            <header class="bg-white dark:bg-gray-800 shadow-sm border-b dark:border-gray-700 h-16 flex items-center justify-between px-8 sticky top-0 z-20">
-                <h1 class="text-lg font-semibold text-gray-900 dark:text-white">@ViewData["Title"]</h1>
+            <header class="h-16 flex items-center justify-between px-8 sticky top-0 z-20" style="background: var(--md-sys-color-surface-container); border-bottom: 1px solid var(--md-sys-color-outline-variant);">
+                <h1 class="text-lg font-semibold" style="color: var(--md-sys-color-on-surface);">@ViewData["Title"]</h1>
                 <div class="flex items-center space-x-4">
-                    <span class="text-sm text-gray-500 dark:text-gray-400">
-                        Logged in as <span class="font-medium text-gray-900 dark:text-white">@User.Identity?.Name</span>
+                    <span class="text-sm" style="color: var(--md-sys-color-on-surface-variant);">
+                        Logged in as <span class="font-medium" style="color: var(--md-sys-color-on-surface);">@User.Identity?.Name</span>
                     </span>
-                    <a href="/Account" class="text-sm text-blue-600 dark:text-blue-400 hover:underline">My Account</a>
+                    <a href="/Account" class="text-sm" style="color: var(--md-sys-color-primary);">My Account</a>
                 </div>
             </header>
 
@@ -92,12 +204,7 @@
         </div>
     </div>
 
-    <script>
-        document.getElementById('admin-theme-toggle')?.addEventListener('click', function() {
-            document.documentElement.classList.toggle('dark');
-            localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
-        });
-    </script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
