@@ -51,8 +51,15 @@ public class LoginModel : PageModel
             new(ClaimTypes.NameIdentifier, player.Id.ToString()),
             new(ClaimTypes.Name, player.Username),
             new(ClaimTypes.Email, player.Email),
-            new("PlayerId", player.Id.ToString())
+            new("PlayerId", player.Id.ToString()),
+            new("CurrentTier", player.CurrentTier.ToString())
         };
+
+        if (player.IsAdmin)
+        {
+            claims.Add(new Claim(ClaimTypes.Role, "Admin"));
+            claims.Add(new Claim("AdminRole", player.AdminRole.ToString()));
+        }
 
         var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
         var authProperties = new AuthenticationProperties

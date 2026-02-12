@@ -3,12 +3,12 @@
 @if (User.Identity?.IsAuthenticated == true)
 {
     <div class="flex items-center space-x-4">
-        <span class="text-sm text-gray-700">
+        <span class="text-sm text-gray-700 dark:text-gray-300">
             @User.FindFirstValue(ClaimTypes.Name)
         </span>
-        <a asp-page="/Account/Index" class="text-sm text-blue-600 hover:text-blue-700">Dashboard</a>
+        <a asp-page="/Account/Index" class="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300">Dashboard</a>
         <form method="post" asp-page="/Auth/Logout" class="inline">
-            <button type="submit" class="text-sm text-gray-700 hover:text-gray-900">
+            <button type="submit" class="text-sm text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
                 Logout
             </button>
         </form>
@@ -17,7 +17,7 @@
 else
 {
     <div class="flex items-center space-x-4">
-        <a asp-page="/Auth/Login" class="text-sm text-gray-700 hover:text-gray-900">
+        <a asp-page="/Auth/Login" class="text-sm text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
             Login
         </a>
         <a asp-page="/Auth/Register" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">

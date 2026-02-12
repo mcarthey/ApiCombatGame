@@ -9,12 +9,17 @@ namespace ApiCombatGame.Services;
 public class ChallengeService : IChallengeService
 {
     private readonly GameDbContext _context;
+    private readonly IPlayerProgressionService _progressionService;
     private readonly List<IChallengeGenerator> _generators;
     private readonly ILogger<ChallengeService> _logger;
 
-    public ChallengeService(GameDbContext context, ILogger<ChallengeService> logger)
+    public ChallengeService(
+        GameDbContext context,
+        IPlayerProgressionService progressionService,
+        ILogger<ChallengeService> logger)
     {
         _context = context;
+        _progressionService = progressionService;
         _logger = logger;
 
         // Register challenge generators (Extension Point: add new challenge types here)
@@ -22,10 +27,6 @@ public class ChallengeService : IChallengeService
         {
             new TeamCompositionChallenge(),
             new WinStreakChallenge(),
-            // TODO: Add more challenge types
-            // new NoDamageChallenge(),
-            // new SpeedRunChallenge(),
-            // new UnderDogChallenge(),
         };
     }
 
@@ -55,7 +56,7 @@ public class ChallengeService : IChallengeService
         var player = await _context.Players.FindAsync(playerId);
         if (player == null) return;
 
-        // Pick 3 random challenge types (no duplicates)
+        // Pick random challenge types (no duplicates)
         var selectedGenerators = _generators
             .OrderBy(_ => Random.Shared.Next())
             .Take(3 - existingChallenges)
@@ -74,14 +75,6 @@ public class ChallengeService : IChallengeService
 
     public async Task CheckChallengeProgress(Guid playerId, Battle battle)
     {
-        // TODO: Implement progress checking
-        // 1. Get active challenges for the player
-        // 2. For each challenge, find the matching generator by ChallengeType
-        // 3. Call generator.CheckProgress(challenge, battle)
-        // 4. If true, increment challenge.Progress
-        // 5. If Progress >= RequiredProgress, mark as completed
-        // 6. Save changes
-
         var challenges = await GetActiveChallenges(playerId);
         foreach (var challenge in challenges.Where(c => !c.IsCompleted))
         {
@@ -111,19 +104,16 @@ public class ChallengeService : IChallengeService
         if (!challenge.IsCompleted)
             throw new InvalidOperationException("Challenge is not yet completed");
 
-        // Award rewards
-        var player = await _context.Players.FindAsync(playerId);
-        if (player == null)
-            throw new KeyNotFoundException("Player not found");
-
-        player.Currency += challenge.RewardCurrency;
-        // TODO: Award RewardExperience when experience/leveling system is implemented
+        // Award rewards via progression service (applies tier multiplier)
+        await _progressionService.AwardCurrencyAsync(playerId, challenge.RewardCurrency);
+        if (challenge.RewardExperience > 0)
+            await _progressionService.AwardExperienceAsync(playerId, challenge.RewardExperience);
 
         // Remove the challenge (it's been claimed)
         _context.DailyChallenges.Remove(challenge);
         await _context.SaveChangesAsync();
 
-        _logger.LogInformation("Player {PlayerId} claimed reward for challenge {ChallengeId}: {Currency} currency",
-            playerId, challengeId, challenge.RewardCurrency);
+        _logger.LogInformation("Player {PlayerId} claimed reward for challenge {ChallengeId}: {Currency} currency, {XP} XP",
+            playerId, challengeId, challenge.RewardCurrency, challenge.RewardExperience);
     }
 }

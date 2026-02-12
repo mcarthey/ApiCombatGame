@@ -1,3 +1,4 @@
+using System.Text.Json;
 using ApiCombatGame.Data;
 using ApiCombatGame.Models.Domain;
 using ApiCombatGame.Services.Interfaces;
@@ -8,11 +9,22 @@ namespace ApiCombatGame.Services;
 public class GuildBossService : IGuildBossService
 {
     private readonly GameDbContext _context;
+    private readonly IPlayerProgressionService _progressionService;
+    private readonly IAchievementService _achievementService;
+    private readonly INotificationService _notifications;
     private readonly ILogger<GuildBossService> _logger;
 
-    public GuildBossService(GameDbContext context, ILogger<GuildBossService> logger)
+    public GuildBossService(
+        GameDbContext context,
+        IPlayerProgressionService progressionService,
+        IAchievementService achievementService,
+        INotificationService notifications,
+        ILogger<GuildBossService> logger)
     {
         _context = context;
+        _progressionService = progressionService;
+        _achievementService = achievementService;
+        _notifications = notifications;
         _logger = logger;
     }
 
@@ -29,16 +41,115 @@ public class GuildBossService : IGuildBossService
 
     public async Task<GuildBossAttempt> AttemptBoss(Guid guildBossId, Guid playerId, Guid teamId)
     {
-        // TODO: Implement boss battle logic
-        // 1. Load boss and player team
-        // 2. Load boss abilities from AbilitiesJson
-        // 3. Run battle simulation against boss
-        // 4. Calculate damage dealt to boss
-        // 5. Update boss CurrentHp
-        // 6. Check if boss is defeated (CurrentHp <= 0)
-        // 7. If defeated: mark IsDefeated, set DefeatedAt, award rewards to guild
-        // 8. Create and return GuildBossAttempt record
-        throw new NotImplementedException("TODO: Phase 3 implementation - Boss battle logic");
+        var boss = await _context.GuildBosses
+            .Include(b => b.Attempts)
+            .FirstOrDefaultAsync(b => b.Id == guildBossId)
+            ?? throw new KeyNotFoundException("Boss not found.");
+
+        if (boss.IsDefeated)
+            throw new InvalidOperationException("Boss has already been defeated.");
+
+        if (boss.ExpiresAt <= DateTime.UtcNow)
+            throw new InvalidOperationException("Boss encounter has expired.");
+
+        // Verify player is in the guild
+        var membership = await _context.GuildMemberships
+            .Include(m => m.Guild)
+            .FirstOrDefaultAsync(m => m.PlayerId == playerId && m.GuildId == boss.GuildId)
+            ?? throw new InvalidOperationException("You are not a member of this guild.");
+
+        // Check daily attempt limit
+        var today = DateTime.UtcNow.Date;
+        var maxAttempts = membership.Guild.MaxRaidAttempts;
+        var todayAttempts = boss.Attempts.Count(a => a.PlayerId == playerId && a.AttemptedAt.Date == today);
+        if (todayAttempts >= maxAttempts)
+            throw new InvalidOperationException($"Daily raid attempt limit reached ({maxAttempts}/day). Guild upgrade 'Raid Stamina' increases this limit.");
+
+        // Load team and units
+        var team = await _context.Teams.FirstOrDefaultAsync(t => t.Id == teamId && t.PlayerId == playerId)
+            ?? throw new KeyNotFoundException("Team not found.");
+
+        var unitIds = JsonSerializer.Deserialize<List<Guid>>(team.UnitIdsJson) ?? new();
+        var units = await _context.Units.Where(u => unitIds.Contains(u.Id)).ToListAsync();
+
+        if (units.Count == 0)
+            throw new InvalidOperationException("Team has no units.");
+
+        // Simplified damage calculation:
+        // Each unit attacks for 10 simulated turns
+        // Damage per unit per turn = max(1, unit.Attack - boss.Defense / unitCount)
+        int totalDamage = 0;
+        var logEntries = new List<object>();
+
+        foreach (var unit in units)
+        {
+            int damagePerTurn = Math.Max(1, unit.Attack - boss.Defense / units.Count);
+            int unitDamage = damagePerTurn * 10;
+            totalDamage += unitDamage;
+
+            logEntries.Add(new
+            {
+                unit = unit.Name,
+                unitClass = unit.Class.ToString(),
+                damagePerTurn,
+                turns = 10,
+                totalDamage = unitDamage
+            });
+        }
+
+        // Apply damage to boss
+        boss.CurrentHp = Math.Max(0, boss.CurrentHp - totalDamage);
+        bool killingBlow = boss.CurrentHp <= 0;
+
+        if (killingBlow)
+        {
+            boss.IsDefeated = true;
+            boss.DefeatedAt = DateTime.UtcNow;
+
+            // Deposit reward to guild treasury
+            membership.Guild.TreasuryBalance += boss.RewardCurrency;
+
+            // Award XP and gold to all contributors
+            var contributors = boss.Attempts
+                .Select(a => a.PlayerId)
+                .Append(playerId)
+                .Distinct()
+                .ToList();
+
+            foreach (var contributorId in contributors)
+            {
+                await _progressionService.AwardCurrencyAsync(contributorId, boss.RewardCurrency / contributors.Count);
+                await _progressionService.AwardExperienceAsync(contributorId, boss.RewardExperience / contributors.Count);
+            }
+
+            _logger.LogInformation("Boss {BossName} defeated by {PlayerId} (killing blow). {ContributorCount} contributors rewarded.",
+                boss.Name, playerId, contributors.Count);
+
+            // Achievement: killing blow
+            await _achievementService.CheckAndAwardAsync(playerId, "boss_killing_blow");
+
+            await _notifications.SendToGuildAsync(boss.GuildId, Models.Enums.NotificationType.GuildBossDefeated, "Boss Defeated!",
+                $"{(await _context.Players.FindAsync(playerId))?.Username} landed the killing blow on {boss.Name}! Rewards deposited to guild treasury.");
+        }
+
+        // Create attempt record
+        var attempt = new GuildBossAttempt
+        {
+            Id = Guid.NewGuid(),
+            GuildBossId = guildBossId,
+            PlayerId = playerId,
+            DamageDealt = totalDamage,
+            WasKillingBlow = killingBlow,
+            BattleLogJson = JsonSerializer.Serialize(logEntries),
+            AttemptedAt = DateTime.UtcNow
+        };
+
+        membership.ContributionPoints += totalDamage / 10;
+
+        _context.GuildBossAttempts.Add(attempt);
+        await _context.SaveChangesAsync();
+
+        return attempt;
     }
 
     public async Task<List<GuildBossAttempt>> GetBossLeaderboard(Guid guildBossId)
@@ -53,7 +164,6 @@ public class GuildBossService : IGuildBossService
 
     public async Task SpawnBossForGuild(Guid guildId)
     {
-        // Check if guild already has an active boss
         var existingBoss = await GetActiveGuildBoss(guildId);
         if (existingBoss != null)
         {
@@ -61,12 +171,9 @@ public class GuildBossService : IGuildBossService
             return;
         }
 
-        // Get guild member count for HP scaling
         var memberCount = await _context.GuildMemberships
             .CountAsync(m => m.GuildId == guildId);
 
-        // TODO: Implement boss type selection and ability assignment
-        // For now, create a basic boss with scaled stats
         var boss = new GuildBoss
         {
             Id = Guid.NewGuid(),
@@ -87,6 +194,9 @@ public class GuildBossService : IGuildBossService
 
         _context.GuildBosses.Add(boss);
         await _context.SaveChangesAsync();
+
+        await _notifications.SendToGuildAsync(guildId, Models.Enums.NotificationType.GuildBossSpawned, "Boss Spawned!",
+            $"A new boss has appeared: {boss.Name}! Rally your guild to defeat it before it expires.");
 
         _logger.LogInformation("Spawned boss {BossName} for guild {GuildId} with {Hp} HP",
             boss.Name, guildId, boss.MaxHp);

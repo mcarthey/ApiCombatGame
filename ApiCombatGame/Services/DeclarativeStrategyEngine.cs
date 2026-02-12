@@ -25,9 +25,9 @@ public class DeclarativeStrategyEngine : IStrategyEngine
         var rng = seed.HasValue ? new Random(seed.Value) : new Random();
         var log = new List<BattleLogEntry>();
 
-        // Create battle state copies
-        var team1 = team1Units.Select(u => new BattleUnitState(u, 1)).ToList();
-        var team2 = team2Units.Select(u => new BattleUnitState(u, 2)).ToList();
+        // Create battle state copies and apply formations from strategy configs
+        var team1 = team1Units.Select(u => new BattleUnitState(u, 1) { Formation = team1Strategy.Formation ?? "balanced" }).ToList();
+        var team2 = team2Units.Select(u => new BattleUnitState(u, 2) { Formation = team2Strategy.Formation ?? "balanced" }).ToList();
 
         int turn = 0;
 

@@ -1,0 +1,84 @@
+@page
+@model ApiCombatGame.Pages.Admin.ToolsModel
+@{
+    ViewData["Title"] = "Admin Tools";
+    Layout = "_AdminLayout";
+}
+
+@if (!string.IsNullOrEmpty(Model.SuccessMessage))
+{
+    <div class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-300 px-4 py-3 rounded-lg mb-6">
+        @Model.SuccessMessage
+    </div>
+}
+
+@if (!string.IsNullOrEmpty(Model.ErrorMessage))
+{
+    <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 px-4 py-3 rounded-lg mb-6">
+        @Model.ErrorMessage
+    </div>
+}
+
+<!-- Stats -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border dark:border-gray-700">
+        <div class="text-sm font-medium text-gray-500 dark:text-gray-400">Admin Users</div>
+        <div class="text-3xl font-bold mt-1">@Model.AdminCount</div>
+        <div class="text-sm text-gray-500 dark:text-gray-400 mt-1">of @Model.TotalPlayers total players</div>
+    </div>
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border dark:border-gray-700">
+        <div class="text-sm font-medium text-gray-500 dark:text-gray-400">Current User</div>
+        <div class="text-xl font-bold mt-1">@User.Identity?.Name</div>
+        <div class="text-sm text-gray-500 dark:text-gray-400 mt-1">SuperAdmin</div>
+    </div>
+</div>
+
+<!-- Admin Actions -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <!-- Grant Admin -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border dark:border-gray-700">
+        <h3 class="text-lg font-semibold mb-4">Grant Admin Access</h3>
+        <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
+            Grant SuperAdmin access to a player by username. They'll need to log out and back in for changes to take effect.
+        </p>
+        <form method="post" asp-page-handler="GrantAdminByUsername" class="flex gap-2">
+            <input type="text" name="username" placeholder="Username" required
+                   class="flex-1 rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm px-4 py-2" />
+            <button type="submit" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium">
+                Grant Admin
+            </button>
+        </form>
+    </div>
+
+    <!-- Danger Zone -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border-2 border-red-200 dark:border-red-800">
+        <h3 class="text-lg font-semibold text-red-600 dark:text-red-400 mb-4">Danger Zone</h3>
+        <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
+            Reset the entire database. This will delete ALL data and re-seed with defaults. This action cannot be undone.
+        </p>
+        <form method="post" asp-page-handler="ResetDatabase" onsubmit="return confirm('Are you absolutely sure? This will DELETE ALL DATA and cannot be undone!');">
+            <button type="submit" class="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition font-medium">
+                Reset Database
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- Quick Links -->
+<div class="mt-8">
+    <h3 class="text-lg font-semibold mb-4">Quick Links</h3>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <a href="/openapi/v1.json" target="_blank" class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 border dark:border-gray-700 hover:shadow-md transition">
+            <div class="font-medium">OpenAPI Spec</div>
+            <div class="text-sm text-gray-500 dark:text-gray-400">View the raw JSON specification</div>
+        </a>
+        <a href="/api-docs/v1" target="_blank" class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 border dark:border-gray-700 hover:shadow-md transition">
+            <div class="font-medium">API Documentation</div>
+            <div class="text-sm text-gray-500 dark:text-gray-400">Interactive API reference</div>
+        </a>
+        <a href="/health" target="_blank" class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 border dark:border-gray-700 hover:shadow-md transition">
+            <div class="font-medium">Health Check</div>
+            <div class="text-sm text-gray-500 dark:text-gray-400">Application health status</div>
+        </a>
+    </div>
+</div>

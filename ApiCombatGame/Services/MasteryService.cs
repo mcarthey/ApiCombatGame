@@ -9,14 +9,16 @@ public class MasteryService : IMasteryService
 {
     private readonly GameDbContext _context;
     private readonly ILogger<MasteryService> _logger;
+    private readonly INotificationService _notifications;
 
     // Experience required per level (index = level, value = total XP needed)
     private static readonly int[] LevelThresholds = { 0, 0, 100, 300, 600, 1000, 1500, 2100, 2800, 3600, 4500 };
 
-    public MasteryService(GameDbContext context, ILogger<MasteryService> logger)
+    public MasteryService(GameDbContext context, ILogger<MasteryService> logger, INotificationService notifications)
     {
         _context = context;
         _logger = logger;
+        _notifications = notifications;
     }
 
     public async Task<List<UnitMastery>> GetPlayerMastery(Guid playerId)
@@ -77,6 +79,9 @@ public class MasteryService : IMasteryService
             mastery.Level++;
             _logger.LogInformation("Player {PlayerId} reached mastery level {Level} with unit {UnitId}",
                 playerId, mastery.Level, unitId);
+            var unit = await _context.Units.FindAsync(unitId);
+            await _notifications.SendAsync(playerId, Models.Enums.NotificationType.MasteryRankUp, "Mastery Level Up!",
+                $"Your mastery of {unit?.Name ?? "unit"} reached level {mastery.Level}!");
         }
 
         await _context.SaveChangesAsync();

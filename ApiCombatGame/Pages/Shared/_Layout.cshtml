@@ -5,34 +5,80 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - API Combat Game</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = { darkMode: 'class' }
+    </script>
+    <script>
+        (function() {
+            if (localStorage.getItem('theme') === 'dark') {
+                document.documentElement.classList.add('dark');
+            }
+        })();
+    </script>
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 </head>
-<body class="bg-gray-50 min-h-screen flex flex-col">
-    <nav class="bg-white shadow-sm border-b">
+<body class="bg-gray-50 dark:bg-gray-900 min-h-screen flex flex-col text-gray-900 dark:text-gray-100 transition-colors">
+    <nav class="bg-white dark:bg-gray-800 shadow-sm border-b dark:border-gray-700">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16">
                 <div class="flex">
                     <div class="flex-shrink-0 flex items-center">
-                        <a asp-page="/Index" class="text-xl font-bold text-gray-900">
+                        <a asp-page="/Index" class="text-xl font-bold text-gray-900 dark:text-white">
                             API Combat Game
                         </a>
                     </div>
+                    @{
+                        var currentPath = ViewContext.HttpContext.Request.Path.Value ?? "/";
+                        string NavClass(bool isActive) => isActive
+                            ? "border-blue-500 text-blue-600 dark:text-blue-400 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
+                            : "border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 hover:text-gray-700 dark:hover:text-white inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium";
+                    }
                     <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
-                        <a asp-page="/Index" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                        <a asp-page="/Index" class="@NavClass(currentPath == "/")">
                             Home
                         </a>
-                        <a href="/swagger" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                        <a href="/api-docs/v1" class="@NavClass(currentPath.StartsWith("/api-docs"))">
                             API Docs
                         </a>
                         @if (User.Identity?.IsAuthenticated == true)
                         {
-                            <a asp-page="/Account/Index" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                            <a asp-page="/Account/Index" class="@NavClass(currentPath.StartsWith("/Account"))">
                                 Dashboard
                             </a>
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <a href="/Admin" class="@NavClass(currentPath.StartsWith("/Admin"))">
+                                    Admin
+                                </a>
+                            }
                         }
                     </div>
                 </div>
-                <div class="flex items-center">
+                <div class="flex items-center space-x-4">
+                    @if (User.Identity?.IsAuthenticated == true)
+                    {
+                        <a asp-page="/Account/Notifications" class="relative p-2 rounded-md text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700" id="notification-bell" title="Notifications">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                            </svg>
+                            <span id="notification-badge" class="hidden absolute -top-0.5 -right-0.5 inline-flex items-center justify-center px-1.5 py-0.5 text-xs font-bold leading-none text-white bg-red-500 rounded-full"></span>
+                        </a>
+                    }
+                    <button id="theme-toggle" aria-label="Toggle dark mode"
+                            class="p-2 rounded-md text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none">
+                        <span id="icon-sun" class="hidden">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                            </svg>
+                        </span>
+                        <span id="icon-moon">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                            </svg>
+                        </span>
+                    </button>
                     <partial name="_LoginPartial" />
                 </div>
             </div>
@@ -43,21 +89,47 @@
         @RenderBody()
     </main>
 
-    <footer class="bg-white border-t mt-auto">
+    <footer class="bg-white dark:bg-gray-800 border-t dark:border-gray-700 mt-auto">
         <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center">
-                <p class="text-gray-500 text-sm">
+                <p class="text-gray-500 dark:text-gray-400 text-sm">
                     &copy; @DateTime.UtcNow.Year API Combat Game
                 </p>
                 <div class="flex space-x-6">
-                    <a asp-page="/Privacy" class="text-gray-500 hover:text-gray-700 text-sm">Privacy Policy</a>
-                    <a href="/swagger" class="text-gray-500 hover:text-gray-700 text-sm">API Documentation</a>
+                    <a asp-page="/Privacy" class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-white text-sm">Privacy Policy</a>
+                    <a href="/api-docs/v1" class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-white text-sm">API Documentation</a>
+                    <a href="/openapi/v1.json" class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-white text-sm">OpenAPI Spec</a>
                 </div>
             </div>
         </div>
     </footer>
 
     <script src="~/js/site.js" asp-append-version="true"></script>
+    @if (User.Identity?.IsAuthenticated == true)
+    {
+        <script>
+            (function () {
+                const badge = document.getElementById('notification-badge');
+                if (!badge) return;
+                async function checkNotifications() {
+                    try {
+                        const res = await fetch('/api/v1/player/notifications/count');
+                        if (res.ok) {
+                            const data = await res.json();
+                            if (data.unreadCount > 0) {
+                                badge.textContent = data.unreadCount > 99 ? '99+' : data.unreadCount;
+                                badge.classList.remove('hidden');
+                            } else {
+                                badge.classList.add('hidden');
+                            }
+                        }
+                    } catch (e) { /* silent */ }
+                }
+                checkNotifications();
+                setInterval(checkNotifications, 60000);
+            })();
+        </script>
+    }
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

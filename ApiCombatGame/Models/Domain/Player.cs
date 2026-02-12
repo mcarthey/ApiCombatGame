@@ -31,6 +31,18 @@ public class Player
     public int DailyBattlesUsed { get; set; }
     public DateTime LastBattleResetDate { get; set; } = DateTime.UtcNow.Date;
 
+    // Progression
+    public int ExperiencePoints { get; set; } = 0;
+    public int WinStreak { get; set; } = 0;
+    public DateTime? LastFirstBattleBonus { get; set; }
+
+    // Admin
+    public bool IsAdmin { get; set; } = false;
+    public AdminRole AdminRole { get; set; } = AdminRole.None;
+
+    // Notifications
+    public string? NotificationPreferencesJson { get; set; }
+
     // Phase 3: Progression
     public Guid? ActiveTitleId { get; set; }
     public PlayerTitle? ActiveTitle { get; set; }
@@ -49,4 +61,5 @@ public class Player
     public List<UnitMastery> UnitMasteries { get; set; } = new();
     public List<PlayerAchievement> Achievements { get; set; } = new();
     public List<GuildBossAttempt> BossAttempts { get; set; } = new();
+    public List<Notification> Notifications { get; set; } = new();
 }

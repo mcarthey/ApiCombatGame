@@ -25,6 +25,12 @@ public class Battle
 
     public string Mode { get; set; } = "ranked";
 
+    /// <summary>JSON array of unit class names for Team 1 (e.g. ["Warrior","Mage"]). Used for challenge checking.</summary>
+    public string Team1ClassesJson { get; set; } = "[]";
+
+    /// <summary>JSON array of unit class names for Team 2. Used for challenge checking.</summary>
+    public string Team2ClassesJson { get; set; } = "[]";
+
     public int? Player1RatingChange { get; set; }
     public int? Player2RatingChange { get; set; }
     public int? CurrencyReward { get; set; }

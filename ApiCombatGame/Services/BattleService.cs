@@ -14,7 +14,10 @@ public class BattleService : IBattleService
     private readonly GameDbContext _context;
     private readonly IStrategyEngine _strategyEngine;
     private readonly IMatchmakingService _matchmaking;
+    private readonly IPlayerProgressionService _progressionService;
+    private readonly IAchievementService _achievementService;
     private readonly IConfiguration _config;
+    private readonly INotificationService _notifications;
     private readonly ILogger<BattleService> _logger;
     private static readonly JsonSerializerOptions JsonOptions = new() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
 
@@ -22,12 +25,18 @@ public class BattleService : IBattleService
         GameDbContext context,
         IStrategyEngine strategyEngine,
         IMatchmakingService matchmaking,
+        IPlayerProgressionService progressionService,
+        IAchievementService achievementService,
+        INotificationService notifications,
         IConfiguration config,
         ILogger<BattleService> logger)
     {
+        _achievementService = achievementService;
+        _notifications = notifications;
         _context = context;
         _strategyEngine = strategyEngine;
         _matchmaking = matchmaking;
+        _progressionService = progressionService;
         _config = config;
         _logger = logger;
     }
@@ -229,6 +238,12 @@ public class BattleService : IBattleService
                 .Where(u => team2UnitIds.Contains(u.Id))
                 .ToListAsync(cancellationToken);
 
+            // Store team class compositions for challenge checking
+            battle1.Team1ClassesJson = JsonSerializer.Serialize(
+                team1Units.Select(u => u.Class.ToString()).ToList(), JsonOptions);
+            battle1.Team2ClassesJson = JsonSerializer.Serialize(
+                team2Units.Select(u => u.Class.ToString()).ToList(), JsonOptions);
+
             var strategy1 = !string.IsNullOrEmpty(team1.StrategyJson) && team1.StrategyJson != "{}"
                 ? JsonSerializer.Deserialize<StrategyConfig>(team1.StrategyJson, JsonOptions) ?? new StrategyConfig()
                 : new StrategyConfig();
@@ -248,24 +263,26 @@ public class BattleService : IBattleService
             battle1.Status = BattleStatus.Completed;
             battle1.CompletedAt = DateTime.UtcNow;
 
-            // Determine winner and update ratings
+            // Determine winner and update ratings + rewards
             if (resolution.WinnerTeam == 1)
             {
                 battle1.WinnerId = battle1.Player1Id;
-                await UpdateRatingsAndCurrency(battle1.Player1Id, battle1.Player2Id!.Value, battle1, cancellationToken);
+                await UpdateRatingsAndRewards(battle1.Player1Id, battle1.Player2Id!.Value, battle1, cancellationToken);
             }
             else if (resolution.WinnerTeam == 2)
             {
                 battle1.WinnerId = battle1.Player2Id;
-                await UpdateRatingsAndCurrency(battle1.Player2Id!.Value, battle1.Player1Id, battle1, cancellationToken);
+                await UpdateRatingsAndRewards(battle1.Player2Id!.Value, battle1.Player1Id, battle1, cancellationToken);
             }
             else
             {
-                // Draw - small rating change
+                // Draw - process rewards for both
                 battle1.WinnerId = null;
                 battle1.Player1RatingChange = 0;
                 battle1.Player2RatingChange = 0;
-                battle1.CurrencyReward = 25;
+                var p1Rewards = await _progressionService.ProcessBattleRewardsAsync(battle1.Player1Id, false, 0);
+                var p2Rewards = await _progressionService.ProcessBattleRewardsAsync(battle1.Player2Id!.Value, false, 0);
+                battle1.CurrencyReward = p1Rewards.GoldEarned;
             }
 
             await _context.SaveChangesAsync(cancellationToken);
@@ -282,7 +299,7 @@ public class BattleService : IBattleService
         }
     }
 
-    private async Task UpdateRatingsAndCurrency(Guid winnerId, Guid loserId, Battle battle, CancellationToken ct)
+    private async Task UpdateRatingsAndRewards(Guid winnerId, Guid loserId, Battle battle, CancellationToken ct)
     {
         var winner = await _context.Players.FindAsync(new object[] { winnerId }, ct);
         var loser = await _context.Players.FindAsync(new object[] { loserId }, ct);
@@ -301,13 +318,44 @@ public class BattleService : IBattleService
         // Ensure rating doesn't go below 100
         if (loser.Rating < 100) loser.Rating = 100;
 
-        // Currency rewards
-        int currencyReward = 100 + Math.Abs(winnerChange);
-        winner.Currency += currencyReward;
-        loser.Currency += 25; // Consolation prize
-
         battle.Player1RatingChange = winnerId == battle.Player1Id ? winnerChange : loserChange;
         battle.Player2RatingChange = winnerId == battle.Player2Id ? winnerChange : loserChange;
-        battle.CurrencyReward = currencyReward;
+
+        // Process gold/XP rewards via progression service
+        var winnerRewards = await _progressionService.ProcessBattleRewardsAsync(winnerId, true, winnerChange);
+        var loserRewards = await _progressionService.ProcessBattleRewardsAsync(loserId, false, loserChange);
+
+        battle.CurrencyReward = winnerRewards.GoldEarned;
+
+        // Check achievements
+        try
+        {
+            await _achievementService.CheckAndAwardAsync(winnerId, "battle_won");
+            await _achievementService.CheckAndAwardAsync(loserId, "battle_lost");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Achievement check failed for battle {BattleId}", battle.Id);
+        }
+
+        // Notify both players
+        try
+        {
+            await _notifications.SendAsync(winnerId, Models.Enums.NotificationType.BattleCompleted, "Battle Won!",
+                $"You defeated {loser.Username}! Rating: {(winnerChange >= 0 ? "+" : "")}{winnerChange}", $"/api/v1/battle/results/{battle.Id}");
+            await _notifications.SendAsync(loserId, Models.Enums.NotificationType.BattleCompleted, "Battle Lost",
+                $"You were defeated by {winner.Username}. Rating: {loserChange}", $"/api/v1/battle/results/{battle.Id}");
+
+            // Win streak milestone notifications (every 5 wins)
+            if (winner.WinStreak > 0 && winner.WinStreak % 5 == 0)
+            {
+                await _notifications.SendAsync(winnerId, Models.Enums.NotificationType.WinStreakMilestone, "Win Streak!",
+                    $"You're on a {winner.WinStreak}-game win streak! Keep it up!");
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Notification failed for battle {BattleId}", battle.Id);
+        }
     }
 }

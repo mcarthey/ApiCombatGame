@@ -148,7 +148,8 @@ public class AuthService : IAuthService
             new Claim(ClaimTypes.NameIdentifier, player.Id.ToString()),
             new Claim(ClaimTypes.Name, player.Username),
             new Claim(ClaimTypes.Email, player.Email),
-            new Claim("PlayerId", player.Id.ToString())
+            new Claim("PlayerId", player.Id.ToString()),
+            new Claim("CurrentTier", player.CurrentTier.ToString())
         };
 
         var token = new JwtSecurityToken(

@@ -1,23 +1,23 @@
 @* Sidebar navigation for account pages *@
 <nav class="space-y-1">
     <a asp-page="/Account/Index"
-       class="@(ViewContext.RouteData.Values["page"]?.ToString() == "/Account/Index" ? "bg-gray-100 text-gray-900" : "text-gray-600 hover:bg-gray-50 hover:text-gray-900") group flex items-center px-3 py-2 text-sm font-medium rounded-md">
+       class="@(ViewContext.RouteData.Values["page"]?.ToString() == "/Account/Index" ? "bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white" : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white") group flex items-center px-3 py-2 text-sm font-medium rounded-md">
         Dashboard
     </a>
     <a asp-page="/Account/Subscription"
-       class="@(ViewContext.RouteData.Values["page"]?.ToString() == "/Account/Subscription" ? "bg-gray-100 text-gray-900" : "text-gray-600 hover:bg-gray-50 hover:text-gray-900") group flex items-center px-3 py-2 text-sm font-medium rounded-md">
+       class="@(ViewContext.RouteData.Values["page"]?.ToString() == "/Account/Subscription" ? "bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white" : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white") group flex items-center px-3 py-2 text-sm font-medium rounded-md">
         Subscription
     </a>
     <a asp-page="/Account/Billing"
-       class="@(ViewContext.RouteData.Values["page"]?.ToString() == "/Account/Billing" ? "bg-gray-100 text-gray-900" : "text-gray-600 hover:bg-gray-50 hover:text-gray-900") group flex items-center px-3 py-2 text-sm font-medium rounded-md">
+       class="@(ViewContext.RouteData.Values["page"]?.ToString() == "/Account/Billing" ? "bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white" : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white") group flex items-center px-3 py-2 text-sm font-medium rounded-md">
         Billing
     </a>
     <a asp-page="/Account/ApiKeys"
-       class="@(ViewContext.RouteData.Values["page"]?.ToString() == "/Account/ApiKeys" ? "bg-gray-100 text-gray-900" : "text-gray-600 hover:bg-gray-50 hover:text-gray-900") group flex items-center px-3 py-2 text-sm font-medium rounded-md">
+       class="@(ViewContext.RouteData.Values["page"]?.ToString() == "/Account/ApiKeys" ? "bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white" : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white") group flex items-center px-3 py-2 text-sm font-medium rounded-md">
         API Keys
     </a>
     <a asp-page="/Account/Settings"
-       class="@(ViewContext.RouteData.Values["page"]?.ToString() == "/Account/Settings" ? "bg-gray-100 text-gray-900" : "text-gray-600 hover:bg-gray-50 hover:text-gray-900") group flex items-center px-3 py-2 text-sm font-medium rounded-md">
+       class="@(ViewContext.RouteData.Values["page"]?.ToString() == "/Account/Settings" ? "bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white" : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white") group flex items-center px-3 py-2 text-sm font-medium rounded-md">
         Settings
     </a>
 </nav>

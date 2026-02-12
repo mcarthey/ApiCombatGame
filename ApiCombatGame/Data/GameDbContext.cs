@@ -34,6 +34,17 @@ public class GameDbContext : DbContext
     public DbSet<PlayerAchievement> PlayerAchievements => Set<PlayerAchievement>();
     public DbSet<BattleReplay> BattleReplays => Set<BattleReplay>();
     public DbSet<PlayerTitle> PlayerTitles => Set<PlayerTitle>();
+    public DbSet<GuildInvite> GuildInvites => Set<GuildInvite>();
+    public DbSet<GuildChatMessage> GuildChatMessages => Set<GuildChatMessage>();
+    public DbSet<GuildStrategy> GuildStrategies => Set<GuildStrategy>();
+
+    // Phase 4: Notifications & Logging
+    public DbSet<Notification> Notifications => Set<Notification>();
+    public DbSet<PlayerActivity> PlayerActivities => Set<PlayerActivity>();
+    public DbSet<ApiKeyUsageLog> ApiKeyUsageLogs => Set<ApiKeyUsageLog>();
+    public DbSet<AdminAuditLog> AdminAuditLogs => Set<AdminAuditLog>();
+    public DbSet<AdminAlert> AdminAlerts => Set<AdminAlert>();
+    public DbSet<SubscriptionEvent> SubscriptionEvents => Set<SubscriptionEvent>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -100,6 +111,11 @@ public class GameDbContext : DbContext
                 .WithOne(a => a.Player)
                 .HasForeignKey(a => a.PlayerId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasMany(p => p.Notifications)
+                .WithOne(n => n.Player)
+                .HasForeignKey(n => n.PlayerId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
         // ── Unit ──
@@ -160,12 +176,65 @@ public class GameDbContext : DbContext
                 .WithOne(b => b.Guild)
                 .HasForeignKey(b => b.GuildId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasMany(g => g.ChatMessages)
+                .WithOne(m => m.Guild)
+                .HasForeignKey(m => m.GuildId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasMany(g => g.Strategies)
+                .WithOne(s => s.Guild)
+                .HasForeignKey(s => s.GuildId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // ── GuildChatMessage ──
+        modelBuilder.Entity<GuildChatMessage>(entity =>
+        {
+            entity.HasIndex(m => new { m.GuildId, m.CreatedAt });
+
+            entity.HasOne(m => m.Player)
+                .WithMany()
+                .HasForeignKey(m => m.PlayerId)
+                .OnDelete(DeleteBehavior.SetNull);
+        });
+
+        // ── GuildStrategy ──
+        modelBuilder.Entity<GuildStrategy>(entity =>
+        {
+            entity.HasIndex(s => new { s.GuildId, s.CreatedAt });
+
+            entity.HasOne(s => s.Creator)
+                .WithMany()
+                .HasForeignKey(s => s.CreatorId)
+                .OnDelete(DeleteBehavior.Restrict);
         });
 
         // ── GuildMembership ──
         modelBuilder.Entity<GuildMembership>(entity =>
         {
             entity.HasIndex(m => new { m.GuildId, m.PlayerId }).IsUnique();
+        });
+
+        // ── GuildInvite ──
+        modelBuilder.Entity<GuildInvite>(entity =>
+        {
+            entity.HasIndex(i => new { i.GuildId, i.InvitedPlayerId, i.Status });
+
+            entity.HasOne(i => i.Guild)
+                .WithMany()
+                .HasForeignKey(i => i.GuildId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(i => i.InvitedPlayer)
+                .WithMany()
+                .HasForeignKey(i => i.InvitedPlayerId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(i => i.InvitedBy)
+                .WithMany()
+                .HasForeignKey(i => i.InvitedByPlayerId)
+                .OnDelete(DeleteBehavior.Restrict);
         });
 
         // ── GuildBoss ──
@@ -246,6 +315,73 @@ public class GameDbContext : DbContext
         modelBuilder.Entity<PlayerTitle>(entity =>
         {
             entity.HasIndex(t => t.Name).IsUnique();
+        });
+
+        // ── Notification ──
+        modelBuilder.Entity<Notification>(entity =>
+        {
+            entity.HasIndex(n => new { n.PlayerId, n.IsRead, n.CreatedAt });
+            entity.HasIndex(n => n.ExpiresAt);
+        });
+
+        // ── PlayerActivity ──
+        modelBuilder.Entity<PlayerActivity>(entity =>
+        {
+            entity.HasIndex(a => new { a.PlayerId, a.ActivityDate }).IsUnique();
+            entity.HasIndex(a => a.ActivityDate);
+
+            entity.HasOne(a => a.Player)
+                .WithMany()
+                .HasForeignKey(a => a.PlayerId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // ── ApiKeyUsageLog ──
+        modelBuilder.Entity<ApiKeyUsageLog>(entity =>
+        {
+            entity.HasIndex(l => new { l.ApiKeyId, l.Timestamp });
+            entity.HasIndex(l => new { l.ApiKeyId, l.IpAddress });
+
+            entity.HasOne(l => l.ApiKey)
+                .WithMany()
+                .HasForeignKey(l => l.ApiKeyId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // ── AdminAuditLog ──
+        modelBuilder.Entity<AdminAuditLog>(entity =>
+        {
+            entity.HasIndex(l => l.CreatedAt);
+            entity.HasIndex(l => l.AdminPlayerId);
+
+            entity.HasOne(l => l.AdminPlayer)
+                .WithMany()
+                .HasForeignKey(l => l.AdminPlayerId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(l => l.TargetPlayer)
+                .WithMany()
+                .HasForeignKey(l => l.TargetPlayerId)
+                .OnDelete(DeleteBehavior.SetNull);
+        });
+
+        // ── AdminAlert ──
+        modelBuilder.Entity<AdminAlert>(entity =>
+        {
+            entity.HasIndex(a => new { a.IsAcknowledged, a.CreatedAt });
+            entity.HasIndex(a => a.Severity);
+        });
+
+        // ── SubscriptionEvent ──
+        modelBuilder.Entity<SubscriptionEvent>(entity =>
+        {
+            entity.HasIndex(e => new { e.PlayerId, e.CreatedAt });
+            entity.Property(e => e.AmountUsd).HasColumnType("decimal(10,2)");
+
+            entity.HasOne(e => e.Player)
+                .WithMany()
+                .HasForeignKey(e => e.PlayerId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
     }
 }

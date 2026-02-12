@@ -5,8 +5,8 @@ using ApiCombatGame.Models.Enums;
 namespace ApiCombatGame.Services.Challenges;
 
 /// <summary>
-/// Example challenge: Win N battles using only units of a specific class.
-/// Demonstrates personalized challenge generation based on player data.
+/// Challenge: Win N battles using only units of a specific class.
+/// Uses Battle.Team1ClassesJson / Team2ClassesJson populated during battle processing.
 /// </summary>
 public class TeamCompositionChallenge : BaseChallengeGenerator
 {
@@ -35,12 +35,34 @@ public class TeamCompositionChallenge : BaseChallengeGenerator
 
     public override bool CheckProgress(DailyChallenge challenge, Battle battle)
     {
-        // TODO: Check if the winning team used only the required class
-        // 1. Deserialize RequirementsJson to get required class
-        // 2. Check if player won the battle
-        // 3. Check if all units in the player's team are of the required class
-        // 4. Return true if all conditions met
-        return false; // Stub
+        // Must have won
+        if (battle.WinnerId != challenge.PlayerId)
+            return false;
+
+        // Deserialize requirements to get the required class
+        var requirements = JsonSerializer.Deserialize<JsonElement>(challenge.RequirementsJson);
+        if (!requirements.TryGetProperty("Class", out var classProp))
+            return false;
+
+        var requiredClass = classProp.GetString();
+        if (string.IsNullOrEmpty(requiredClass))
+            return false;
+
+        // Determine which team the player was on and get their unit classes
+        string classesJson;
+        if (battle.Player1Id == challenge.PlayerId)
+            classesJson = battle.Team1ClassesJson;
+        else if (battle.Player2Id == challenge.PlayerId)
+            classesJson = battle.Team2ClassesJson;
+        else
+            return false;
+
+        var classes = JsonSerializer.Deserialize<List<string>>(classesJson) ?? new();
+        if (classes.Count == 0)
+            return false;
+
+        // All units must be the required class
+        return classes.All(c => c.Equals(requiredClass, StringComparison.OrdinalIgnoreCase));
     }
 
     private static UnitClass PickRandomClass()

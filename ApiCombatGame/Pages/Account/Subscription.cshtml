@@ -9,27 +9,27 @@
 
     @if (Model.ShowSuccessMessage)
     {
-        <div class="bg-green-50 border-l-4 border-green-400 p-4 mb-8">
-            <p class="text-sm text-green-700">Subscription successfully updated! Your new benefits are active now.</p>
+        <div class="bg-green-50 dark:bg-green-900/20 border-l-4 border-green-400 p-4 mb-8">
+            <p class="text-sm text-green-700 dark:text-green-400">Subscription successfully updated! Your new benefits are active now.</p>
         </div>
     }
 
     @if (Model.ShowCanceledMessage)
     {
-        <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-8">
-            <p class="text-sm text-yellow-700">Your subscription has been scheduled for cancellation at the end of the billing period.</p>
+        <div class="bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-400 p-4 mb-8">
+            <p class="text-sm text-yellow-700 dark:text-yellow-300">Your subscription has been scheduled for cancellation at the end of the billing period.</p>
         </div>
     }
 
     <!-- Current Plan Status -->
-    <div class="bg-white rounded-lg shadow p-6 mb-8">
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-8">
         <div class="flex items-center justify-between">
             <div>
                 <h2 class="text-lg font-semibold">Current Plan</h2>
-                <p class="text-3xl font-bold text-blue-600 mt-2">@Model.CurrentTier</p>
+                <p class="text-3xl font-bold text-blue-600 dark:text-blue-400 mt-2">@Model.CurrentTier</p>
                 @if (Model.NextBillingDate.HasValue)
                 {
-                    <p class="text-sm text-gray-600 mt-1">
+                    <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
                         Next billing: @Model.NextBillingDate.Value.ToString("MMMM dd, yyyy") ($@Model.MonthlyAmount)
                     </p>
                 }
@@ -38,7 +38,7 @@
             {
                 <div>
                     <button type="button" onclick="if(confirm('Are you sure you want to cancel? Access continues until end of billing period.')){document.getElementById('cancelForm').submit();}"
-                            class="text-sm text-red-600 hover:text-red-700">
+                            class="text-sm text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300">
                         Cancel Subscription
                     </button>
                     <form id="cancelForm" method="post" asp-page-handler="Cancel" class="hidden"></form>
@@ -50,13 +50,13 @@
     <!-- Plan Comparison -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
         <!-- Free Tier -->
-        <div class="@(Model.CurrentTier == "Free" ? "border-2 border-blue-500" : "border") rounded-lg p-6 bg-white">
+        <div class="@(Model.CurrentTier == "Free" ? "border-2 border-blue-500" : "border dark:border-gray-700") rounded-lg p-6 bg-white dark:bg-gray-800">
             @if (Model.CurrentTier == "Free")
             {
-                <div class="bg-blue-100 text-blue-800 text-xs font-semibold px-3 py-1 rounded-full inline-block mb-4">Current Plan</div>
+                <div class="bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-300 text-xs font-semibold px-3 py-1 rounded-full inline-block mb-4">Current Plan</div>
             }
             <h3 class="text-2xl font-bold mb-2">Free</h3>
-            <p class="text-4xl font-bold mb-6">$0<span class="text-lg text-gray-600">/month</span></p>
+            <p class="text-4xl font-bold mb-6">$0<span class="text-lg text-gray-600 dark:text-gray-400">/month</span></p>
             <ul class="space-y-3 mb-6">
                 <li class="flex items-start"><svg class="h-6 w-6 text-green-500 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg><span>10 battles per day</span></li>
                 <li class="flex items-start"><svg class="h-6 w-6 text-green-500 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg><span>Basic units</span></li>
@@ -65,28 +65,28 @@
             </ul>
             @if (Model.CurrentTier == "Free")
             {
-                <button disabled class="w-full bg-blue-100 text-blue-600 py-2 px-4 rounded cursor-not-allowed">Current Plan</button>
+                <button disabled class="w-full bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-300 py-2 px-4 rounded cursor-not-allowed">Current Plan</button>
             }
             else
             {
                 <form method="post" asp-page-handler="Downgrade">
-                    <button type="submit" class="w-full bg-gray-200 text-gray-700 py-2 px-4 rounded hover:bg-gray-300">Downgrade to Free</button>
+                    <button type="submit" class="w-full bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 py-2 px-4 rounded hover:bg-gray-300 dark:hover:bg-gray-600">Downgrade to Free</button>
                 </form>
             }
         </div>
 
         <!-- Premium Tier -->
-        <div class="@(Model.CurrentTier == "Premium" ? "border-2 border-blue-500" : "border") rounded-lg p-6 bg-white relative">
+        <div class="@(Model.CurrentTier == "Premium" ? "border-2 border-blue-500" : "border dark:border-gray-700") rounded-lg p-6 bg-white dark:bg-gray-800 relative">
             @if (Model.CurrentTier != "Premium")
             {
                 <div class="absolute top-0 right-0 bg-purple-500 text-white px-3 py-1 text-xs font-semibold rounded-bl-lg">POPULAR</div>
             }
             @if (Model.CurrentTier == "Premium")
             {
-                <div class="bg-blue-100 text-blue-800 text-xs font-semibold px-3 py-1 rounded-full inline-block mb-4">Current Plan</div>
+                <div class="bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-300 text-xs font-semibold px-3 py-1 rounded-full inline-block mb-4">Current Plan</div>
             }
             <h3 class="text-2xl font-bold mb-2">Premium</h3>
-            <p class="text-4xl font-bold mb-6">$5<span class="text-lg text-gray-600">/month</span></p>
+            <p class="text-4xl font-bold mb-6">$5<span class="text-lg text-gray-600 dark:text-gray-400">/month</span></p>
             <ul class="space-y-3 mb-6">
                 <li class="flex items-start"><svg class="h-6 w-6 text-green-500 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg><span class="font-semibold">Unlimited battles</span></li>
                 <li class="flex items-start"><svg class="h-6 w-6 text-green-500 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg><span>50+ units (all rarities)</span></li>
@@ -96,7 +96,7 @@
             </ul>
             @if (Model.CurrentTier == "Premium")
             {
-                <button disabled class="w-full bg-blue-100 text-blue-600 py-2 px-4 rounded cursor-not-allowed">Current Plan</button>
+                <button disabled class="w-full bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-300 py-2 px-4 rounded cursor-not-allowed">Current Plan</button>
             }
             else
             {
@@ -108,13 +108,13 @@
         </div>
 
         <!-- Premium Plus Tier -->
-        <div class="@(Model.CurrentTier == "PremiumPlus" ? "border-2 border-blue-500" : "border") rounded-lg p-6 bg-white">
+        <div class="@(Model.CurrentTier == "PremiumPlus" ? "border-2 border-blue-500" : "border dark:border-gray-700") rounded-lg p-6 bg-white dark:bg-gray-800">
             @if (Model.CurrentTier == "PremiumPlus")
             {
-                <div class="bg-blue-100 text-blue-800 text-xs font-semibold px-3 py-1 rounded-full inline-block mb-4">Current Plan</div>
+                <div class="bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-300 text-xs font-semibold px-3 py-1 rounded-full inline-block mb-4">Current Plan</div>
             }
             <h3 class="text-2xl font-bold mb-2">Premium Plus</h3>
-            <p class="text-4xl font-bold mb-6">$10<span class="text-lg text-gray-600">/month</span></p>
+            <p class="text-4xl font-bold mb-6">$10<span class="text-lg text-gray-600 dark:text-gray-400">/month</span></p>
             <ul class="space-y-3 mb-6">
                 <li class="flex items-start"><svg class="h-6 w-6 text-green-500 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg><span class="font-semibold">Everything in Premium</span></li>
                 <li class="flex items-start"><svg class="h-6 w-6 text-green-500 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg><span>Scripting engine (Lua)</span></li>
@@ -124,31 +124,31 @@
             </ul>
             @if (Model.CurrentTier == "PremiumPlus")
             {
-                <button disabled class="w-full bg-blue-100 text-blue-600 py-2 px-4 rounded cursor-not-allowed">Current Plan</button>
+                <button disabled class="w-full bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-300 py-2 px-4 rounded cursor-not-allowed">Current Plan</button>
             }
             else
             {
                 <form method="post" asp-page-handler="Upgrade">
                     <input type="hidden" name="tier" value="premium_plus" />
-                    <button type="submit" class="w-full bg-gray-900 text-white py-2 px-4 rounded hover:bg-gray-800 font-semibold">Upgrade to Premium Plus</button>
+                    <button type="submit" class="w-full bg-gray-900 dark:bg-gray-600 text-white py-2 px-4 rounded hover:bg-gray-800 dark:hover:bg-gray-500 font-semibold">Upgrade to Premium Plus</button>
                 </form>
             }
         </div>
     </div>
 
     <!-- Trust Signals -->
-    <div class="mt-8 bg-gray-50 rounded-lg p-6">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-center text-sm text-gray-600">
+    <div class="mt-8 bg-gray-50 dark:bg-gray-800 rounded-lg p-6">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-center text-sm text-gray-600 dark:text-gray-400">
             <div>
-                <p class="font-semibold">Secure Payments</p>
+                <p class="font-semibold text-gray-900 dark:text-white">Secure Payments</p>
                 <p>Powered by Stripe</p>
             </div>
             <div>
-                <p class="font-semibold">Cancel Anytime</p>
+                <p class="font-semibold text-gray-900 dark:text-white">Cancel Anytime</p>
                 <p>No questions asked</p>
             </div>
             <div>
-                <p class="font-semibold">Money-Back Guarantee</p>
+                <p class="font-semibold text-gray-900 dark:text-white">Money-Back Guarantee</p>
                 <p>First 30 days</p>
             </div>
         </div>

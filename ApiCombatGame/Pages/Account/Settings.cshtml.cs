@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
 using ApiCombatGame.Data;
+using ApiCombatGame.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -12,11 +13,13 @@ namespace ApiCombatGame.Pages.Account;
 public class SettingsModel : PageModel
 {
     private readonly GameDbContext _context;
+    private readonly INotificationService _notifications;
     private readonly ILogger<SettingsModel> _logger;
 
-    public SettingsModel(GameDbContext context, ILogger<SettingsModel> logger)
+    public SettingsModel(GameDbContext context, INotificationService notifications, ILogger<SettingsModel> logger)
     {
         _context = context;
+        _notifications = notifications;
         _logger = logger;
     }
 
@@ -28,6 +31,7 @@ public class SettingsModel : PageModel
     public string CurrentUsername { get; set; } = string.Empty;
     public string CurrentEmail { get; set; } = string.Empty;
     public DateTime MemberSince { get; set; }
+    public NotificationPreferences NotifPrefs { get; set; } = new();
 
     public async Task OnGetAsync()
     {
@@ -39,6 +43,7 @@ public class SettingsModel : PageModel
         CurrentEmail = player.Email;
         MemberSince = player.CreatedAt;
         Input.Email = player.Email;
+        NotifPrefs = await _notifications.GetPreferencesAsync(playerId);
     }
 
     public async Task<IActionResult> OnPostUpdateEmailAsync()
@@ -106,13 +111,31 @@ public class SettingsModel : PageModel
         return Page();
     }
 
-    private Task LoadPlayerInfo(Models.Domain.Player player)
+    public async Task<IActionResult> OnPostUpdateNotificationPreferencesAsync(bool battle, bool guild, bool progression, bool marketplace)
+    {
+        var playerId = GetPlayerId();
+        var prefs = new NotificationPreferences
+        {
+            Battle = battle,
+            Guild = guild,
+            Progression = progression,
+            Marketplace = marketplace
+        };
+        await _notifications.UpdatePreferencesAsync(playerId, prefs);
+
+        SuccessMessage = "Notification preferences updated.";
+        var player = await _context.Players.FindAsync(playerId);
+        if (player != null) await LoadPlayerInfo(player);
+        return Page();
+    }
+
+    private async Task LoadPlayerInfo(Models.Domain.Player player)
     {
         CurrentUsername = player.Username;
         CurrentEmail = player.Email;
         MemberSince = player.CreatedAt;
         Input.Email = player.Email;
-        return Task.CompletedTask;
+        NotifPrefs = await _notifications.GetPreferencesAsync(player.Id);
     }
 
     private Guid GetPlayerId()

@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Security.Claims;
 
 namespace ApiCombatGame.Middleware;
 
@@ -7,8 +8,15 @@ public class RateLimitingMiddleware
     private readonly RequestDelegate _next;
     private readonly ILogger<RateLimitingMiddleware> _logger;
     private static readonly ConcurrentDictionary<string, ClientRateInfo> Clients = new();
-    private const int MaxRequestsPerMinute = 60;
     private static readonly TimeSpan Window = TimeSpan.FromMinutes(1);
+
+    /// <summary>Set to false in integration tests to disable rate limiting.</summary>
+    public static bool Enabled { get; set; } = true;
+
+    // Tier-based rate limits per minute
+    private const int FreeLimit = 60;
+    private const int PremiumLimit = 120;
+    private const int PremiumPlusLimit = 300;
 
     public RateLimitingMiddleware(RequestDelegate next, ILogger<RateLimitingMiddleware> logger)
     {
@@ -18,9 +26,26 @@ public class RateLimitingMiddleware
 
     public async Task InvokeAsync(HttpContext context)
     {
+        if (!Enabled)
+        {
+            await _next(context);
+            return;
+        }
+
         var clientIp = context.Connection.RemoteIpAddress?.ToString() ?? "unknown";
 
-        var clientInfo = Clients.GetOrAdd(clientIp, _ => new ClientRateInfo());
+        // Determine rate limit based on subscription tier from JWT claims
+        var tierClaim = context.User?.FindFirst("CurrentTier")?.Value;
+        int maxRequests = tierClaim switch
+        {
+            "PremiumPlus" => PremiumPlusLimit,
+            "Premium" => PremiumLimit,
+            _ => FreeLimit
+        };
+
+        // Use IP + tier as key so upgraded users get their own bucket
+        var clientKey = $"{clientIp}:{tierClaim ?? "Free"}";
+        var clientInfo = Clients.GetOrAdd(clientKey, _ => new ClientRateInfo());
 
         lock (clientInfo)
         {
@@ -35,20 +60,26 @@ public class RateLimitingMiddleware
 
             clientInfo.RequestCount++;
 
-            var remaining = Math.Max(0, MaxRequestsPerMinute - clientInfo.RequestCount);
+            var remaining = Math.Max(0, maxRequests - clientInfo.RequestCount);
             var resetTime = clientInfo.WindowStart.Add(Window);
 
-            context.Response.Headers["X-RateLimit-Limit"] = MaxRequestsPerMinute.ToString();
+            context.Response.Headers["X-RateLimit-Limit"] = maxRequests.ToString();
             context.Response.Headers["X-RateLimit-Remaining"] = remaining.ToString();
             context.Response.Headers["X-RateLimit-Reset"] = new DateTimeOffset(resetTime).ToUnixTimeSeconds().ToString();
 
-            if (clientInfo.RequestCount > MaxRequestsPerMinute)
+            if (clientInfo.RequestCount > maxRequests)
             {
-                _logger.LogWarning("Rate limit exceeded for IP: {ClientIp}", clientIp);
+                _logger.LogWarning("Rate limit exceeded for {ClientKey} ({Limit}/min)", clientKey, maxRequests);
                 context.Response.StatusCode = StatusCodes.Status429TooManyRequests;
                 context.Response.Headers["Retry-After"] = ((int)(resetTime - now).TotalSeconds).ToString();
                 context.Response.ContentType = "application/json";
-                var body = System.Text.Json.JsonSerializer.Serialize(new { error = "Rate limit exceeded. Try again later." });
+                var body = System.Text.Json.JsonSerializer.Serialize(new
+                {
+                    error = "Rate limit exceeded. Try again later.",
+                    limit = maxRequests,
+                    tier = tierClaim ?? "Free",
+                    retryAfterSeconds = (int)(resetTime - now).TotalSeconds
+                });
                 context.Response.WriteAsync(body).Wait();
                 return;
             }
@@ -57,7 +88,7 @@ public class RateLimitingMiddleware
         await _next(context);
 
         // Periodic cleanup of stale entries
-        if (Random.Shared.NextDouble() < 0.01) // 1% chance per request
+        if (Random.Shared.NextDouble() < 0.01)
         {
             CleanupStaleEntries();
         }

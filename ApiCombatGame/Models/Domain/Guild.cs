@@ -28,10 +28,17 @@ public class Guild
     public int ExperiencePoints { get; set; } = 0;
     public int MaxMembers { get; set; } = 20;
 
+    // Treasury & Upgrades
+    public int TreasuryBalance { get; set; } = 0;
+    public int GoldBonusPercent { get; set; } = 0;
+    public int MaxRaidAttempts { get; set; } = 3;
+
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
     // Navigation
     public List<GuildMembership> Members { get; set; } = new();
     public List<GuildBoss> Bosses { get; set; } = new();
+    public List<GuildChatMessage> ChatMessages { get; set; } = new();
+    public List<GuildStrategy> Strategies { get; set; } = new();
 }

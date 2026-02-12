@@ -4,8 +4,8 @@ using ApiCombatGame.Models.Domain;
 namespace ApiCombatGame.Services.Challenges;
 
 /// <summary>
-/// Example challenge: Win N battles in a row without losing.
-/// Demonstrates a streak-based challenge that resets on loss.
+/// Challenge: Win N battles in a row without losing.
+/// Streak-based challenge that resets progress on loss.
 /// </summary>
 public class WinStreakChallenge : BaseChallengeGenerator
 {
@@ -32,11 +32,14 @@ public class WinStreakChallenge : BaseChallengeGenerator
 
     public override bool CheckProgress(DailyChallenge challenge, Battle battle)
     {
-        // TODO: Track win streak, reset progress on loss
-        // 1. Check if player won the battle
-        // 2. If won, increment progress
-        // 3. If lost, reset progress to 0
-        // 4. Return true if won (progress was updated)
-        return false; // Stub
+        if (battle.WinnerId == challenge.PlayerId)
+        {
+            // Won — progress incremented by ChallengeService caller
+            return true;
+        }
+
+        // Lost — reset streak progress to 0
+        challenge.Progress = 0;
+        return false;
     }
 }
