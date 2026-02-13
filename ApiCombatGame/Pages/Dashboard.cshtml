@@ -43,7 +43,7 @@
     @* SECTION 1: Welcome Banner + Login Streak                      *@
     @* ============================================================ *@
     <div class="p-6 mb-8"
-         style="background: linear-gradient(135deg, var(--md-sys-color-primary), var(--md-sys-color-tertiary)); border-radius: var(--md-sys-shape-corner-large); box-shadow: var(--md-sys-elevation-2); color: var(--md-sys-color-on-primary);">
+         style="background: linear-gradient(135deg, #1e40af, #6d28d9); border-radius: var(--md-sys-shape-corner-large); box-shadow: var(--md-sys-elevation-2); color: #ffffff;">
         <div class="flex flex-col md:flex-row md:items-center md:justify-between">
             <div>
                 <h1 class="text-2xl md:text-3xl font-bold">Welcome back, @Model.Dashboard.Username!</h1>
@@ -97,22 +97,22 @@
     @* SECTION 2: Player Status Cards                                *@
     @* ============================================================ *@
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-        <div class="md3-card stat-card">
+        <div class="md3-card stat-card stat-card-xp">
             <div class="text-sm" style="color: var(--md-sys-color-on-surface-variant);">Level @Model.Dashboard.Level</div>
             <div class="md3-progress" style="margin-top: 0.5rem;"><div class="md3-progress-bar" style="width: @(Model.Dashboard.XpProgressPercent)%;"></div></div>
             <div class="text-xs mt-1" style="color: var(--md-sys-color-outline);">
                 @Model.Dashboard.ExperiencePoints / @Model.Dashboard.XpToNextLevel XP
             </div>
         </div>
-        <div class="md3-card stat-card">
+        <div class="md3-card stat-card stat-card-currency">
             <div class="text-sm" style="color: var(--md-sys-color-on-surface-variant);">Currency</div>
             <div class="text-2xl font-bold" style="color: var(--md-sys-color-tertiary);">@Model.Dashboard.Currency.ToString("N0")g</div>
         </div>
-        <div class="md3-card stat-card">
+        <div class="md3-card stat-card stat-card-rating">
             <div class="text-sm" style="color: var(--md-sys-color-on-surface-variant);">Rating</div>
             <div class="text-2xl font-bold" style="color: var(--md-sys-color-on-surface);">@Model.Dashboard.Rating</div>
         </div>
-        <div class="md3-card stat-card">
+        <div class="md3-card stat-card stat-card-achievement">
             <div class="text-sm" style="color: var(--md-sys-color-on-surface-variant);">Achievement Points</div>
             <div class="text-2xl font-bold" style="color: var(--md-sys-color-secondary);">@Model.Dashboard.AchievementPoints</div>
             <div class="text-xs mt-1" style="color: var(--md-sys-color-outline);">

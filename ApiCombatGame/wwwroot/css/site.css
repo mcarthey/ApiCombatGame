@@ -506,6 +506,33 @@ main {
     border-bottom-color: var(--md-sys-color-outline-variant);
 }
 
+/* ─── Dark mode card visibility ─── */
+.dark .md3-card,
+.dark .md3-card-elevated {
+    border: 1px solid var(--md-sys-color-outline-variant);
+}
+
+/* ─── Tonal stat cards (M3E "Color as Signal") ─── */
+.stat-card-xp {
+    border-left: 3px solid var(--md-sys-color-primary);
+    background: color-mix(in srgb, var(--md-sys-color-primary) 8%, var(--md-sys-color-surface-container-low));
+}
+
+.stat-card-currency {
+    border-left: 3px solid var(--md-sys-color-tertiary);
+    background: color-mix(in srgb, var(--md-sys-color-tertiary) 8%, var(--md-sys-color-surface-container-low));
+}
+
+.stat-card-rating {
+    border-left: 3px solid var(--md-sys-color-secondary);
+    background: color-mix(in srgb, var(--md-sys-color-secondary) 8%, var(--md-sys-color-surface-container-low));
+}
+
+.stat-card-achievement {
+    border-left: 3px solid #22c55e;
+    background: color-mix(in srgb, #22c55e 8%, var(--md-sys-color-surface-container-low));
+}
+
 /* ─── Scrollbar ─── */
 html {
     scroll-behavior: smooth;
