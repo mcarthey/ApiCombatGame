@@ -128,7 +128,7 @@
         <div class="px-6 py-4 flex items-center justify-between"
              style="border-bottom: 1px solid var(--md-sys-color-outline-variant);">
             <h2 class="text-lg font-semibold" style="color: var(--md-sys-color-on-surface);">Achievements</h2>
-            <a href="/swagger/index.html#/Player/get_api_v1_player_achievements"
+            <a href="/api-docs/v1#player"
                class="text-sm" style="color: var(--md-sys-color-primary);">
                 API: GET /api/v1/player/achievements &rarr;
             </a>
@@ -192,7 +192,7 @@
                     @Model.Dashboard.Heroes.Count of @Model.Dashboard.TotalUnitsAvailable
                 </span>
             </h2>
-            <a href="/swagger/index.html#/Player/get_api_v1_player_roster"
+            <a href="/api-docs/v1#player"
                class="text-sm" style="color: var(--md-sys-color-primary);">
                 API: GET /api/v1/player/roster &rarr;
             </a>
@@ -243,7 +243,7 @@
                     <span class="text-sm">
                         <strong>@Model.Dashboard.AffordableUnlockCount hero(es)</strong> you can afford to unlock right now!
                     </span>
-                    <a href="/swagger/index.html#/Player/post_api_v1_player_roster_unlock"
+                    <a href="/api-docs/v1#player"
                        class="ml-2 text-sm font-medium" style="color: var(--md-sys-color-primary);">
                         Unlock via API &rarr;
                     </a>
@@ -259,7 +259,7 @@
         <div class="px-6 py-4 flex items-center justify-between"
              style="border-bottom: 1px solid var(--md-sys-color-outline-variant);">
             <h2 class="text-lg font-semibold" style="color: var(--md-sys-color-on-surface);">Daily Challenges</h2>
-            <a href="/swagger/index.html#/Challenges/get_api_v1_challenges_daily"
+            <a href="/api-docs/v1#challenges"
                class="text-sm" style="color: var(--md-sys-color-primary);">
                 API: GET /api/v1/challenges/daily &rarr;
             </a>
@@ -301,7 +301,7 @@
                         @if (challenge.IsCompleted)
                         {
                             <div class="mt-2">
-                                <a href="/swagger/index.html#/Challenges/post_api_v1_challenges_claim"
+                                <a href="/api-docs/v1#challenges"
                                    class="text-xs font-medium" style="color: #22c55e;">
                                     Claim reward via API: POST /api/v1/challenges/claim &rarr;
                                 </a>
@@ -365,7 +365,7 @@
                         </div>
                         <div class="md3-progress"><div class="md3-progress-bar" style="width: @(boss.HpPercent)%; background: var(--md-sys-color-error);"></div></div>
                         <div class="mt-2 text-right">
-                            <a href="/swagger/index.html#/GuildBoss/post_api_v1_guild_boss_attempt"
+                            <a href="/api-docs/v1#guild-boss"
                                class="text-xs font-medium" style="color: var(--md-sys-color-error);">
                                 Attack via API: POST /api/v1/guild/boss/attempt &rarr;
                             </a>
@@ -389,7 +389,7 @@
                     }
                     else
                     {
-                        <a href="/swagger/index.html#/Guild/post_api_v1_guild_create"
+                        <a href="/api-docs/v1#guild"
                            class="text-sm" style="color: var(--md-sys-color-primary);">
                             API: POST /api/v1/guild/create &rarr;
                         </a>
@@ -442,7 +442,7 @@
                         Upgrade for unlimited battles
                     </a>
                 }
-                <a class="md3-btn-tonal" href="/swagger/index.html#/Battle/post_api_v1_battle_queue" style="text-decoration: none;">
+                <a class="md3-btn-tonal" href="/api-docs/v1#battle" style="text-decoration: none;">
                     <span class="material-symbols-outlined">swords</span>
                     Queue Battle
                 </a>

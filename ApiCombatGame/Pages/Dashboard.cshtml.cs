@@ -343,7 +343,7 @@ public class DashboardPageModel : PageModel
             {
                 Title = "Fight Your First Battle",
                 Description = "Earn a +100g first battle bonus today!",
-                LinkUrl = "/swagger/index.html#/Battle/post_api_v1_battle_queue",
+                LinkUrl = "/api-docs/v1#battle",
                 LinkText = "API: POST /api/v1/battle/queue",
                 IconType = "sword"
             });
@@ -355,7 +355,7 @@ public class DashboardPageModel : PageModel
             {
                 Title = "Claim Challenge Rewards",
                 Description = $"{challenges.Count(c => c.IsCompleted)} completed challenge(s) with rewards waiting!",
-                LinkUrl = "/swagger/index.html#/Challenges/post_api_v1_challenges_claim",
+                LinkUrl = "/api-docs/v1#challenges",
                 LinkText = "API: POST /api/v1/challenges/claim",
                 IconType = "trophy"
             });
@@ -367,7 +367,7 @@ public class DashboardPageModel : PageModel
             {
                 Title = "Unlock a New Hero",
                 Description = $"{affordableUnlocks} hero(es) you can afford right now!",
-                LinkUrl = "/swagger/index.html#/Player/post_api_v1_player_roster_unlock",
+                LinkUrl = "/api-docs/v1#player",
                 LinkText = "API: POST /api/v1/player/roster/unlock",
                 IconType = "star"
             });
@@ -379,7 +379,7 @@ public class DashboardPageModel : PageModel
             {
                 Title = "Attack the Guild Boss",
                 Description = $"{boss.Name} has {boss.HpPercent}% HP remaining!",
-                LinkUrl = "/swagger/index.html#/GuildBoss/post_api_v1_guild_boss_attempt",
+                LinkUrl = "/api-docs/v1#guild-boss",
                 LinkText = "API: POST /api/v1/guild/boss/attempt",
                 IconType = "guild"
             });
@@ -391,7 +391,7 @@ public class DashboardPageModel : PageModel
             {
                 Title = "Create or Join a Guild",
                 Description = "Unlock boss battles, shared treasury, and team strategies!",
-                LinkUrl = "/swagger/index.html#/Guild/post_api_v1_guild_create",
+                LinkUrl = "/api-docs/v1#guild",
                 LinkText = "API: POST /api/v1/guild/create",
                 IconType = "guild"
             });
@@ -415,7 +415,7 @@ public class DashboardPageModel : PageModel
             {
                 Title = "Check Notifications",
                 Description = $"{unreadNotifications} unread notification(s)",
-                LinkUrl = "/swagger/index.html#/Player/get_api_v1_player_notifications",
+                LinkUrl = "/api-docs/v1#player",
                 LinkText = "API: GET /api/v1/player/notifications",
                 IconType = "shield"
             });
