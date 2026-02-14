@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using ApiCombatGame.Filters;
 using ApiCombatGame.Filters.Attributes;
+using ApiCombatGame.Models.DTOs.Common;
 using ApiCombatGame.Models.DTOs.Guild;
 using ApiCombatGame.Models.Enums;
 using ApiCombatGame.Services.Interfaces;
@@ -75,6 +76,14 @@ public class GuildController : ControllerBase
                 MaxMembers = guild.MaxMembers,
                 CreatedAt = guild.CreatedAt
             };
+            response.Links = new Dictionary<string, ApiLink>
+            {
+                ["self"] = Links.Get($"/api/v1/guild/{response.GuildId}"),
+                ["members"] = Links.Get($"/api/v1/guild/{response.GuildId}/members"),
+                ["boss"] = Links.Get("/api/v1/guild/boss/current"),
+                ["treasury"] = Links.Get($"/api/v1/guild/{response.GuildId}/treasury"),
+                ["strategies"] = Links.Get($"/api/v1/guild/{response.GuildId}/strategies")
+            };
 
             return Created($"/api/v1/guild/{guild.Id}", response);
         }
@@ -132,7 +141,7 @@ public class GuildController : ControllerBase
         var guild = await _guildService.GetGuildAsync(guildId);
         if (guild == null) return NotFound(new { error = "Guild not found." });
 
-        return Ok(new GuildResponse
+        var response = new GuildResponse
         {
             GuildId = guild.Id,
             Name = guild.Name,
@@ -143,7 +152,16 @@ public class GuildController : ControllerBase
             MemberCount = guild.Members.Count,
             MaxMembers = guild.MaxMembers,
             CreatedAt = guild.CreatedAt
-        });
+        };
+        response.Links = new Dictionary<string, ApiLink>
+        {
+            ["self"] = Links.Get($"/api/v1/guild/{response.GuildId}"),
+            ["members"] = Links.Get($"/api/v1/guild/{response.GuildId}/members"),
+            ["boss"] = Links.Get("/api/v1/guild/boss/current"),
+            ["treasury"] = Links.Get($"/api/v1/guild/{response.GuildId}/treasury"),
+            ["strategies"] = Links.Get($"/api/v1/guild/{response.GuildId}/strategies")
+        };
+        return Ok(response);
     }
 
     /// <summary>Get your current guild.</summary>
@@ -163,7 +181,7 @@ public class GuildController : ControllerBase
         var guild = await _guildService.GetPlayerGuildAsync(playerId);
         if (guild == null) return NotFound(new { error = "You are not in a guild." });
 
-        return Ok(new GuildResponse
+        var response = new GuildResponse
         {
             GuildId = guild.Id,
             Name = guild.Name,
@@ -174,7 +192,16 @@ public class GuildController : ControllerBase
             MemberCount = guild.Members.Count,
             MaxMembers = guild.MaxMembers,
             CreatedAt = guild.CreatedAt
-        });
+        };
+        response.Links = new Dictionary<string, ApiLink>
+        {
+            ["self"] = Links.Get($"/api/v1/guild/{response.GuildId}"),
+            ["members"] = Links.Get($"/api/v1/guild/{response.GuildId}/members"),
+            ["boss"] = Links.Get("/api/v1/guild/boss/current"),
+            ["treasury"] = Links.Get($"/api/v1/guild/{response.GuildId}/treasury"),
+            ["strategies"] = Links.Get($"/api/v1/guild/{response.GuildId}/strategies")
+        };
+        return Ok(response);
     }
 
     /// <summary>List guild members.</summary>

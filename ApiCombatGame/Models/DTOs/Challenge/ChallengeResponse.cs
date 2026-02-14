@@ -1,8 +1,16 @@
+using System.Text.Json.Serialization;
+using ApiCombatGame.Models.DTOs.Common;
+
 namespace ApiCombatGame.Models.DTOs.Challenge;
 
 /// <summary>A daily challenge objective with progress tracking and rewards.</summary>
 public class ChallengeResponse
 {
+    /// <summary>Hypermedia links to related resources (claim reward when completed).</summary>
+    [JsonPropertyName("_links")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public Dictionary<string, ApiLink>? Links { get; set; }
+
     /// <summary>Unique challenge identifier.</summary>
     public Guid ChallengeId { get; set; }
 
@@ -11,6 +19,12 @@ public class ChallengeResponse
 
     /// <summary>What you need to do to complete this challenge.</summary>
     public string Description { get; set; } = string.Empty;
+
+    /// <summary>Difficulty tier: "easy", "medium", or "hard". Harder = better rewards.</summary>
+    public string Difficulty { get; set; } = "medium";
+
+    /// <summary>Battle pass XP awarded on completion.</summary>
+    public int BattlePassXp { get; set; }
 
     /// <summary>Current progress toward completion.</summary>
     public int Progress { get; set; }

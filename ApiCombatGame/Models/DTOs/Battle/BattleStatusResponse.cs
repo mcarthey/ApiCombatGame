@@ -1,8 +1,16 @@
+using System.Text.Json.Serialization;
+using ApiCombatGame.Models.DTOs.Common;
+
 namespace ApiCombatGame.Models.DTOs.Battle;
 
 /// <summary>Real-time status of a battle from queue to completion.</summary>
 public class BattleStatusResponse
 {
+    /// <summary>Hypermedia links to related resources.</summary>
+    [JsonPropertyName("_links")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public Dictionary<string, ApiLink>? Links { get; set; }
+
     /// <summary>Unique battle identifier. Use this to poll for updates and retrieve results.</summary>
     public Guid BattleId { get; set; }
 

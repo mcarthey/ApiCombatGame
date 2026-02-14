@@ -2,11 +2,18 @@
 @model ApiCombatGame.Pages.Auth.LoginModel
 @{
     ViewData["Title"] = "Login";
+    ViewData["Description"] = "Log in to API Combat Game to manage your roster, queue battles, and track your Arena Power Index ranking.";
 }
 
-<div class="max-w-md mx-auto px-4">
-    <div class="md3-card p-8">
-        <h1 class="text-2xl font-bold text-center mb-6" style="color: var(--md-sys-color-on-surface);">Login</h1>
+<div class="auth-backdrop">
+    <div class="auth-card">
+        <div class="text-center mb-8">
+            <div class="w-12 h-12 rounded-2xl flex items-center justify-center mx-auto mb-4" style="background: color-mix(in srgb, var(--md-sys-color-primary) 12%, transparent);">
+                <span class="material-symbols-outlined" style="color: var(--md-sys-color-primary); font-size: 24px;">shield_person</span>
+            </div>
+            <h1 class="text-2xl font-bold" style="color: var(--md-sys-color-on-surface); letter-spacing: -0.02em;">Welcome back</h1>
+            <p class="text-sm mt-1" style="color: var(--md-sys-color-on-surface-variant);">Sign in to your account</p>
+        </div>
 
         @if (!string.IsNullOrEmpty(Model.ErrorMessage))
         {
@@ -23,7 +30,7 @@
         }
 
         <form method="post">
-            <div class="mb-4">
+            <div class="mb-5">
                 <div class="md3-input-wrapper">
                     <label for="Input_Username">Username</label>
                     <input class="md3-input" id="Input_Username" name="Input.Username" type="text" required value="@Model.Input?.Username" placeholder="Enter your username" />
@@ -39,7 +46,7 @@
                 <span asp-validation-for="Input.Password" class="field-validation-error"></span>
             </div>
 
-            <div class="mb-4">
+            <div class="mb-6">
                 <label class="flex items-center gap-3">
                     <input type="checkbox" class="md3-checkbox" name="Input.RememberMe" value="true"
                                  @(Model.Input?.RememberMe == true ? "checked" : "") />
@@ -47,14 +54,14 @@
                 </label>
             </div>
 
-            <button type="submit" class="md3-btn-filled w-full">
-                Login
+            <button type="submit" class="btn-glow w-full">
+                Sign In
             </button>
         </form>
 
         <p class="text-center text-sm mt-6" style="color: var(--md-sys-color-on-surface-variant);">
             Don't have an account?
-            <a asp-page="/Auth/Register" class="font-medium" style="color: var(--md-sys-color-primary);">Sign up</a>
+            <a asp-page="/Auth/Register" class="font-semibold link-underline" style="color: var(--md-sys-color-primary);">Create one</a>
         </p>
     </div>
 </div>

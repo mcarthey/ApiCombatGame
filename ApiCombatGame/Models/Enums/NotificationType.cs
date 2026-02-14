@@ -28,6 +28,18 @@ public enum NotificationType
     StrategyRated,
     StrategyDownloadMilestone,
 
+    // Seasons
+    SeasonReward,
+    SeasonRankChange,
+
+    // Competitive
+    RevengeOpportunity,
+    RivalDefeatedYou,
+    TournamentResult,
+    GuildWarResult,
+    RankUp,
+    RankDown,
+
     // System
     NewModifierActive,
     AdminAnnouncement,

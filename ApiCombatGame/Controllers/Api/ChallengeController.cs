@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using ApiCombatGame.Filters.Attributes;
 using ApiCombatGame.Models.DTOs.Challenge;
+using ApiCombatGame.Models.DTOs.Common;
 using ApiCombatGame.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -42,17 +43,29 @@ public class ChallengeController : ControllerBase
         var playerId = GetPlayerId();
         var challenges = await _challengeService.GetActiveChallenges(playerId);
 
-        return Ok(challenges.Select(c => new ChallengeResponse
+        return Ok(challenges.Select(c =>
         {
-            ChallengeId = c.Id,
-            Name = c.Name,
-            Description = c.Description,
-            Progress = c.Progress,
-            RequiredProgress = c.RequiredProgress,
-            IsCompleted = c.IsCompleted,
-            RewardCurrency = c.RewardCurrency,
-            RewardExperience = c.RewardExperience,
-            ExpiresAt = c.ExpiresAt
+            var r = new ChallengeResponse
+            {
+                ChallengeId = c.Id,
+                Name = c.Name,
+                Description = c.Description,
+                Difficulty = c.Difficulty,
+                BattlePassXp = c.Difficulty switch { "easy" => 50, "hard" => 200, _ => 100 },
+                Progress = c.Progress,
+                RequiredProgress = c.RequiredProgress,
+                IsCompleted = c.IsCompleted,
+                RewardCurrency = c.RewardCurrency,
+                RewardExperience = c.RewardExperience,
+                ExpiresAt = c.ExpiresAt
+            };
+            r.Links = new Dictionary<string, ApiLink>
+            {
+                ["self"] = Links.Get("/api/v1/challenges/daily")
+            };
+            if (c.IsCompleted)
+                r.Links["claim"] = Links.Post("/api/v1/challenges/claim", "Claim this challenge reward");
+            return r;
         }));
     }
 
@@ -79,6 +92,40 @@ public class ChallengeController : ControllerBase
             var playerId = GetPlayerId();
             await _challengeService.ClaimReward(request.ChallengeId, playerId);
             return Ok(new { message = "Reward claimed successfully" });
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new { error = ex.Message });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { error = ex.Message });
+        }
+    }
+
+    /// <summary>Refresh your daily challenges (Premium only).</summary>
+    /// <remarks>
+    /// Replaces all uncompleted challenges with a fresh set. Premium and Premium Plus
+    /// subscribers can refresh once per day. Already-completed challenges are kept.
+    ///
+    /// Each refresh generates one easy, one medium, and one hard challenge — giving you
+    /// a better shot at rewards that match your skill level.
+    /// </remarks>
+    /// <response code="200">Challenges refreshed. Fetch `/daily` to see new ones.</response>
+    /// <response code="400">Not a Premium subscriber or no challenges to refresh.</response>
+    [ApiDifficulty("beginner")]
+    [ApiGameTip("Use refresh strategically — if you get a hard challenge you can't complete, swap it for a new set.")]
+    [ApiPrerequisite("Premium or Premium Plus subscription")]
+    [HttpPost("refresh")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult> RefreshChallenges()
+    {
+        try
+        {
+            var playerId = GetPlayerId();
+            await _challengeService.RefreshChallengesAsync(playerId);
+            return Ok(new { message = "Daily challenges refreshed! Check /daily for your new objectives." });
         }
         catch (KeyNotFoundException ex)
         {

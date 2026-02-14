@@ -1,8 +1,16 @@
+using System.Text.Json.Serialization;
+using ApiCombatGame.Models.DTOs.Common;
+
 namespace ApiCombatGame.Models.DTOs.Guild;
 
 /// <summary>Guild information and membership details.</summary>
 public class GuildResponse
 {
+    /// <summary>Hypermedia links to related resources (members, boss, treasury, strategies).</summary>
+    [JsonPropertyName("_links")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public Dictionary<string, ApiLink>? Links { get; set; }
+
     /// <summary>Unique guild identifier.</summary>
     public Guid GuildId { get; set; }
 

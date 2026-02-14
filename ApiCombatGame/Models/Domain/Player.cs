@@ -53,6 +53,32 @@ public class Player
     public PlayerTitle? ActiveTitle { get; set; }
     public int AchievementPoints { get; set; } = 0;
 
+    // Phase 5: Premium Currency
+    public int Gems { get; set; } = 0;
+    public int GemsEarnedTotal { get; set; } = 0;
+    public int GemsSpentTotal { get; set; } = 0;
+
+    /// <summary>Equipped cosmetic profile border ID.</summary>
+    public Guid? ActiveProfileBorderId { get; set; }
+
+    /// <summary>Equipped card back cosmetic ID.</summary>
+    public Guid? ActiveCardBackId { get; set; }
+
+    /// <summary>Badge displayed on profile (e.g., "creator", "premium_plus"). Null = no badge.</summary>
+    [MaxLength(30)]
+    public string? Badge { get; set; }
+
+    /// <summary>When the player last claimed their monthly gem stipend (Premium Plus perk).</summary>
+    public DateTime? LastGemStipendClaimedAt { get; set; }
+
+    // Lifetime stats (sunk cost tracking)
+    public int TotalBattlesPlayed { get; set; } = 0;
+    public int TotalBattlesWon { get; set; } = 0;
+    public long TotalGoldEarned { get; set; } = 0;
+    public long TotalXpEarned { get; set; } = 0;
+    public int HighestRating { get; set; } = 1000;
+    public int HighestWinStreak { get; set; } = 0;
+
     // Navigation properties
     public List<Unit> Roster { get; set; } = new();
     public List<Team> Teams { get; set; } = new();

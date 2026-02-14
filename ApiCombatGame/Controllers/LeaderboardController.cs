@@ -1,5 +1,6 @@
 using ApiCombatGame.Data;
 using ApiCombatGame.Filters.Attributes;
+using ApiCombatGame.Models.DTOs.Common;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -25,7 +26,7 @@ public class LeaderboardController : ControllerBase
 
     /// <summary>Get the global leaderboard.</summary>
     /// <remarks>
-    /// Returns the top players ranked by Elo rating with win/loss statistics.
+    /// Returns the top players ranked by API (Arena Power Index) rating with win/loss statistics.
     /// </remarks>
     /// <param name="limit">Number of top players to return (default 100).</param>
     /// <response code="200">Ranked array of top players with stats.</response>
@@ -63,7 +64,11 @@ public class LeaderboardController : ControllerBase
             p.Level,
             p.WinCount,
             p.TotalBattles,
-            WinRate = p.TotalBattles > 0 ? Math.Round((double)p.WinCount / p.TotalBattles * 100, 1) : 0
+            WinRate = p.TotalBattles > 0 ? Math.Round((double)p.WinCount / p.TotalBattles * 100, 1) : 0,
+            _links = new Dictionary<string, ApiLink>
+            {
+                ["player"] = Links.Get($"/api/v1/leaderboard/player/{p.Id}")
+            }
         });
 
         return Ok(ranked);
@@ -105,7 +110,12 @@ public class LeaderboardController : ControllerBase
             player.Level,
             WinCount = winCount,
             TotalBattles = totalBattles,
-            WinRate = totalBattles > 0 ? Math.Round((double)winCount / totalBattles * 100, 1) : 0
+            WinRate = totalBattles > 0 ? Math.Round((double)winCount / totalBattles * 100, 1) : 0,
+            _links = new Dictionary<string, ApiLink>
+            {
+                ["self"] = Links.Get($"/api/v1/leaderboard/player/{playerId}"),
+                ["profile"] = Links.Get("/api/v1/player/profile")
+            }
         });
     }
 }

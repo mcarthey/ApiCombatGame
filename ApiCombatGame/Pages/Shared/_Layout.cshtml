@@ -5,6 +5,39 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - API Combat Game</title>
 
+    @{
+        var seoDescription = ViewData["Description"] as string
+            ?? "A turn-based combat game played entirely through REST API endpoints. Build your own client, design battle strategies in JSON, and compete on the leaderboard.";
+        var seoImage = ViewData["OgImage"] as string ?? "/images/og-default.jpg";
+        var canonicalPath = ViewData["CanonicalPath"] as string ?? Context.Request.Path.Value;
+        var baseUrl = $"{Context.Request.Scheme}://{Context.Request.Host}";
+        var canonicalUrl = $"{baseUrl}{canonicalPath}";
+        var ogType = ViewData["OgType"] as string ?? "website";
+    }
+
+    <!-- SEO -->
+    <meta name="description" content="@seoDescription" />
+    <link rel="canonical" href="@canonicalUrl" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="@ogType" />
+    <meta property="og:title" content="@ViewData["Title"] - API Combat Game" />
+    <meta property="og:description" content="@seoDescription" />
+    <meta property="og:image" content="@(baseUrl)@(seoImage)" />
+    <meta property="og:url" content="@canonicalUrl" />
+    <meta property="og:site_name" content="API Combat Game" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="@ViewData["Title"] - API Combat Game" />
+    <meta name="twitter:description" content="@seoDescription" />
+    <meta name="twitter:image" content="@(baseUrl)@(seoImage)" />
+
+    <!-- DNS Prefetch -->
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
+    <link rel="dns-prefetch" href="https://cdn.tailwindcss.com" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
+
     <!-- Tailwind (layout utilities only) -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>tailwind.config = { darkMode: 'class' }</script>
@@ -102,16 +135,53 @@
     </script>
 
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+
+    <!-- Structured Data (JSON-LD) -->
+    <script type="application/ld+json">
+    {
+        "@@context": "https://schema.org",
+        "@@type": "WebSite",
+        "name": "API Combat Game",
+        "url": "@(baseUrl)",
+        "description": "A turn-based combat game played entirely through REST API endpoints.",
+        "potentialAction": {
+            "@@type": "SearchAction",
+            "target": "@(baseUrl)/api-docs/v1#@("{search_term_string}")",
+            "query-input": "required name=search_term_string"
+        }
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+        "@@context": "https://schema.org",
+        "@@type": "SoftwareApplication",
+        "name": "API Combat Game",
+        "applicationCategory": "GameApplication",
+        "operatingSystem": "Any (REST API)",
+        "description": "@seoDescription",
+        "url": "@(baseUrl)",
+        "offers": {
+            "@@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
+        }
+    }
+    </script>
 </head>
 <body class="min-h-screen flex flex-col" style="background: var(--md-sys-color-surface); color: var(--md-sys-color-on-surface);">
     <!-- Navigation -->
-    <nav style="background: var(--md-sys-color-surface-container); border-bottom: 1px solid var(--md-sys-color-outline-variant);">
+    <nav class="nav-glass sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16">
                 <div class="flex">
                     <div class="flex-shrink-0 flex items-center">
-                        <a asp-page="/Index" class="text-xl font-bold" style="color: var(--md-sys-color-on-surface); text-decoration: none;">
-                            API Combat Game
+                        <a asp-page="/Index" class="flex items-center gap-2.5" style="text-decoration: none;">
+                            <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background: var(--md-sys-color-primary);">
+                                <span class="material-symbols-outlined" style="color: var(--md-sys-color-on-primary); font-size: 18px;">swords</span>
+                            </div>
+                            <span class="text-base font-bold" style="color: var(--md-sys-color-on-surface); letter-spacing: -0.02em;">
+                                API Combat
+                            </span>
                         </a>
                     </div>
                     @{
@@ -120,7 +190,7 @@
                             ? "nav-link-active inline-flex items-center px-1 pt-1 text-sm font-medium"
                             : "nav-link-inactive inline-flex items-center px-1 pt-1 text-sm font-medium";
                     }
-                    <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
+                    <div class="hidden sm:ml-8 sm:flex sm:space-x-6">
                         <a asp-page="/Index" class="@NavClass(currentPath == "/")" style="text-decoration: none;">
                             Home
                         </a>
@@ -144,7 +214,7 @@
                         }
                     </div>
                 </div>
-                <div class="flex items-center space-x-2">
+                <div class="flex items-center space-x-1">
                     @if (User.Identity?.IsAuthenticated == true)
                     {
                         <a asp-page="/Account/Notifications" class="relative" id="notification-bell" title="Notifications" style="display: inline-flex;">
@@ -164,21 +234,44 @@
         </div>
     </nav>
 
-    <main class="py-8 flex-grow">
+    <main class="flex-grow">
         @RenderBody()
     </main>
 
-    <footer style="background: var(--md-sys-color-surface-container); border-top: 1px solid var(--md-sys-color-outline-variant);" class="mt-auto">
-        <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between items-center">
-                <p class="text-sm" style="color: var(--md-sys-color-on-surface-variant);">
-                    &copy; @DateTime.UtcNow.Year API Combat Game
-                </p>
-                <div class="flex space-x-6">
-                    <a asp-page="/Privacy" class="text-sm" style="color: var(--md-sys-color-on-surface-variant); text-decoration: none;">Privacy Policy</a>
-                    <a href="/api-docs/v1" class="text-sm" style="color: var(--md-sys-color-on-surface-variant); text-decoration: none;">API Documentation</a>
-                    <a href="/openapi/v1.json" class="text-sm" style="color: var(--md-sys-color-on-surface-variant); text-decoration: none;">OpenAPI Spec</a>
+    <footer class="footer-modern mt-auto">
+        <div class="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+                <div class="md:col-span-2">
+                    <div class="flex items-center gap-2.5 mb-4">
+                        <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background: var(--md-sys-color-primary);">
+                            <span class="material-symbols-outlined" style="color: var(--md-sys-color-on-primary); font-size: 18px;">swords</span>
+                        </div>
+                        <span class="text-base font-bold" style="color: var(--md-sys-color-on-surface); letter-spacing: -0.02em;">
+                            API Combat Game
+                        </span>
+                    </div>
+                    <p class="text-sm max-w-sm" style="color: var(--md-sys-color-on-surface-variant); line-height: 1.6;">
+                        An API-first strategic combat game built for developers. Build clients, design strategies, and compete on the leaderboard.
+                    </p>
                 </div>
+                <div>
+                    <h4 class="text-sm font-semibold mb-3" style="color: var(--md-sys-color-on-surface);">Resources</h4>
+                    <div class="space-y-2">
+                        <a href="/api-docs/v1" class="block text-sm link-underline" style="color: var(--md-sys-color-on-surface-variant);">API Documentation</a>
+                        <a href="/openapi/v1.json" class="block text-sm link-underline" style="color: var(--md-sys-color-on-surface-variant);">OpenAPI Spec</a>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="text-sm font-semibold mb-3" style="color: var(--md-sys-color-on-surface);">Legal</h4>
+                    <div class="space-y-2">
+                        <a asp-page="/Privacy" class="block text-sm link-underline" style="color: var(--md-sys-color-on-surface-variant);">Privacy Policy</a>
+                    </div>
+                </div>
+            </div>
+            <div class="pt-6" style="border-top: 1px solid var(--md-sys-color-outline-variant);">
+                <p class="text-xs" style="color: var(--md-sys-color-outline);">
+                    &copy; @DateTime.UtcNow.Year API Combat Game. Built for developers who think in JSON.
+                </p>
             </div>
         </div>
     </footer>

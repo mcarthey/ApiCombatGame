@@ -2,6 +2,7 @@
 @model ApiCombatGame.Pages.ApiDocsModel
 @{
     ViewData["Title"] = "API Documentation";
+    ViewData["Description"] = "Complete API reference for API Combat Game. Browse endpoints, view request/response examples, and learn how to build your own game client.";
 }
 
 <style>
@@ -56,6 +57,34 @@
 
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
+    @* ==================== NEW TO APIS? ==================== *@
+    <div id="new-to-apis" class="pt-16 pb-8 scroll-mt-20">
+        <div class="p-6 rounded-2xl" style="background: color-mix(in srgb, var(--md-sys-color-primary) 5%, var(--md-sys-color-surface-container-low)); border: 1px solid color-mix(in srgb, var(--md-sys-color-primary) 15%, var(--md-sys-color-outline-variant));">
+            <div class="flex items-start gap-4">
+                <span class="material-symbols-outlined shrink-0 mt-0.5" style="color: var(--md-sys-color-primary); font-size: 28px;">school</span>
+                <div>
+                    <h3 class="text-lg font-bold mb-2" style="color: var(--md-sys-color-on-surface);">New to APIs?</h3>
+                    <p class="text-sm mb-3" style="color: var(--md-sys-color-on-surface-variant); line-height: 1.7;">
+                        An <strong>API</strong> (Application Programming Interface) is how programs talk to each other over the internet.
+                        Instead of clicking buttons in a browser, you send <strong>HTTP requests</strong> (like <code class="text-xs px-1.5 py-0.5" style="background: var(--md-sys-color-surface-container-high); border-radius: 4px;">GET</code>,
+                        <code class="text-xs px-1.5 py-0.5" style="background: var(--md-sys-color-surface-container-high); border-radius: 4px;">POST</code>) to URLs and receive
+                        <strong>JSON</strong> responses — structured data your code can read.
+                    </p>
+                    <p class="text-sm mb-3" style="color: var(--md-sys-color-on-surface-variant); line-height: 1.7;">
+                        In this game, <strong>every action is an API call</strong>. You'll use a tool like
+                        <code class="text-xs px-1.5 py-0.5" style="background: var(--md-sys-color-surface-container-high); border-radius: 4px;">curl</code>, Postman, or your own code
+                        to register, build teams, and battle other players. A <strong>JWT token</strong> is like a temporary password — you get one when you log in
+                        and include it with every request so the server knows who you are.
+                    </p>
+                    <p class="text-sm" style="color: var(--md-sys-color-on-surface-variant); line-height: 1.7;">
+                        Don't worry about memorizing endpoints. Every response includes <code class="text-xs px-1.5 py-0.5" style="background: var(--md-sys-color-surface-container-high); border-radius: 4px;">_links</code>
+                        that tell you where to go next — just follow them.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
     @* ==================== QUICK START ==================== *@
     <div id="quick-start" class="py-16 scroll-mt-20" style="border-bottom: 1px solid var(--md-sys-color-outline-variant);">
         <h2 class="text-2xl font-bold text-center mb-2" style="color: var(--md-sys-color-on-surface);">Quick Start</h2>
@@ -68,7 +97,7 @@
                     ("2", "Browse Units", "GET /api/v1/player/roster/available", "Explore the unit shop. Five classes, each with unique abilities.", "#8b5cf6"),
                     ("3", "Unlock Units", "POST /api/v1/player/roster/unlock", "Spend your starting 1000 currency to recruit combatants.", "#06b6d4"),
                     ("4", "Build a Team", "POST /api/v1/team/configure", "Assemble up to 5 units with a declarative battle strategy.", "#10b981"),
-                    ("5", "Enter Battle", "POST /api/v1/battle/queue", "Queue for matchmaking. The system pairs you by Elo rating.", "#ef4444"),
+                    ("5", "Enter Battle", "POST /api/v1/battle/queue", "Queue for matchmaking. The system pairs you by API rating.", "#ef4444"),
                     ("6", "Check Results", "GET /api/v1/battle/results/{id}", "Get the full turn-by-turn combat log and rewards.", "#f59e0b")
                 };
             }
@@ -138,6 +167,84 @@ curl -X POST /api/v1/auth/register \
 <span style="color: var(--md-sys-color-on-surface-variant);"># Use the returned token</span>
 curl /api/v1/player/profile \
   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIs..."</code></pre>
+            </div>
+        </div>
+    </div>
+
+    @* ==================== FOLLOWING THE LINKS ==================== *@
+    <div id="links" class="py-16 scroll-mt-20" style="border-bottom: 1px solid var(--md-sys-color-outline-variant);">
+        <h2 class="text-2xl font-bold mb-2" style="color: var(--md-sys-color-on-surface);">Following the Links</h2>
+        <p class="mb-6" style="color: var(--md-sys-color-on-surface-variant);">Every response includes <code class="text-xs px-1.5 py-0.5" style="background: var(--md-sys-color-surface-container-high); border-radius: var(--md-sys-shape-corner-small);">_links</code> — related endpoints you can follow without memorizing URLs.</p>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="space-y-4">
+                <div class="flex items-start gap-3">
+                    <span class="material-symbols-outlined shrink-0 mt-0.5" style="color: var(--md-sys-color-primary); font-size: 20px;">link</span>
+                    <div>
+                        <p class="font-medium" style="color: var(--md-sys-color-on-surface);">Self-Discoverable</p>
+                        <p class="text-sm" style="color: var(--md-sys-color-on-surface-variant);">After a battle, the result links to the replay, both players' profiles, and a shortcut to queue again. No docs lookup required.</p>
+                    </div>
+                </div>
+                <div class="flex items-start gap-3">
+                    <span class="material-symbols-outlined shrink-0 mt-0.5" style="color: var(--md-sys-color-primary); font-size: 20px;">explore</span>
+                    <div>
+                        <p class="font-medium" style="color: var(--md-sys-color-on-surface);">Navigate Naturally</p>
+                        <p class="text-sm" style="color: var(--md-sys-color-on-surface-variant);">Your profile links to your roster, teams, achievements, and the leaderboard. Each team links to the battle queue. Just follow the chain.</p>
+                    </div>
+                </div>
+                <div class="flex items-start gap-3">
+                    <span class="material-symbols-outlined shrink-0 mt-0.5" style="color: var(--md-sys-color-primary); font-size: 20px;">code</span>
+                    <div>
+                        <p class="font-medium" style="color: var(--md-sys-color-on-surface);">Method Included</p>
+                        <p class="text-sm" style="color: var(--md-sys-color-on-surface-variant);">Each link includes <code class="text-xs px-1.5 py-0.5" style="background: var(--md-sys-color-surface-container-high); border-radius: 4px;">method</code> (GET, POST, etc.) so your client knows exactly how to call it.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="relative group/code">
+                <span class="absolute top-2 left-3 text-xs font-medium uppercase tracking-wide" style="color: var(--md-sys-color-on-surface-variant);">Example Response</span>
+                <pre class="p-4 pt-8 overflow-x-auto text-sm" style="background: var(--md-sys-color-inverse-surface); color: var(--md-sys-color-inverse-on-surface); border-radius: var(--md-sys-shape-corner-large);"><code>{
+  "battleId": "f47ac10b-...",
+  "winnerId": "a1b2c3d4-...",
+  "rewards": { "currency": 150, "ratingChange": 24 },
+  <span style="color: #60a5fa;">"_links"</span>: {
+    <span style="color: #60a5fa;">"self"</span>:        { "href": "/api/v1/battle/results/f47ac...", "method": "GET" },
+    <span style="color: #60a5fa;">"replay"</span>:      { "href": "/api/v1/replays/f47ac...", "method": "GET" },
+    <span style="color: #60a5fa;">"queue_again"</span>: { "href": "/api/v1/battle/queue", "method": "POST" }
+  }
+}</code></pre>
+            </div>
+        </div>
+    </div>
+
+    @* ==================== WHAT'S NEXT? ==================== *@
+    <div id="whats-next" class="py-16 scroll-mt-20" style="border-bottom: 1px solid var(--md-sys-color-outline-variant);">
+        <h2 class="text-2xl font-bold text-center mb-2" style="color: var(--md-sys-color-on-surface);">What's Next After Your First Battle?</h2>
+        <p class="text-center mb-10" style="color: var(--md-sys-color-on-surface-variant);">You've got the basics. Here's where the game really opens up.</p>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="md3-card p-5 stat-card">
+                <span class="material-symbols-outlined mb-3" style="color: #f97316; font-size: 28px;">flag</span>
+                <h3 class="font-semibold mb-1" style="color: var(--md-sys-color-on-surface);">Daily Challenges</h3>
+                <p class="text-sm" style="color: var(--md-sys-color-on-surface-variant);">Complete daily objectives for bonus gold and XP. New challenges every 24 hours.</p>
+                <code class="text-xs mt-2 block" style="color: var(--md-sys-color-on-surface-variant);">GET /api/v1/challenges/daily</code>
+            </div>
+            <div class="md3-card p-5 stat-card">
+                <span class="material-symbols-outlined mb-3" style="color: #f59e0b; font-size: 28px;">groups</span>
+                <h3 class="font-semibold mb-1" style="color: var(--md-sys-color-on-surface);">Join a Guild</h3>
+                <p class="text-sm" style="color: var(--md-sys-color-on-surface-variant);">Team up with other players to tackle cooperative boss raids and earn shared rewards.</p>
+                <code class="text-xs mt-2 block" style="color: var(--md-sys-color-on-surface-variant);">POST /api/v1/guild/create</code>
+            </div>
+            <div class="md3-card p-5 stat-card">
+                <span class="material-symbols-outlined mb-3" style="color: #a855f7; font-size: 28px;">star</span>
+                <h3 class="font-semibold mb-1" style="color: var(--md-sys-color-on-surface);">Unit Mastery</h3>
+                <p class="text-sm" style="color: var(--md-sys-color-on-surface-variant);">The more you battle with a unit, the stronger your bond. Track mastery across all classes.</p>
+                <code class="text-xs mt-2 block" style="color: var(--md-sys-color-on-surface-variant);">GET /api/v1/mastery/progress</code>
+            </div>
+            <div class="md3-card p-5 stat-card">
+                <span class="material-symbols-outlined mb-3" style="color: #ef4444; font-size: 28px;">trophy</span>
+                <h3 class="font-semibold mb-1" style="color: var(--md-sys-color-on-surface);">Climb the Ranks</h3>
+                <p class="text-sm" style="color: var(--md-sys-color-on-surface-variant);">Climb the API leaderboard from Rubber Duck to "I Use Arch btw." Can you reach the top?</p>
+                <code class="text-xs mt-2 block" style="color: var(--md-sys-color-on-surface-variant);">GET /api/v1/leaderboard</code>
             </div>
         </div>
     </div>

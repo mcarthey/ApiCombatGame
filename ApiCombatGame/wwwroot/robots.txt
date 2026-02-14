@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /Admin/
+Disallow: /api/
+Disallow: /Account/
+
+Sitemap: https://apicombat.com/sitemap.xml

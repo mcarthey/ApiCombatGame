@@ -83,6 +83,51 @@ builder.Services.AddScoped<IMatchmakingService, MatchmakingService>();
 builder.Services.AddScoped<ISubscriptionService, ApiCombatGame.Services.SubscriptionService>();
 builder.Services.AddScoped<IApiKeyService, ApiKeyService>();
 
+// AI Practice Opponents
+builder.Services.AddScoped<IAiOpponentService, AiOpponentService>();
+
+// Ranked Seasons
+builder.Services.AddScoped<ISeasonService, SeasonService>();
+
+// Loot Drops
+builder.Services.AddScoped<ILootService, LootService>();
+
+// Referral System
+builder.Services.AddScoped<IReferralService, ReferralService>();
+
+// Rival System
+builder.Services.AddScoped<IRivalService, RivalService>();
+
+// Battle Pass
+builder.Services.AddScoped<IBattlePassService, BattlePassService>();
+
+// Guild Wars
+builder.Services.AddScoped<IGuildWarService, GuildWarService>();
+
+// Tournaments
+builder.Services.AddScoped<ITournamentService, TournamentService>();
+
+// Cosmetics
+builder.Services.AddScoped<ICosmeticService, CosmeticService>();
+
+// Premium Plus
+builder.Services.AddScoped<IPremiumPlusService, PremiumPlusService>();
+
+// Activity Feed
+builder.Services.AddScoped<IActivityFeedService, ActivityFeedService>();
+
+// Education
+builder.Services.AddScoped<IEducationService, EducationService>();
+
+// SDK
+builder.Services.AddScoped<ISdkService, SdkService>();
+
+// Discord
+builder.Services.AddScoped<IDiscordService, DiscordService>();
+
+// Content Creators
+builder.Services.AddScoped<IContentCreatorService, ContentCreatorService>();
+
 // Phase 3: Guild & Engagement Services
 builder.Services.AddScoped<IGuildService, GuildService>();
 builder.Services.AddScoped<IGuildTreasuryService, GuildTreasuryService>();
@@ -111,6 +156,10 @@ builder.Services.AddHostedService<DailyChallengeGenerationJob>();
 builder.Services.AddHostedService<StrategyDecayJob>();
 builder.Services.AddHostedService<GuildBossSpawnJob>();
 builder.Services.AddHostedService<GuildInviteExpiryJob>();
+
+// Phase 5: Background Jobs
+builder.Services.AddHostedService<GuildWarMatchingJob>();
+builder.Services.AddHostedService<TournamentProcessingJob>();
 
 // Phase 4: Background Jobs
 builder.Services.AddHostedService<NotificationCleanupJob>();
@@ -156,12 +205,22 @@ builder.Services.AddSwaggerGen(c =>
             "then include it as `Authorization: Bearer <token>` in all subsequent requests. " +
             "Tokens expire after 60 minutes — use the refresh endpoint to get a new one.\n\n" +
             "## Game Concepts\n" +
-            "- **Units** — Five classes (Warrior, Mage, Ranger, Healer, Tank) with unique abilities and a rock-paper-scissors balance\n" +
+            "- **Units** — Six classes (Warrior, Mage, Ranger, Healer, Tank, Assassin) with unique abilities and a rock-paper-scissors balance\n" +
             "- **Strategies** — Declarative JSON configs that control unit AI: formations, target priority, and conditional ability usage\n" +
-            "- **Rating** — Elo-based matchmaking. Win to climb the leaderboard\n" +
+            "- **API Rating** — Arena Power Index matchmaking. Climb from Rubber Duck to I Use Arch btw\n" +
             "- **Modifiers** — Weekly environmental effects that change battle rules for everyone\n" +
             "- **Guilds** — Join a guild to tackle cooperative boss raids\n" +
-            "- **Mastery** — The more you use a unit, the deeper your mastery grows",
+            "- **Mastery** — The more you use a unit, the deeper your mastery grows\n\n" +
+            "## Discoverable Links (`_links`)\n" +
+            "Every response includes a `_links` object with related endpoints you can follow. " +
+            "No need to memorize URLs — just follow the links.\n\n" +
+            "```json\n" +
+            "\"_links\": {\n" +
+            "  \"self\": { \"href\": \"/api/v1/battle/results/abc-123\", \"method\": \"GET\" },\n" +
+            "  \"replay\": { \"href\": \"/api/v1/replays/abc-123\", \"method\": \"GET\", \"title\": \"Watch replay\" },\n" +
+            "  \"queue_again\": { \"href\": \"/api/v1/battle/queue\", \"method\": \"POST\" }\n" +
+            "}\n" +
+            "```",
         Contact = new OpenApiContact
         {
             Name = "API Combat Game"
@@ -246,7 +305,7 @@ app.UseSwagger(options =>
     options.RouteTemplate = "openapi/{documentName}.json";
 });
 
-// Scalar API docs are rendered via Pages/ApiDocs.cshtml within the site layout
+// API docs are rendered via Pages/ApiDocs.cshtml within the site layout
 
 // Rate limiting middleware (only for API endpoints)
 app.UseWhen(
@@ -280,7 +339,7 @@ using (var scope = app.Services.CreateScope())
         try
         {
             // Quick schema check — if a query on a new column fails, recreate
-            await context.Database.ExecuteSqlRawAsync("SELECT LoginStreak FROM Players LIMIT 0");
+            await context.Database.ExecuteSqlRawAsync("SELECT LoginStreak, Badge, TotalBattlesPlayed FROM Players LIMIT 0; SELECT Id FROM BattlePasses LIMIT 0; SELECT RequiredTier FROM CosmeticItems LIMIT 0; SELECT Id FROM ActivityFeedEntries LIMIT 0");
         }
         catch
         {

@@ -8,4 +8,5 @@ public interface IChallengeService
     Task GenerateDailyChallenges(Guid playerId);
     Task CheckChallengeProgress(Guid playerId, Battle battle);
     Task ClaimReward(Guid challengeId, Guid playerId);
+    Task<bool> RefreshChallengesAsync(Guid playerId);
 }

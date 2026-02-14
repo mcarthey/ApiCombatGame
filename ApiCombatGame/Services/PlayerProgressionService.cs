@@ -66,10 +66,12 @@ public class PlayerProgressionService : IPlayerProgressionService
         summary.GoldEarned = gold;
         player.Currency += summary.GoldEarned;
 
-        // XP: Win = 100, Loss = 25
+        // XP: Win = 100, Loss = 25, with Premium Plus multiplier
         int baseXp = won ? 100 : 25;
-        summary.XpEarned = baseXp;
-        player.ExperiencePoints += baseXp;
+        decimal xpMultiplier = player.CurrentTier == SubscriptionTier.PremiumPlus ? 1.5m : 1.0m;
+        int finalXp = (int)(baseXp * xpMultiplier);
+        summary.XpEarned = finalXp;
+        player.ExperiencePoints += finalXp;
 
         // Level-up check
         int xpNeeded = GetXpForLevel(player.Level);

@@ -218,6 +218,11 @@ public class NotificationService : INotificationService
             NotificationType.StrategyRated or NotificationType.StrategyDownloadMilestone
                 => NotificationCategory.Marketplace,
 
+            NotificationType.RevengeOpportunity or NotificationType.RivalDefeatedYou
+                or NotificationType.TournamentResult or NotificationType.GuildWarResult
+                or NotificationType.RankUp or NotificationType.RankDown
+                => NotificationCategory.Battle,
+
             NotificationType.NewModifierActive or NotificationType.AdminAnnouncement
                 => NotificationCategory.System,
 
@@ -227,6 +232,80 @@ public class NotificationService : INotificationService
 
             _ => NotificationCategory.System
         };
+    }
+
+    public async Task<NotificationDigestResponse> GetDigestAsync(Guid playerId)
+    {
+        var unreadNotifications = await _context.Notifications
+            .Where(n => n.PlayerId == playerId && !n.IsRead && (n.ExpiresAt == null || n.ExpiresAt > DateTime.UtcNow))
+            .OrderByDescending(n => n.CreatedAt)
+            .ToListAsync();
+
+        var categories = unreadNotifications
+            .GroupBy(n => n.Category)
+            .Select(g => new DigestCategory
+            {
+                Category = g.Key.ToString(),
+                UnreadCount = g.Count(),
+                LatestAt = g.Max(n => n.CreatedAt)
+            })
+            .OrderByDescending(c => c.LatestAt)
+            .ToList();
+
+        var highlights = unreadNotifications
+            .Take(10)
+            .Select(n => new DigestItem
+            {
+                Id = n.Id,
+                Type = n.Type.ToString(),
+                Title = n.Title,
+                Message = n.Message,
+                ActionUrl = n.ActionUrl,
+                CreatedAt = n.CreatedAt
+            })
+            .ToList();
+
+        return new NotificationDigestResponse
+        {
+            TotalUnread = unreadNotifications.Count,
+            Categories = categories,
+            RecentHighlights = highlights
+        };
+    }
+
+    public async Task SendRevengeAlertAsync(Guid loserId, Guid winnerId, Guid battleId)
+    {
+        var winner = await _context.Players.FindAsync(winnerId);
+        if (winner == null) return;
+
+        await SendAsync(loserId, NotificationType.RevengeOpportunity,
+            "Revenge Opportunity!",
+            $"{winner.Username} just defeated you. Queue up and take your revenge!",
+            $"/api/v1/battle/queue");
+    }
+
+    public async Task SendRankChangeAlertAsync(Guid playerId, int oldRating, int newRating)
+    {
+        // Only alert on significant rank changes (crossing 100-point thresholds)
+        int oldBracket = oldRating / 100;
+        int newBracket = newRating / 100;
+
+        if (oldBracket == newBracket) return;
+
+        if (newBracket > oldBracket)
+        {
+            await SendAsync(playerId, NotificationType.RankUp,
+                $"Rating Milestone: {newBracket * 100}+",
+                $"You've climbed to {newRating} rating! Keep pushing higher.",
+                "/api/v1/leaderboard");
+        }
+        else
+        {
+            await SendAsync(playerId, NotificationType.RankDown,
+                $"Rating Drop Below {(oldBracket) * 100}",
+                $"Your rating dropped to {newRating}. Time to rally and climb back!",
+                "/api/v1/battle/queue");
+        }
     }
 
     private static NotificationPreferences DeserializePreferences(string? json)

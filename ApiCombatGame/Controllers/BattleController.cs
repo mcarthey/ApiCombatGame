@@ -2,6 +2,7 @@ using System.Security.Claims;
 using ApiCombatGame.Data;
 using ApiCombatGame.Filters.Attributes;
 using ApiCombatGame.Models.DTOs.Battle;
+using ApiCombatGame.Models.DTOs.Common;
 using ApiCombatGame.Models.Enums;
 using ApiCombatGame.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -82,6 +83,11 @@ public class BattleController : ControllerBase
             }
 
             var response = await _battleService.QueueBattleAsync(playerId, request);
+            response.Links = new Dictionary<string, ApiLink>
+            {
+                ["self"] = Links.Get($"/api/v1/battle/status/{response.BattleId}"),
+                ["results"] = Links.Get($"/api/v1/battle/results/{response.BattleId}", "Get results when completed")
+            };
             return Created($"/api/v1/battle/status/{response.BattleId}", response);
         }
         catch (InvalidOperationException ex)
@@ -110,6 +116,11 @@ public class BattleController : ControllerBase
         {
             var playerId = GetPlayerId();
             var response = await _battleService.GetBattleStatusAsync(battleId, playerId);
+            response.Links = new Dictionary<string, ApiLink>
+            {
+                ["self"] = Links.Get($"/api/v1/battle/status/{battleId}"),
+                ["results"] = Links.Get($"/api/v1/battle/results/{battleId}", "Get results when completed")
+            };
             return Ok(response);
         }
         catch (KeyNotFoundException ex)
@@ -139,6 +150,16 @@ public class BattleController : ControllerBase
         {
             var playerId = GetPlayerId();
             var response = await _battleService.GetBattleResultAsync(battleId, playerId);
+            response.Links = new Dictionary<string, ApiLink>
+            {
+                ["self"] = Links.Get($"/api/v1/battle/results/{battleId}"),
+                ["replay"] = Links.Get($"/api/v1/replays/{battleId}", "Watch replay"),
+                ["queue_again"] = Links.Post("/api/v1/battle/queue", "Queue another battle")
+            };
+            if (response.WinnerId.HasValue)
+                response.Links["winner"] = Links.Get($"/api/v1/leaderboard/player/{response.WinnerId}");
+            if (response.LoserId.HasValue)
+                response.Links["loser"] = Links.Get($"/api/v1/leaderboard/player/{response.LoserId}");
             return Ok(response);
         }
         catch (KeyNotFoundException ex)
@@ -166,6 +187,14 @@ public class BattleController : ControllerBase
         offset = Math.Max(0, offset);
 
         var results = await _battleService.GetBattleHistoryAsync(playerId, limit, offset);
+        foreach (var r in results)
+        {
+            r.Links = new Dictionary<string, ApiLink>
+            {
+                ["self"] = Links.Get($"/api/v1/battle/results/{r.BattleId}"),
+                ["replay"] = Links.Get($"/api/v1/replays/{r.BattleId}", "Watch replay")
+            };
+        }
         return Ok(results);
     }
 

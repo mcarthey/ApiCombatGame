@@ -16,6 +16,12 @@ public class BattleService : IBattleService
     private readonly IMatchmakingService _matchmaking;
     private readonly IPlayerProgressionService _progressionService;
     private readonly IAchievementService _achievementService;
+    private readonly ISeasonService _seasonService;
+    private readonly ILootService _lootService;
+    private readonly IRivalService _rivalService;
+    private readonly IBattlePassService _battlePassService;
+    private readonly IGuildWarService _guildWarService;
+    private readonly IActivityFeedService _activityFeedService;
     private readonly IConfiguration _config;
     private readonly INotificationService _notifications;
     private readonly ILogger<BattleService> _logger;
@@ -27,11 +33,23 @@ public class BattleService : IBattleService
         IMatchmakingService matchmaking,
         IPlayerProgressionService progressionService,
         IAchievementService achievementService,
+        ISeasonService seasonService,
+        ILootService lootService,
+        IRivalService rivalService,
+        IBattlePassService battlePassService,
+        IGuildWarService guildWarService,
+        IActivityFeedService activityFeedService,
         INotificationService notifications,
         IConfiguration config,
         ILogger<BattleService> logger)
     {
         _achievementService = achievementService;
+        _seasonService = seasonService;
+        _lootService = lootService;
+        _rivalService = rivalService;
+        _battlePassService = battlePassService;
+        _guildWarService = guildWarService;
+        _activityFeedService = activityFeedService;
         _notifications = notifications;
         _context = context;
         _strategyEngine = strategyEngine;
@@ -283,6 +301,17 @@ public class BattleService : IBattleService
                 var p1Rewards = await _progressionService.ProcessBattleRewardsAsync(battle1.Player1Id, false, 0);
                 var p2Rewards = await _progressionService.ProcessBattleRewardsAsync(battle1.Player2Id!.Value, false, 0);
                 battle1.CurrencyReward = p1Rewards.GoldEarned;
+
+                // Update season rankings for draws
+                if (battle1.Mode == "ranked")
+                {
+                    try
+                    {
+                        await _seasonService.UpdateSeasonRatingAsync(battle1.Player1Id, 0, false, true);
+                        await _seasonService.UpdateSeasonRatingAsync(battle1.Player2Id!.Value, 0, false, true);
+                    }
+                    catch (Exception ex) { _logger.LogWarning(ex, "Season update failed for draw battle {BattleId}", battle1.Id); }
+                }
             }
 
             await _context.SaveChangesAsync(cancellationToken);
@@ -306,7 +335,7 @@ public class BattleService : IBattleService
 
         if (winner == null || loser == null) return;
 
-        // ELO-style rating calculation
+        // API (Arena Power Index) rating calculation
         double expectedWinner = 1.0 / (1.0 + Math.Pow(10, (loser.Rating - winner.Rating) / 400.0));
         int kFactor = 32;
         int winnerChange = (int)(kFactor * (1 - expectedWinner));
@@ -327,6 +356,17 @@ public class BattleService : IBattleService
 
         battle.CurrencyReward = winnerRewards.GoldEarned;
 
+        // Update season rankings for ranked battles
+        if (battle.Mode == "ranked")
+        {
+            try
+            {
+                await _seasonService.UpdateSeasonRatingAsync(winnerId, winnerChange, true, false);
+                await _seasonService.UpdateSeasonRatingAsync(loserId, loserChange, false, false);
+            }
+            catch (Exception ex) { _logger.LogWarning(ex, "Season update failed for battle {BattleId}", battle.Id); }
+        }
+
         // Check achievements
         try
         {
@@ -336,6 +376,51 @@ public class BattleService : IBattleService
         catch (Exception ex)
         {
             _logger.LogWarning(ex, "Achievement check failed for battle {BattleId}", battle.Id);
+        }
+
+        // Roll loot drops for both players
+        try
+        {
+            await _lootService.RollLootAsync(winnerId, battle.Id, true, winner.WinStreak);
+            await _lootService.RollLootAsync(loserId, battle.Id, false, 0);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Loot roll failed for battle {BattleId}", battle.Id);
+        }
+
+        // Check rival matchups
+        try
+        {
+            await _rivalService.CheckRivalBattleAsync(winnerId, loserId, battle.Id);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Rival check failed for battle {BattleId}", battle.Id);
+        }
+
+        // Award battle pass XP (100 for win, 25 for loss)
+        try
+        {
+            await _battlePassService.AddXpAsync(winnerId, 100, "battle_win");
+            await _battlePassService.AddXpAsync(loserId, 25, "battle_loss");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Battle pass XP failed for battle {BattleId}", battle.Id);
+        }
+
+        // Record guild war contributions (ranked wins only)
+        if (battle.Mode == "ranked")
+        {
+            try
+            {
+                await _guildWarService.RecordWarContributionAsync(winnerId, battle.Id);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Guild war contribution failed for battle {BattleId}", battle.Id);
+            }
         }
 
         // Notify both players
@@ -356,6 +441,35 @@ public class BattleService : IBattleService
         catch (Exception ex)
         {
             _logger.LogWarning(ex, "Notification failed for battle {BattleId}", battle.Id);
+        }
+
+        // Revenge alert and rank change notifications
+        try
+        {
+            await _notifications.SendRevengeAlertAsync(loserId, winnerId, battle.Id);
+            int winnerOldRating = winner.Rating - winnerChange;
+            int loserOldRating = loser.Rating - loserChange;
+            await _notifications.SendRankChangeAlertAsync(winnerId, winnerOldRating, winner.Rating);
+            await _notifications.SendRankChangeAlertAsync(loserId, loserOldRating, loser.Rating);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Enhanced notification failed for battle {BattleId}", battle.Id);
+        }
+
+        // Record activity feed entries and lifetime stats
+        try
+        {
+            await _activityFeedService.RecordBattleStatsAsync(winnerId, true, winnerRewards.GoldEarned, winnerRewards.XpEarned, winner.Rating);
+            await _activityFeedService.RecordBattleStatsAsync(loserId, false, loserRewards.GoldEarned, loserRewards.XpEarned, loser.Rating);
+            await _activityFeedService.LogActivityAsync(winnerId, "battle_won",
+                $"Defeated {loser.Username} (+{winnerChange} rating)", battle.Id);
+            await _activityFeedService.LogActivityAsync(loserId, "battle_lost",
+                $"Lost to {winner.Username} ({loserChange} rating)", battle.Id);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Activity feed logging failed for battle {BattleId}", battle.Id);
         }
     }
 }

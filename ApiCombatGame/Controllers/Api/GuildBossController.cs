@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using ApiCombatGame.Data;
 using ApiCombatGame.Filters.Attributes;
+using ApiCombatGame.Models.DTOs.Common;
 using ApiCombatGame.Models.DTOs.Guild;
 using ApiCombatGame.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -57,7 +58,7 @@ public class GuildBossController : ControllerBase
         if (boss == null)
             return NotFound(new { error = "No active boss for your guild" });
 
-        return Ok(new GuildBossResponse
+        var response = new GuildBossResponse
         {
             BossId = boss.Id,
             Name = boss.Name,
@@ -68,7 +69,14 @@ public class GuildBossController : ControllerBase
             IsDefeated = boss.IsDefeated,
             RewardCurrency = boss.RewardCurrency,
             RewardExperience = boss.RewardExperience
-        });
+        };
+        response.Links = new Dictionary<string, ApiLink>
+        {
+            ["self"] = Links.Get("/api/v1/guild/boss/current"),
+            ["attack"] = Links.Post("/api/v1/guild/boss/attempt", "Attack the boss"),
+            ["leaderboard"] = Links.Get($"/api/v1/guild/boss/leaderboard?bossId={response.BossId}", "Boss damage leaderboard")
+        };
+        return Ok(response);
     }
 
     /// <summary>Attack the guild boss with your team.</summary>

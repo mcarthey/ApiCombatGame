@@ -38,6 +38,50 @@ public class GameDbContext : DbContext
     public DbSet<GuildChatMessage> GuildChatMessages => Set<GuildChatMessage>();
     public DbSet<GuildStrategy> GuildStrategies => Set<GuildStrategy>();
 
+    // Phase 5: Ranked Seasons
+    public DbSet<Season> Seasons => Set<Season>();
+    public DbSet<PlayerSeasonRank> PlayerSeasonRanks => Set<PlayerSeasonRank>();
+
+    // Phase 5: Loot Drops
+    public DbSet<LootDrop> LootDrops => Set<LootDrop>();
+
+    // Phase 5: Referrals
+    public DbSet<Referral> Referrals => Set<Referral>();
+
+    // Phase 5: Rivals
+    public DbSet<RivalAssignment> RivalAssignments => Set<RivalAssignment>();
+
+    // Phase 5: Battle Pass
+    public DbSet<BattlePass> BattlePasses => Set<BattlePass>();
+    public DbSet<PlayerBattlePass> PlayerBattlePasses => Set<PlayerBattlePass>();
+
+    // Phase 5: Guild Wars
+    public DbSet<GuildWar> GuildWars => Set<GuildWar>();
+    public DbSet<GuildWarContribution> GuildWarContributions => Set<GuildWarContribution>();
+
+    // Phase 5: Cosmetics
+    public DbSet<CosmeticItem> CosmeticItems => Set<CosmeticItem>();
+    public DbSet<PlayerCosmetic> PlayerCosmetics => Set<PlayerCosmetic>();
+
+    // Phase 5: Tournaments
+    public DbSet<Tournament> Tournaments => Set<Tournament>();
+    public DbSet<TournamentEntry> TournamentEntries => Set<TournamentEntry>();
+    public DbSet<TournamentMatch> TournamentMatches => Set<TournamentMatch>();
+
+    // Phase 5: Activity Feed
+    public DbSet<ActivityFeedEntry> ActivityFeedEntries => Set<ActivityFeedEntry>();
+
+    // Phase 5: Education
+    public DbSet<CurriculumModule> CurriculumModules => Set<CurriculumModule>();
+    public DbSet<StudentEnrollment> StudentEnrollments => Set<StudentEnrollment>();
+
+    // Phase 5: Discord Integration
+    public DbSet<DiscordLink> DiscordLinks => Set<DiscordLink>();
+    public DbSet<DiscordWebhook> DiscordWebhooks => Set<DiscordWebhook>();
+
+    // Phase 5: Content Creators
+    public DbSet<ContentCreator> ContentCreators => Set<ContentCreator>();
+
     // Phase 4: Notifications & Logging
     public DbSet<Notification> Notifications => Set<Notification>();
     public DbSet<PlayerActivity> PlayerActivities => Set<PlayerActivity>();
@@ -381,6 +425,265 @@ public class GameDbContext : DbContext
             entity.HasOne(e => e.Player)
                 .WithMany()
                 .HasForeignKey(e => e.PlayerId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // ── Season ──
+        modelBuilder.Entity<Season>(entity =>
+        {
+            entity.HasIndex(s => s.IsActive);
+            entity.HasIndex(s => s.SeasonNumber).IsUnique();
+
+            entity.HasMany(s => s.PlayerRanks)
+                .WithOne(r => r.Season)
+                .HasForeignKey(r => r.SeasonId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // ── PlayerSeasonRank ──
+        modelBuilder.Entity<PlayerSeasonRank>(entity =>
+        {
+            entity.HasIndex(r => new { r.PlayerId, r.SeasonId }).IsUnique();
+            entity.HasIndex(r => new { r.SeasonId, r.SeasonRating });
+
+            entity.HasOne(r => r.Player)
+                .WithMany()
+                .HasForeignKey(r => r.PlayerId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // ── LootDrop ──
+        modelBuilder.Entity<LootDrop>(entity =>
+        {
+            entity.HasIndex(d => new { d.PlayerId, d.Claimed });
+            entity.HasIndex(d => d.BattleId);
+
+            entity.HasOne(d => d.Player)
+                .WithMany()
+                .HasForeignKey(d => d.PlayerId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // ── Referral ──
+        modelBuilder.Entity<Referral>(entity =>
+        {
+            entity.HasIndex(r => r.Code).IsUnique();
+            entity.HasIndex(r => r.ReferrerId);
+
+            entity.HasOne(r => r.Referrer)
+                .WithMany()
+                .HasForeignKey(r => r.ReferrerId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(r => r.ReferredPlayer)
+                .WithMany()
+                .HasForeignKey(r => r.ReferredPlayerId)
+                .OnDelete(DeleteBehavior.SetNull);
+        });
+
+        // ── RivalAssignment ──
+        modelBuilder.Entity<RivalAssignment>(entity =>
+        {
+            entity.HasIndex(r => new { r.PlayerId, r.ExpiresAt });
+
+            entity.HasOne(r => r.Player)
+                .WithMany()
+                .HasForeignKey(r => r.PlayerId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(r => r.Rival)
+                .WithMany()
+                .HasForeignKey(r => r.RivalId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        // ── BattlePass ──
+        modelBuilder.Entity<BattlePass>(entity =>
+        {
+            entity.HasIndex(bp => bp.IsActive);
+
+            entity.HasOne(bp => bp.Season)
+                .WithMany()
+                .HasForeignKey(bp => bp.SeasonId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasMany(bp => bp.PlayerProgress)
+                .WithOne(pp => pp.BattlePass)
+                .HasForeignKey(pp => pp.BattlePassId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // ── PlayerBattlePass ──
+        modelBuilder.Entity<PlayerBattlePass>(entity =>
+        {
+            entity.HasIndex(pp => new { pp.PlayerId, pp.BattlePassId }).IsUnique();
+
+            entity.HasOne(pp => pp.Player)
+                .WithMany()
+                .HasForeignKey(pp => pp.PlayerId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // ── GuildWar ──
+        modelBuilder.Entity<GuildWar>(entity =>
+        {
+            entity.HasIndex(w => w.Status);
+
+            entity.HasOne(w => w.Guild1)
+                .WithMany()
+                .HasForeignKey(w => w.Guild1Id)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(w => w.Guild2)
+                .WithMany()
+                .HasForeignKey(w => w.Guild2Id)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasMany(w => w.Contributions)
+                .WithOne(c => c.GuildWar)
+                .HasForeignKey(c => c.GuildWarId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // ── GuildWarContribution ──
+        modelBuilder.Entity<GuildWarContribution>(entity =>
+        {
+            entity.HasIndex(c => new { c.GuildWarId, c.PlayerId }).IsUnique();
+
+            entity.HasOne(c => c.Player)
+                .WithMany()
+                .HasForeignKey(c => c.PlayerId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // ── Tournament ──
+        modelBuilder.Entity<Tournament>(entity =>
+        {
+            entity.HasIndex(t => t.Status);
+
+            entity.HasMany(t => t.Entries)
+                .WithOne(e => e.Tournament)
+                .HasForeignKey(e => e.TournamentId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasMany(t => t.Matches)
+                .WithOne(m => m.Tournament)
+                .HasForeignKey(m => m.TournamentId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // ── TournamentEntry ──
+        modelBuilder.Entity<TournamentEntry>(entity =>
+        {
+            entity.HasIndex(e => new { e.TournamentId, e.PlayerId }).IsUnique();
+
+            entity.HasOne(e => e.Player)
+                .WithMany()
+                .HasForeignKey(e => e.PlayerId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // ── TournamentMatch ──
+        modelBuilder.Entity<TournamentMatch>(entity =>
+        {
+            entity.HasIndex(m => new { m.TournamentId, m.Round, m.MatchNumber });
+        });
+
+        // ── ActivityFeedEntry ──
+        modelBuilder.Entity<ActivityFeedEntry>(entity =>
+        {
+            entity.HasIndex(a => new { a.PlayerId, a.CreatedAt });
+            entity.HasIndex(a => a.ActivityType);
+
+            entity.HasOne(a => a.Player)
+                .WithMany()
+                .HasForeignKey(a => a.PlayerId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // ── CosmeticItem ──
+        modelBuilder.Entity<CosmeticItem>(entity =>
+        {
+            entity.HasIndex(c => c.Category);
+            entity.HasIndex(c => c.IsAvailable);
+        });
+
+        // ── PlayerCosmetic ──
+        modelBuilder.Entity<PlayerCosmetic>(entity =>
+        {
+            entity.HasIndex(pc => new { pc.PlayerId, pc.CosmeticItemId }).IsUnique();
+
+            entity.HasOne(pc => pc.Player)
+                .WithMany()
+                .HasForeignKey(pc => pc.PlayerId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(pc => pc.CosmeticItem)
+                .WithMany()
+                .HasForeignKey(pc => pc.CosmeticItemId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // ── CurriculumModule ──
+        modelBuilder.Entity<CurriculumModule>(entity =>
+        {
+            entity.HasIndex(m => m.JoinCode).IsUnique();
+            entity.HasIndex(m => m.IsPublished);
+
+            entity.HasOne(m => m.Instructor)
+                .WithMany()
+                .HasForeignKey(m => m.InstructorId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // ── StudentEnrollment ──
+        modelBuilder.Entity<StudentEnrollment>(entity =>
+        {
+            entity.HasIndex(e => new { e.PlayerId, e.ModuleId }).IsUnique();
+
+            entity.HasOne(e => e.Player)
+                .WithMany()
+                .HasForeignKey(e => e.PlayerId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(e => e.Module)
+                .WithMany()
+                .HasForeignKey(e => e.ModuleId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // ── DiscordLink ──
+        modelBuilder.Entity<DiscordLink>(entity =>
+        {
+            entity.HasIndex(d => d.PlayerId).IsUnique();
+            entity.HasIndex(d => d.DiscordUserId);
+
+            entity.HasOne(d => d.Player)
+                .WithMany()
+                .HasForeignKey(d => d.PlayerId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // ── DiscordWebhook ──
+        modelBuilder.Entity<DiscordWebhook>(entity =>
+        {
+            entity.HasIndex(w => w.PlayerId);
+
+            entity.HasOne(w => w.Player)
+                .WithMany()
+                .HasForeignKey(w => w.PlayerId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // ── ContentCreator ──
+        modelBuilder.Entity<ContentCreator>(entity =>
+        {
+            entity.HasIndex(c => c.PlayerId).IsUnique();
+            entity.HasIndex(c => c.IsVerified);
+
+            entity.HasOne(c => c.Player)
+                .WithMany()
+                .HasForeignKey(c => c.PlayerId)
                 .OnDelete(DeleteBehavior.Cascade);
         });
     }

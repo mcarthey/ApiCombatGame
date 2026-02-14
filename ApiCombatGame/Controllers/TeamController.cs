@@ -3,6 +3,7 @@ using System.Text.Json;
 using ApiCombatGame.Data;
 using ApiCombatGame.Filters.Attributes;
 using ApiCombatGame.Models.Domain;
+using ApiCombatGame.Models.DTOs.Common;
 using ApiCombatGame.Models.DTOs.Strategy;
 using ApiCombatGame.Models.DTOs.Team;
 using ApiCombatGame.Models.Enums;
@@ -108,6 +109,12 @@ public class TeamController : ControllerBase
         await _context.SaveChangesAsync();
 
         var response = BuildTeamResponse(team, playerUnits);
+        response.Links = new Dictionary<string, ApiLink>
+        {
+            ["self"] = Links.Get($"/api/v1/team/{response.Id}"),
+            ["queue_battle"] = Links.Post("/api/v1/battle/queue", "Queue a battle with this team"),
+            ["delete"] = Links.Delete($"/api/v1/team/{response.Id}", "Delete this team")
+        };
         return Created($"/api/v1/team/{team.Id}", response);
     }
 
@@ -134,7 +141,14 @@ public class TeamController : ControllerBase
             .Where(u => unitIds.Contains(u.Id))
             .ToListAsync();
 
-        return Ok(BuildTeamResponse(team, units));
+        var response = BuildTeamResponse(team, units);
+        response.Links = new Dictionary<string, ApiLink>
+        {
+            ["self"] = Links.Get($"/api/v1/team/{response.Id}"),
+            ["queue_battle"] = Links.Post("/api/v1/battle/queue", "Queue a battle with this team"),
+            ["delete"] = Links.Delete($"/api/v1/team/{response.Id}", "Delete this team")
+        };
+        return Ok(response);
     }
 
     /// <summary>List all your teams.</summary>
@@ -166,7 +180,14 @@ public class TeamController : ControllerBase
         {
             var teamUnitIds = JsonSerializer.Deserialize<List<Guid>>(t.UnitIdsJson, JsonOptions) ?? new();
             var teamUnits = units.Where(u => teamUnitIds.Contains(u.Id)).ToList();
-            return BuildTeamResponse(t, teamUnits);
+            var r = BuildTeamResponse(t, teamUnits);
+            r.Links = new Dictionary<string, ApiLink>
+            {
+                ["self"] = Links.Get($"/api/v1/team/{r.Id}"),
+                ["queue_battle"] = Links.Post("/api/v1/battle/queue", "Queue a battle with this team"),
+                ["delete"] = Links.Delete($"/api/v1/team/{r.Id}", "Delete this team")
+            };
+            return r;
         }).ToList();
 
         return Ok(responses);
@@ -222,7 +243,14 @@ public class TeamController : ControllerBase
 
         await _context.SaveChangesAsync();
 
-        return Ok(BuildTeamResponse(team, playerUnits));
+        var response = BuildTeamResponse(team, playerUnits);
+        response.Links = new Dictionary<string, ApiLink>
+        {
+            ["self"] = Links.Get($"/api/v1/team/{response.Id}"),
+            ["queue_battle"] = Links.Post("/api/v1/battle/queue", "Queue a battle with this team"),
+            ["delete"] = Links.Delete($"/api/v1/team/{response.Id}", "Delete this team")
+        };
+        return Ok(response);
     }
 
     /// <summary>Delete a team.</summary>

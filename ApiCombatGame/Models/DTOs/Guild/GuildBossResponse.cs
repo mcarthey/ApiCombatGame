@@ -1,8 +1,16 @@
+using System.Text.Json.Serialization;
+using ApiCombatGame.Models.DTOs.Common;
+
 namespace ApiCombatGame.Models.DTOs.Guild;
 
 /// <summary>Current state of a guild's raid boss encounter.</summary>
 public class GuildBossResponse
 {
+    /// <summary>Hypermedia links to related resources (attack, leaderboard).</summary>
+    [JsonPropertyName("_links")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public Dictionary<string, ApiLink>? Links { get; set; }
+
     /// <summary>Unique boss encounter identifier.</summary>
     public Guid BossId { get; set; }
 

@@ -9,6 +9,6 @@ public class BattleQueueRequest
     [Required]
     public Guid TeamId { get; set; }
 
-    /// <summary>Battle mode: "ranked" (affects Elo rating) or "casual" (no rating change). Default: "ranked".</summary>
+    /// <summary>Battle mode: "ranked" (affects API rating) or "casual" (no rating change). Default: "ranked".</summary>
     public string Mode { get; set; } = "ranked";
 }

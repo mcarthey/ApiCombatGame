@@ -31,6 +31,16 @@ public class Unit
     /// </summary>
     public bool IsTemplate { get; set; }
 
+    /// <summary>Custom display name set by the player (null = use original name).</summary>
+    [MaxLength(100)]
+    public string? CustomName { get; set; }
+
+    /// <summary>Golden upgrade: +5% stat boost, costs 2000g, once per unit.</summary>
+    public bool IsGolden { get; set; }
+
+    /// <summary>Number of stat rerolls performed on this unit.</summary>
+    public int RerollCount { get; set; }
+
     // Relationships
     public Guid? PlayerId { get; set; }
     public Player? Player { get; set; }

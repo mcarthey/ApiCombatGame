@@ -1,10 +1,17 @@
+using System.Text.Json.Serialization;
 using ApiCombatGame.Models.Domain;
+using ApiCombatGame.Models.DTOs.Common;
 
 namespace ApiCombatGame.Models.DTOs.Battle;
 
 /// <summary>Detailed outcome of a completed battle, including the full combat log.</summary>
 public class BattleResultResponse
 {
+    /// <summary>Hypermedia links to related resources (replay, player profiles, queue again).</summary>
+    [JsonPropertyName("_links")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public Dictionary<string, ApiLink>? Links { get; set; }
+
     /// <summary>Unique battle identifier.</summary>
     public Guid BattleId { get; set; }
 
@@ -36,7 +43,7 @@ public class BattleRewards
     /// <summary>In-game currency earned. Winners earn more than losers.</summary>
     public int Currency { get; set; }
 
-    /// <summary>Elo rating change. Positive for wins, negative for losses. Zero in casual mode.</summary>
+    /// <summary>API rating change. Positive for wins, negative for losses. Zero in casual mode.</summary>
     public int RatingChange { get; set; }
 
     /// <summary>Experience points earned from this battle.</summary>

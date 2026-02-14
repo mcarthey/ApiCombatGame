@@ -3,6 +3,7 @@ using System.Text.Json;
 using ApiCombatGame.Data;
 using ApiCombatGame.Filters.Attributes;
 using ApiCombatGame.Models.Domain;
+using ApiCombatGame.Models.DTOs.Common;
 using ApiCombatGame.Models.DTOs.Team;
 using ApiCombatGame.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -43,7 +44,7 @@ public class PlayerController : ControllerBase
 
     /// <summary>Get your player profile.</summary>
     /// <remarks>
-    /// Returns your account details including level, currency balance, Elo rating,
+    /// Returns your account details including level, currency balance, API rating,
     /// and counts of owned units and configured teams.
     /// </remarks>
     /// <response code="200">Player profile with current stats.</response>
@@ -94,7 +95,18 @@ public class PlayerController : ControllerBase
             player.CreatedAt,
             player.LastLoginAt,
             RosterCount = await _context.Units.CountAsync(u => u.PlayerId == playerId && !u.IsTemplate),
-            TeamCount = await _context.Teams.CountAsync(t => t.PlayerId == playerId)
+            TeamCount = await _context.Teams.CountAsync(t => t.PlayerId == playerId),
+            _links = new Dictionary<string, ApiLink>
+            {
+                ["self"] = Links.Get("/api/v1/player/profile"),
+                ["roster"] = Links.Get("/api/v1/player/roster", "Your owned units"),
+                ["roster_available"] = Links.Get("/api/v1/player/roster/available", "Units available to unlock"),
+                ["teams"] = Links.Get("/api/v1/player/teams", "Your configured teams"),
+                ["achievements"] = Links.Get("/api/v1/player/achievements", "Your achievements"),
+                ["notifications"] = Links.Get("/api/v1/player/notifications", "Your notifications"),
+                ["leaderboard"] = Links.Get($"/api/v1/leaderboard/player/{playerId}", "Your leaderboard rank"),
+                ["queue_battle"] = Links.Post("/api/v1/battle/queue", "Enter the arena")
+            }
         });
     }
 
@@ -395,6 +407,25 @@ public class PlayerController : ControllerBase
         var playerId = GetPlayerId();
         await _notifications.UpdatePreferencesAsync(playerId, preferences);
         return NoContent();
+    }
+
+    /// <summary>Get notification digest (summary grouped by category).</summary>
+    /// <remarks>
+    /// Returns a compact digest of all unread notifications grouped by category,
+    /// with counts and the 10 most recent highlights. Use this for a quick status check
+    /// instead of paginating through all notifications.
+    /// </remarks>
+    /// <response code="200">Notification digest with category counts and highlights.</response>
+    [ApiDifficulty("beginner")]
+    [ApiGameTip("Check the digest endpoint for a quick overview before diving into individual notifications.")]
+    [ApiPrerequisite("Register and login")]
+    [HttpGet("notifications/digest")]
+    [ProducesResponseType(typeof(NotificationDigestResponse), StatusCodes.Status200OK)]
+    public async Task<ActionResult<NotificationDigestResponse>> GetNotificationDigest()
+    {
+        var playerId = GetPlayerId();
+        var digest = await _notifications.GetDigestAsync(playerId);
+        return Ok(digest);
     }
 
     private Guid GetPlayerId()

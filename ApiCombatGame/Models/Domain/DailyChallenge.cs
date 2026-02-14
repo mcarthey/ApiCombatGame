@@ -29,6 +29,10 @@ public class DailyChallenge
     /// </summary>
     public string RequirementsJson { get; set; } = "{}";
 
+    /// <summary>"easy", "medium", or "hard". Harder challenges give better rewards.</summary>
+    [MaxLength(20)]
+    public string Difficulty { get; set; } = "medium";
+
     public int Progress { get; set; } = 0;
     public int RequiredProgress { get; set; }
     public bool IsCompleted { get; set; } = false;

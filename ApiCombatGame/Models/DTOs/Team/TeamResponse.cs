@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+using ApiCombatGame.Models.DTOs.Common;
 using ApiCombatGame.Models.DTOs.Strategy;
 
 namespace ApiCombatGame.Models.DTOs.Team;
@@ -5,6 +7,11 @@ namespace ApiCombatGame.Models.DTOs.Team;
 /// <summary>A configured team with its units and battle strategy.</summary>
 public class TeamResponse
 {
+    /// <summary>Hypermedia links to related resources (queue battle, delete team).</summary>
+    [JsonPropertyName("_links")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public Dictionary<string, ApiLink>? Links { get; set; }
+
     /// <summary>Unique team identifier.</summary>
     public Guid Id { get; set; }
 
