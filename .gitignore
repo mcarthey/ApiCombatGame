@@ -46,7 +46,6 @@ Thumbs.db
 .env
 *.env.local
 appsettings.*.json
-!appsettings.Development.json
 
 ## Publish output
 publish/
