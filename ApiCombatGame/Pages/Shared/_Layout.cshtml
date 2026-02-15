@@ -38,7 +38,8 @@
     <link rel="dns-prefetch" href="https://cdn.tailwindcss.com" />
     <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
 
-    <!-- Tailwind (layout utilities only) -->
+    <!-- Tailwind (layout utilities only — CDN is intentional for this project) -->
+    <script>var _tw=console.warn;console.warn=function(m){if(typeof m==='string'&&m.includes('cdn.tailwindcss.com'))return;_tw.apply(console,arguments)};</script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>tailwind.config = { darkMode: 'class' }</script>
 
@@ -197,6 +198,9 @@
                         <a href="/api-docs/v1" class="@NavClass(currentPath.StartsWith("/api-docs"))" style="text-decoration: none;">
                             API Docs
                         </a>
+                        <a asp-page="/Contact" class="@NavClass(currentPath == "/Contact")" style="text-decoration: none;">
+                            Contact
+                        </a>
                         @if (User.Identity?.IsAuthenticated == true)
                         {
                             <a asp-page="/Dashboard" class="@NavClass(currentPath == "/Dashboard")" style="text-decoration: none;">
@@ -265,12 +269,16 @@
                     <h4 class="text-sm font-semibold mb-3" style="color: var(--md-sys-color-on-surface);">Legal</h4>
                     <div class="space-y-2">
                         <a asp-page="/Privacy" class="block text-sm link-underline" style="color: var(--md-sys-color-on-surface-variant);">Privacy Policy</a>
+                        <a asp-page="/Contact" class="block text-sm link-underline" style="color: var(--md-sys-color-on-surface-variant);">Contact</a>
                     </div>
                 </div>
             </div>
             <div class="pt-6" style="border-top: 1px solid var(--md-sys-color-outline-variant);">
                 <p class="text-xs" style="color: var(--md-sys-color-outline);">
                     &copy; @DateTime.UtcNow.Year API Combat Game. Built for developers who think in JSON.
+                    <span style="margin-left: 0.25rem;">&mdash;</span>
+                    <a href="https://learnedgeek.com" target="_blank" rel="noopener noreferrer"
+                       class="link-underline" style="color: var(--md-sys-color-outline);">Built by LearnedGeek</a>
                 </p>
             </div>
         </div>
@@ -302,6 +310,12 @@
             })();
         </script>
     }
+    <script src="~/js/celebrations.js"></script>
+    @if (User.Identity?.IsAuthenticated == true)
+    {
+        <script src="~/js/egg-hunt.js"></script>
+    }
+    <script src="https://unpkg.com/@@dotlottie/player-component@@2/dist/dotlottie-player.mjs" type="module"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

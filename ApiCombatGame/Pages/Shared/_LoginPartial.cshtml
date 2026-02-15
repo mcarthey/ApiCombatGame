@@ -6,7 +6,6 @@
         <span class="text-sm" style="color: var(--md-sys-color-on-surface-variant);">
             @User.FindFirstValue(ClaimTypes.Name)
         </span>
-        <a href="/Dashboard" class="md3-btn-text" style="text-decoration: none;">Dashboard</a>
         <form method="post" asp-page="/Auth/Logout" class="inline">
             <button type="submit" class="md3-btn-text">Logout</button>
         </form>

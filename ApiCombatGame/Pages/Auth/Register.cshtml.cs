@@ -28,6 +28,10 @@ public class RegisterModel : PageModel
 
     public async Task<IActionResult> OnPostAsync()
     {
+        // Registration temporarily disabled during pre-launch
+        ErrorMessage = "Registration is not yet open. Please check back on February 16, 2026.";
+        return Page();
+
         if (!ModelState.IsValid)
             return Page();
 
