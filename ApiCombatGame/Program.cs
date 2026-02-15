@@ -1,8 +1,10 @@
+using System.Reflection;
 using System.Text;
 using ApiCombatGame.BackgroundJobs;
 using ApiCombatGame.Data;
 using ApiCombatGame.Filters;
 using ApiCombatGame.Middleware;
+using ApiCombatGame.Models;
 using ApiCombatGame.Services;
 using ApiCombatGame.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication;
@@ -17,7 +19,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Database
 builder.Services.AddDbContext<GameDbContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // Dual authentication: JWT for API + Cookies for Web UI
 var jwtSecret = builder.Configuration["JWT:Secret"]
@@ -92,6 +94,9 @@ builder.Services.AddScoped<ISeasonService, SeasonService>();
 // Loot Drops
 builder.Services.AddScoped<ILootService, LootService>();
 
+// Easter Egg Hunt
+builder.Services.AddScoped<IEasterEggService, EasterEggService>();
+
 // Referral System
 builder.Services.AddScoped<IReferralService, ReferralService>();
 
@@ -141,6 +146,13 @@ builder.Services.AddScoped<IAchievementService, AchievementService>();
 builder.Services.AddScoped<IGuildChatService, GuildChatService>();
 builder.Services.AddScoped<IGuildStrategyService, GuildStrategyService>();
 
+// Contact page: reCAPTCHA + Email
+builder.Services.Configure<RecaptchaSettings>(builder.Configuration.GetSection("Recaptcha"));
+builder.Services.AddHttpClient<IRecaptchaService, RecaptchaService>();
+builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("Email"));
+builder.Services.AddSingleton<IEmailTemplateService, EmailTemplateService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
+
 // Admin
 builder.Services.AddScoped<IAdminAnalyticsService, AdminAnalyticsService>();
 
@@ -185,10 +197,14 @@ builder.Services.AddRazorPages();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
+    var appVersion = typeof(Program).Assembly
+        .GetCustomAttribute<AssemblyInformationalVersionAttribute>()
+        ?.InformationalVersion ?? "1.0.0";
+
     c.SwaggerDoc("v1", new OpenApiInfo
     {
         Title = "API Combat Game",
-        Version = "v1",
+        Version = appVersion,
         Description =
             "**The API IS the game.** A turn-based combat game played entirely through REST endpoints.\n\n" +
             "Register an account, recruit units to your roster, assemble teams, configure declarative battle strategies, " +
@@ -326,31 +342,42 @@ app.MapControllers();
 app.MapRazorPages();
 app.MapHealthChecks("/health");
 
-// Apply database schema and seed data on startup
+app.MapGet("/version", () =>
+{
+    var asm = typeof(Program).Assembly;
+    var infoVersion = asm.GetCustomAttribute<AssemblyInformationalVersionAttribute>()
+        ?.InformationalVersion ?? "unknown";
+    return Results.Ok(new { version = infoVersion });
+}).ExcludeFromDescription();
+
+// Apply database migrations and seed data on startup
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<GameDbContext>();
     var config = scope.ServiceProvider.GetRequiredService<IConfiguration>();
+    var startupLogger = scope.ServiceProvider.GetRequiredService<ILogger<GameDbContext>>();
 
-    if (app.Environment.IsDevelopment())
+    try
     {
-        // In development, recreate the database when schema changes are detected.
-        // EnsureCreatedAsync does NOT alter existing tables, so we must drop and recreate.
-        try
-        {
-            // Quick schema check — if a query on a new column fails, recreate
-            await context.Database.ExecuteSqlRawAsync("SELECT LoginStreak, Badge, TotalBattlesPlayed FROM Players LIMIT 0; SELECT Id FROM BattlePasses LIMIT 0; SELECT RequiredTier FROM CosmeticItems LIMIT 0; SELECT Id FROM ActivityFeedEntries LIMIT 0");
-        }
-        catch
-        {
-            await context.Database.EnsureDeletedAsync();
-        }
-    }
+        // Use migrations for relational DBs (SqlServer); EnsureCreated for InMemory (tests)
+        if (context.Database.IsRelational())
+            await context.Database.MigrateAsync();
+        else
+            await context.Database.EnsureCreatedAsync();
 
-    await context.Database.EnsureCreatedAsync();
-    await SeedData.InitializeAsync(context);
-    await Phase3SeedData.InitializeAsync(context);
-    await AdminSeedData.InitializeAsync(context, config);
+        await SeedData.InitializeAsync(context);
+        await Phase3SeedData.InitializeAsync(context);
+        await AdminSeedData.InitializeAsync(context, config);
+
+        // Seed weekly easter eggs (auto-generates if none exist for current week)
+        var eggService = scope.ServiceProvider.GetRequiredService<IEasterEggService>();
+        await eggService.GenerateWeeklyEggsAsync(DateTime.UtcNow);
+    }
+    catch (Exception ex)
+    {
+        startupLogger.LogCritical(ex, "Database startup failed");
+        throw;
+    }
 }
 
 await app.RunAsync();

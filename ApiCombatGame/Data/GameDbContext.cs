@@ -82,6 +82,10 @@ public class GameDbContext : DbContext
     // Phase 5: Content Creators
     public DbSet<ContentCreator> ContentCreators => Set<ContentCreator>();
 
+    // Easter Egg Hunt
+    public DbSet<EasterEgg> EasterEggs => Set<EasterEgg>();
+    public DbSet<EggClaim> EggClaims => Set<EggClaim>();
+
     // Phase 4: Notifications & Logging
     public DbSet<Notification> Notifications => Set<Notification>();
     public DbSet<PlayerActivity> PlayerActivities => Set<PlayerActivity>();
@@ -305,7 +309,7 @@ public class GameDbContext : DbContext
             entity.HasMany(s => s.Ratings)
                 .WithOne(r => r.Strategy)
                 .HasForeignKey(r => r.StrategyId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.Restrict);
         });
 
         // ── StrategyRating ──
@@ -633,7 +637,7 @@ public class GameDbContext : DbContext
             entity.HasOne(m => m.Instructor)
                 .WithMany()
                 .HasForeignKey(m => m.InstructorId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.Restrict);
         });
 
         // ── StudentEnrollment ──
@@ -684,6 +688,30 @@ public class GameDbContext : DbContext
             entity.HasOne(c => c.Player)
                 .WithMany()
                 .HasForeignKey(c => c.PlayerId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // ── EasterEgg ──
+        modelBuilder.Entity<EasterEgg>(entity =>
+        {
+            entity.HasIndex(e => e.Code).IsUnique();
+            entity.HasIndex(e => new { e.PagePath, e.IsActive });
+            entity.HasIndex(e => new { e.WeekStart, e.WeekEnd });
+        });
+
+        // ── EggClaim ──
+        modelBuilder.Entity<EggClaim>(entity =>
+        {
+            entity.HasIndex(c => new { c.PlayerId, c.EasterEggId }).IsUnique();
+
+            entity.HasOne(c => c.Player)
+                .WithMany()
+                .HasForeignKey(c => c.PlayerId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(c => c.EasterEgg)
+                .WithMany(e => e.Claims)
+                .HasForeignKey(c => c.EasterEggId)
                 .OnDelete(DeleteBehavior.Cascade);
         });
     }
