@@ -1,0 +1,145 @@
+@page
+@model ApiCombatGame.Pages.ContactModel
+@{
+    ViewData["Title"] = "Contact";
+    ViewData["Description"] = "Get in touch with the API Combat Game team. Report bugs, ask questions, propose collaborations, or share feedback.";
+}
+
+<div class="auth-backdrop">
+    <div class="auth-card" style="max-width: 540px;">
+        <div class="text-center mb-8">
+            <div class="w-12 h-12 rounded-2xl flex items-center justify-center mx-auto mb-4"
+                 style="background: color-mix(in srgb, var(--md-sys-color-tertiary) 12%, transparent);">
+                <span class="material-symbols-outlined"
+                      style="color: var(--md-sys-color-tertiary); font-size: 24px;">mail</span>
+            </div>
+            <h1 class="text-2xl font-bold"
+                style="color: var(--md-sys-color-on-surface); letter-spacing: -0.02em;">Contact Us</h1>
+            <p class="text-sm mt-1"
+               style="color: var(--md-sys-color-on-surface-variant);">
+                Bug reports, questions, collaborations, or licensing inquiries &mdash; we read everything.
+            </p>
+        </div>
+
+        @if (!string.IsNullOrEmpty(Model.SuccessMessage))
+        {
+            <div class="md3-alert md3-alert-success mb-6">
+                <p class="text-sm">@Model.SuccessMessage</p>
+            </div>
+        }
+
+        @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+        {
+            <div class="md3-alert md3-alert-error mb-6">
+                <p class="text-sm">@Model.ErrorMessage</p>
+            </div>
+        }
+
+        @if (string.IsNullOrEmpty(Model.SuccessMessage))
+        {
+            <form method="post" id="contactForm">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5">
+                    <div>
+                        <div class="md3-input-wrapper">
+                            <label for="Input_Name">Name</label>
+                            <input class="md3-input" id="Input_Name" name="Input.Name" type="text"
+                                   required maxlength="100" value="@Model.Input?.Name"
+                                   placeholder="Your name" />
+                        </div>
+                        <span asp-validation-for="Input.Name" class="field-validation-error"></span>
+                    </div>
+                    <div>
+                        <div class="md3-input-wrapper">
+                            <label for="Input_Email">Email</label>
+                            <input class="md3-input" id="Input_Email" name="Input.Email" type="email"
+                                   required maxlength="200" value="@Model.Input?.Email"
+                                   placeholder="your@@email.com" />
+                        </div>
+                        <span asp-validation-for="Input.Email" class="field-validation-error"></span>
+                    </div>
+                </div>
+
+                <div class="mb-5">
+                    <div class="md3-input-wrapper">
+                        <label for="Input_Subject">Subject</label>
+                        <select class="md3-input" id="Input_Subject" name="Input.Subject" required>
+                            <!option value="" disabled @(string.IsNullOrEmpty(Model.Input?.Subject) ? "selected" : "")>Choose a topic...</!option>
+                            <!option value="Bug Report" @(Model.Input?.Subject == "Bug Report" ? "selected" : "")>Bug Report</!option>
+                            <!option value="Feature Request" @(Model.Input?.Subject == "Feature Request" ? "selected" : "")>Feature Request</!option>
+                            <!option value="Support" @(Model.Input?.Subject == "Support" ? "selected" : "")>Support</!option>
+                            <!option value="Collaboration" @(Model.Input?.Subject == "Collaboration" ? "selected" : "")>Collaboration</!option>
+                            <!option value="Licensing" @(Model.Input?.Subject == "Licensing" ? "selected" : "")>Licensing</!option>
+                            <!option value="Other" @(Model.Input?.Subject == "Other" ? "selected" : "")>Other</!option>
+                        </select>
+                    </div>
+                    <span asp-validation-for="Input.Subject" class="field-validation-error"></span>
+                </div>
+
+                <div class="mb-6">
+                    <div class="md3-input-wrapper">
+                        <label for="Input_Message">Message</label>
+                        <textarea class="md3-input" id="Input_Message" name="Input.Message"
+                                  required maxlength="5000" rows="5"
+                                  placeholder="Tell us what's on your mind..."
+                                  style="resize: vertical; min-height: 120px; font-family: inherit; line-height: 1.5;">@Model.Input?.Message</textarea>
+                    </div>
+                    <span asp-validation-for="Input.Message" class="field-validation-error"></span>
+                </div>
+
+                <!-- Honeypot: hidden from humans, filled by bots -->
+                <div style="position: absolute; left: -9999px;" aria-hidden="true">
+                    <input type="text" name="Input.Website" tabindex="-1" autocomplete="off" />
+                </div>
+
+                <!-- reCAPTCHA v3 token -->
+                <input type="hidden" id="recaptchaToken" name="Input.RecaptchaToken" />
+
+                <button type="submit" class="btn-glow w-full" id="submitBtn">
+                    <span class="material-symbols-outlined" style="font-size: 18px; vertical-align: text-bottom; margin-right: 4px;">send</span>
+                    Send Message
+                </button>
+            </form>
+        }
+        else
+        {
+            <div class="text-center">
+                <a asp-page="/Index" class="md3-btn-filled" style="text-decoration: none;">
+                    Back to Home
+                </a>
+            </div>
+        }
+
+        <p class="text-center text-xs mt-6" style="color: var(--md-sys-color-outline);">
+            You can also reach us directly at
+            <a href="mailto:support@@apicombat.com" class="link-underline" style="color: var(--md-sys-color-outline);">support@@apicombat.com</a>
+        </p>
+    </div>
+</div>
+
+@section Scripts {
+    @if (!string.IsNullOrEmpty(Model.RecaptchaSiteKey))
+    {
+        <script src="https://www.google.com/recaptcha/api.js?render=@Model.RecaptchaSiteKey"></script>
+        <script>
+            document.getElementById('contactForm')?.addEventListener('submit', function (e) {
+                e.preventDefault();
+                var form = this;
+                var btn = document.getElementById('submitBtn');
+                btn.disabled = true;
+                btn.textContent = 'Sending...';
+
+                grecaptcha.ready(function () {
+                    grecaptcha.execute('@Model.RecaptchaSiteKey', { action: 'contact_form' })
+                        .then(function (token) {
+                            document.getElementById('recaptchaToken').value = token;
+                            form.submit();
+                        })
+                        .catch(function () {
+                            btn.disabled = false;
+                            btn.innerHTML = '<span class="material-symbols-outlined" style="font-size: 18px; vertical-align: text-bottom; margin-right: 4px;">send</span> Send Message';
+                        });
+                });
+            });
+        </script>
+    }
+}
