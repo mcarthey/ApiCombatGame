@@ -80,6 +80,75 @@ public class SubscriptionService : ISubscriptionService
         return session.Url!;
     }
 
+    public async Task ChangeTierAsync(Guid playerId, string newTier)
+    {
+        var subscription = await _context.Subscriptions
+            .FirstOrDefaultAsync(s => s.PlayerId == playerId && s.Status == SubscriptionStatus.Active);
+
+        if (subscription == null || string.IsNullOrEmpty(subscription.StripeSubscriptionId))
+            throw new InvalidOperationException("No active Stripe subscription found.");
+
+        var newPriceId = newTier.ToLower() switch
+        {
+            "premium" => _config["Stripe:PriceIds:Premium"],
+            "premium_plus" or "premiumplus" => _config["Stripe:PriceIds:PremiumPlus"],
+            _ => throw new InvalidOperationException($"Unknown tier: {newTier}")
+        };
+
+        if (string.IsNullOrEmpty(newPriceId))
+            throw new InvalidOperationException($"Price ID not configured for tier: {newTier}");
+
+        // Fetch current subscription to get the subscription item ID
+        var stripeService = new Stripe.SubscriptionService();
+        var stripeSub = await stripeService.GetAsync(subscription.StripeSubscriptionId);
+        var currentItem = stripeSub.Items.Data.FirstOrDefault()
+            ?? throw new InvalidOperationException("Subscription has no items.");
+
+        // Update the subscription: swap the price, enable proration, remove any pending cancellation
+        var updatedSub = await stripeService.UpdateAsync(subscription.StripeSubscriptionId, new SubscriptionUpdateOptions
+        {
+            Items = new List<SubscriptionItemOptions>
+            {
+                new()
+                {
+                    Id = currentItem.Id,
+                    Price = newPriceId,
+                }
+            },
+            ProrationBehavior = "create_prorations",
+            CancelAtPeriodEnd = false,
+        });
+
+        // Update local DB with authoritative Stripe data
+        var minValid = new DateTime(2020, 1, 1);
+        var tier = DetermineTierFromPriceId(newPriceId);
+        var amount = updatedSub.Items.Data.FirstOrDefault()?.Price?.UnitAmount ?? 0;
+
+        subscription.StripePriceId = newPriceId;
+        subscription.Tier = tier;
+        subscription.Status = SubscriptionStatus.Active;
+        subscription.AmountUsd = amount / 100m;
+        subscription.CancelAt = null;
+        subscription.CanceledAt = null;
+        subscription.UpdatedAt = DateTime.UtcNow;
+
+        if (updatedSub.CurrentPeriodStart > minValid)
+            subscription.CurrentPeriodStart = updatedSub.CurrentPeriodStart;
+        if (updatedSub.CurrentPeriodEnd > minValid)
+            subscription.CurrentPeriodEnd = updatedSub.CurrentPeriodEnd;
+
+        var player = await _context.Players.FindAsync(playerId);
+        if (player != null)
+        {
+            player.CurrentTier = tier;
+            player.DailyBattlesUsed = 0;
+        }
+
+        await _context.SaveChangesAsync();
+
+        _logger.LogInformation("Tier changed for player {PlayerId}: {Tier} (prorated)", playerId, tier);
+    }
+
     public async Task HandleSubscriptionCreatedAsync(string stripeSubscriptionId, string customerId, string priceId, DateTime periodStart, DateTime periodEnd)
     {
         // Look up the Stripe subscription to get metadata
@@ -139,11 +208,19 @@ public class SubscriptionService : ISubscriptionService
         subscription.Tier = tier;
         subscription.Status = SubscriptionStatus.Active;
         subscription.AmountUsd = amount / 100m;
-        subscription.CurrentPeriodStart = periodStart;
-        subscription.CurrentPeriodEnd = periodEnd;
         subscription.CanceledAt = null;
         subscription.CancelAt = null;
         subscription.UpdatedAt = DateTime.UtcNow;
+
+        // Use Stripe API response dates (authoritative) over webhook-deserialized params
+        // which may be epoch zero due to API version mismatch
+        var minValid = new DateTime(2020, 1, 1);
+        var bestPeriodStart = stripeSub.CurrentPeriodStart > minValid ? stripeSub.CurrentPeriodStart : periodStart;
+        var bestPeriodEnd = stripeSub.CurrentPeriodEnd > minValid ? stripeSub.CurrentPeriodEnd : periodEnd;
+        if (bestPeriodStart > minValid)
+            subscription.CurrentPeriodStart = bestPeriodStart;
+        if (bestPeriodEnd > minValid)
+            subscription.CurrentPeriodEnd = bestPeriodEnd;
 
         // Update player tier
         var playerEntity = await _context.Players.FindAsync(playerId.Value);
@@ -184,7 +261,7 @@ public class SubscriptionService : ISubscriptionService
         _logger.LogInformation("Subscription canceled for player {PlayerId}", subscription.PlayerId);
     }
 
-    public async Task HandleSubscriptionUpdatedAsync(string stripeSubscriptionId, string priceId, string status, DateTime periodStart, DateTime periodEnd)
+    public async Task HandleSubscriptionUpdatedAsync(string stripeSubscriptionId, string priceId, string status, DateTime periodStart, DateTime periodEnd, DateTime? cancelAt = null)
     {
         var subscription = await _context.Subscriptions
             .FirstOrDefaultAsync(s => s.StripeSubscriptionId == stripeSubscriptionId);
@@ -201,8 +278,46 @@ public class SubscriptionService : ISubscriptionService
             "incomplete" => SubscriptionStatus.Incomplete,
             _ => SubscriptionStatus.Active
         };
-        subscription.CurrentPeriodStart = periodStart;
-        subscription.CurrentPeriodEnd = periodEnd;
+
+        // If webhook-deserialized dates are epoch zero, fetch authoritative dates from Stripe API
+        var minValid = new DateTime(2020, 1, 1);
+        var effectiveStart = periodStart;
+        var effectiveEnd = periodEnd;
+        var effectiveCancelAt = cancelAt;
+
+        if (periodStart <= minValid || periodEnd <= minValid)
+        {
+            try
+            {
+                var stripeService = new Stripe.SubscriptionService();
+                var stripeSub = await stripeService.GetAsync(stripeSubscriptionId);
+                if (stripeSub.CurrentPeriodStart > minValid)
+                    effectiveStart = stripeSub.CurrentPeriodStart;
+                if (stripeSub.CurrentPeriodEnd > minValid)
+                    effectiveEnd = stripeSub.CurrentPeriodEnd;
+                if (stripeSub.CancelAtPeriodEnd && stripeSub.CurrentPeriodEnd > minValid)
+                    effectiveCancelAt = stripeSub.CurrentPeriodEnd;
+                else if (!stripeSub.CancelAtPeriodEnd)
+                    effectiveCancelAt = null;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to fetch subscription {SubId} from Stripe API, using webhook dates", stripeSubscriptionId);
+            }
+        }
+
+        if (effectiveStart > minValid)
+            subscription.CurrentPeriodStart = effectiveStart;
+        if (effectiveEnd > minValid)
+            subscription.CurrentPeriodEnd = effectiveEnd;
+
+        // Update CancelAt: valid date = set it, null = clear it, epoch = don't overwrite
+        if (effectiveCancelAt.HasValue && effectiveCancelAt.Value > minValid)
+            subscription.CancelAt = effectiveCancelAt;
+        else if (!effectiveCancelAt.HasValue)
+            subscription.CancelAt = null;
+        // else: bad date, keep existing value
+
         subscription.UpdatedAt = DateTime.UtcNow;
 
         var player = await _context.Players.FindAsync(subscription.PlayerId);
@@ -227,13 +342,21 @@ public class SubscriptionService : ISubscriptionService
         if (!string.IsNullOrEmpty(subscription.StripeSubscriptionId))
         {
             var service = new Stripe.SubscriptionService();
-            await service.UpdateAsync(subscription.StripeSubscriptionId, new SubscriptionUpdateOptions
+            var stripeSub = await service.UpdateAsync(subscription.StripeSubscriptionId, new SubscriptionUpdateOptions
             {
                 CancelAtPeriodEnd = true
             });
+
+            // Use Stripe's authoritative dates instead of our potentially stale DB values
+            subscription.CurrentPeriodStart = stripeSub.CurrentPeriodStart;
+            subscription.CurrentPeriodEnd = stripeSub.CurrentPeriodEnd;
+            subscription.CancelAt = stripeSub.CurrentPeriodEnd;
+        }
+        else
+        {
+            subscription.CancelAt = subscription.CurrentPeriodEnd;
         }
 
-        subscription.CancelAt = subscription.CurrentPeriodEnd;
         subscription.UpdatedAt = DateTime.UtcNow;
         await _context.SaveChangesAsync();
 

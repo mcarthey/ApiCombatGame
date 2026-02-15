@@ -40,10 +40,14 @@ public class StripeWebhookController : ControllerBase
 
             if (!string.IsNullOrEmpty(webhookSecret) && webhookSecret != "whsec_test_webhook_secret")
             {
+                // throwOnApiVersionMismatch: false — our Stripe.NET library targets 2023-10-16
+                // but the account may be on a newer API version (e.g. 2026-01-28.clover).
+                // Signature verification still works; only deserialization might differ.
                 stripeEvent = EventUtility.ConstructEvent(
                     json,
                     Request.Headers["Stripe-Signature"],
-                    webhookSecret
+                    webhookSecret,
+                    throwOnApiVersionMismatch: false
                 );
             }
             else
@@ -57,31 +61,35 @@ public class StripeWebhookController : ControllerBase
             switch (stripeEvent.Type)
             {
                 case "customer.subscription.created":
+                case "customer.subscription.updated":
                 {
                     var subscription = stripeEvent.Data.Object as Subscription;
-                    if (subscription != null)
+                    var priceId = subscription?.Items?.Data?.FirstOrDefault()?.Price?.Id;
+
+                    if (subscription == null || priceId == null)
+                    {
+                        _logger.LogWarning("Could not deserialize subscription from {EventType} event", stripeEvent.Type);
+                        break;
+                    }
+
+                    if (stripeEvent.Type == "customer.subscription.created")
                     {
                         await _subscriptionService.HandleSubscriptionCreatedAsync(
                             subscription.Id,
                             subscription.CustomerId,
-                            subscription.Items.Data[0].Price.Id,
+                            priceId,
                             subscription.CurrentPeriodStart,
                             subscription.CurrentPeriodEnd);
                     }
-                    break;
-                }
-
-                case "customer.subscription.updated":
-                {
-                    var subscription = stripeEvent.Data.Object as Subscription;
-                    if (subscription != null)
+                    else
                     {
                         await _subscriptionService.HandleSubscriptionUpdatedAsync(
                             subscription.Id,
-                            subscription.Items.Data[0].Price.Id,
+                            priceId,
                             subscription.Status,
                             subscription.CurrentPeriodStart,
-                            subscription.CurrentPeriodEnd);
+                            subscription.CurrentPeriodEnd,
+                            subscription.CancelAtPeriodEnd ? subscription.CurrentPeriodEnd : null);
                     }
                     break;
                 }
@@ -121,6 +129,11 @@ public class StripeWebhookController : ControllerBase
         {
             _logger.LogError(ex, "Stripe webhook signature verification failed");
             return BadRequest(new { error = "Webhook signature verification failed." });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error processing Stripe webhook event");
+            return Ok();  // Return 200 to prevent Stripe from retrying unprocessable events
         }
     }
 }

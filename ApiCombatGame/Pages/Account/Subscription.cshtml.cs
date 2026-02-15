@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
+using Stripe;
 
 namespace ApiCombatGame.Pages.Account;
 
@@ -31,16 +32,30 @@ public class SubscriptionModel : PageModel
 
     public string CurrentTier { get; set; } = "Free";
     public bool ShowSuccessMessage { get; set; }
+    public bool ShowProcessingMessage { get; set; }
     public bool ShowCanceledMessage { get; set; }
     public DateTime? NextBillingDate { get; set; }
     public decimal MonthlyAmount { get; set; }
     public bool CanCancel { get; set; }
+    public bool IsCancellationPending { get; set; }
+    public DateTime? ExpiresOn { get; set; }
+    public DateTime? CurrentPeriodStart { get; set; }
 
     public async Task OnGetAsync(bool? success, bool? canceled)
     {
-        ShowSuccessMessage = success == true;
         ShowCanceledMessage = canceled == true;
         await LoadSubscriptionDataAsync();
+
+        // Only show success if the player's tier actually upgraded.
+        // If Stripe redirected with ?success=true but the webhook hasn't
+        // been processed yet, show a "processing" message instead.
+        if (success == true)
+        {
+            if (CurrentTier != "Free")
+                ShowSuccessMessage = true;
+            else
+                ShowProcessingMessage = true;
+        }
     }
 
     public async Task<IActionResult> OnPostUpgradeAsync(string tier)
@@ -48,13 +63,23 @@ public class SubscriptionModel : PageModel
         var playerId = GetPlayerId();
         try
         {
+            // If player already has an active Stripe subscription, change tier directly
+            // (handles proration automatically). Otherwise create a new Checkout Session.
+            var existingSub = await _subscriptionService.GetSubscriptionAsync(playerId);
+            if (existingSub != null && !string.IsNullOrEmpty(existingSub.StripeSubscriptionId)
+                && existingSub.Status == Models.Enums.SubscriptionStatus.Active)
+            {
+                await _subscriptionService.ChangeTierAsync(playerId, tier);
+                return RedirectToPage(new { success = true });
+            }
+
             var baseUrl = $"{Request.Scheme}://{Request.Host}";
             var checkoutUrl = await _subscriptionService.CreateCheckoutSessionAsync(playerId, tier, baseUrl);
             return Redirect(checkoutUrl);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to create checkout session for player {PlayerId}", playerId);
+            _logger.LogError(ex, "Failed to upgrade subscription for player {PlayerId}", playerId);
             await LoadSubscriptionDataAsync();
             return Page();
         }
@@ -103,9 +128,57 @@ public class SubscriptionModel : PageModel
         var sub = await _subscriptionService.GetSubscriptionAsync(playerId);
         if (sub != null && sub.Status == SubscriptionStatus.Active)
         {
-            NextBillingDate = sub.CurrentPeriodEnd;
             MonthlyAmount = sub.AmountUsd;
-            CanCancel = true;
+
+            var minValid = new DateTime(2020, 1, 1);
+
+            // Self-heal: if DB dates are bad, fetch authoritative dates from Stripe API
+            if ((sub.CurrentPeriodStart <= minValid || sub.CurrentPeriodEnd <= minValid)
+                && !string.IsNullOrEmpty(sub.StripeSubscriptionId))
+            {
+                try
+                {
+                    var stripeService = new Stripe.SubscriptionService();
+                    var stripeSub = await stripeService.GetAsync(sub.StripeSubscriptionId);
+
+                    if (stripeSub.CurrentPeriodStart > minValid)
+                        sub.CurrentPeriodStart = stripeSub.CurrentPeriodStart;
+                    if (stripeSub.CurrentPeriodEnd > minValid)
+                        sub.CurrentPeriodEnd = stripeSub.CurrentPeriodEnd;
+                    if (stripeSub.Items.Data.FirstOrDefault()?.Price?.UnitAmount is long unitAmount)
+                        sub.AmountUsd = unitAmount / 100m;
+
+                    // Persist the corrected dates so future loads don't need the API call
+                    await _context.SaveChangesAsync();
+                    MonthlyAmount = sub.AmountUsd;
+
+                    _logger.LogInformation("Self-healed subscription dates from Stripe for player {PlayerId}: {Start} – {End}",
+                        playerId, sub.CurrentPeriodStart, sub.CurrentPeriodEnd);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Failed to refresh subscription dates from Stripe for player {PlayerId}", playerId);
+                }
+            }
+
+            var periodStart = sub.CurrentPeriodStart > minValid ? sub.CurrentPeriodStart : (DateTime?)null;
+            var periodEnd = sub.CurrentPeriodEnd > minValid ? sub.CurrentPeriodEnd : (DateTime?)null;
+
+            CurrentPeriodStart = periodStart;
+
+            if (sub.CancelAt.HasValue)
+            {
+                IsCancellationPending = true;
+                ExpiresOn = sub.CancelAt.Value > minValid
+                    ? sub.CancelAt.Value
+                    : periodEnd;
+                CanCancel = false; // Already scheduled
+            }
+            else
+            {
+                NextBillingDate = periodEnd;
+                CanCancel = true;
+            }
         }
     }
 

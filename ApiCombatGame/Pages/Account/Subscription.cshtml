@@ -9,10 +9,20 @@
 
     @if (Model.ShowSuccessMessage)
     {
-        <div class="md3-alert-success p-4 mb-8">
+        <div class="md3-alert-success p-4 mb-8" data-celebrate="confetti">
             <div class="flex items-center">
                 <span class="material-symbols-outlined" style="color: var(--md-sys-color-primary); margin-right: 12px;">check_circle</span>
-                <p class="text-sm" style="color: var(--md-sys-color-on-surface);">Subscription successfully updated! Your new benefits are active now.</p>
+                <p class="text-sm" style="color: var(--md-sys-color-on-surface);">Subscription successfully updated! You are now on the <strong>@(Model.CurrentTier == "PremiumPlus" ? "Premium Plus" : Model.CurrentTier)</strong> plan.</p>
+            </div>
+        </div>
+    }
+
+    @if (Model.ShowProcessingMessage)
+    {
+        <div class="md3-alert-warning p-4 mb-8">
+            <div class="flex items-center">
+                <span class="material-symbols-outlined" style="color: var(--md-sys-color-tertiary); margin-right: 12px;">schedule</span>
+                <p class="text-sm" style="color: var(--md-sys-color-on-surface);">Your payment was received. Your subscription is being activated — this usually takes a few seconds. Please refresh this page shortly.</p>
             </div>
         </div>
     }
@@ -22,32 +32,66 @@
         <div class="md3-alert-warning p-4 mb-8">
             <div class="flex items-center">
                 <span class="material-symbols-outlined" style="color: var(--md-sys-color-error); margin-right: 12px;">warning</span>
-                <p class="text-sm" style="color: var(--md-sys-color-on-surface);">Your subscription has been scheduled for cancellation at the end of the billing period.</p>
+                <p class="text-sm" style="color: var(--md-sys-color-on-surface);">
+                    Your subscription has been canceled.
+                    @if (Model.ExpiresOn.HasValue)
+                    {
+                        <text>You'll retain access to <strong>@Model.CurrentTier</strong> features until <strong>@Model.ExpiresOn.Value.ToString("MMMM dd, yyyy")</strong>.</text>
+                    }
+                    else
+                    {
+                        <text>You'll retain access until the end of your current billing period.</text>
+                    }
+                </p>
             </div>
         </div>
     }
 
     <!-- Current Plan Status -->
     <div class="md3-card p-6 mb-8">
-        <div class="flex items-center justify-between">
-            <div>
-                <h2 class="text-lg font-semibold" style="color: var(--md-sys-color-on-surface);">Current Plan</h2>
-                <p class="text-3xl font-bold mt-2" style="color: var(--md-sys-color-primary);">@Model.CurrentTier</p>
-                @if (Model.NextBillingDate.HasValue)
-                {
-                    <p class="text-sm mt-1" style="color: var(--md-sys-color-on-surface-variant);">
-                        Next billing: @Model.NextBillingDate.Value.ToString("MMMM dd, yyyy") ($@Model.MonthlyAmount)
-                    </p>
-                }
-            </div>
-            @if (Model.CanCancel)
+        <div>
+            <h2 class="text-lg font-semibold" style="color: var(--md-sys-color-on-surface);">Current Plan</h2>
+            <p class="text-3xl font-bold mt-2" style="color: var(--md-sys-color-primary);">@(Model.CurrentTier == "PremiumPlus" ? "Premium Plus" : Model.CurrentTier)</p>
+
+            @if (Model.CurrentTier != "Free")
             {
-                <div>
-                    <button class="md3-btn-text btn-error"
-                                    onclick="if(confirm('Are you sure you want to cancel? Access continues until end of billing period.')){document.getElementById('cancelForm').submit();}">
-                        Cancel Subscription
-                    </button>
-                    <form id="cancelForm" method="post" asp-page-handler="Cancel" class="hidden"></form>
+                <div class="mt-3 text-sm" style="color: var(--md-sys-color-on-surface-variant);">
+                    @if (Model.IsCancellationPending)
+                    {
+                        <p style="color: var(--md-sys-color-error); font-weight: 500;">
+                            <span class="material-symbols-outlined" style="font-size: 16px; vertical-align: text-bottom; margin-right: 4px;">event_busy</span>
+                            @if (Model.ExpiresOn.HasValue)
+                            {
+                                <text>Expires on @Model.ExpiresOn.Value.ToString("MMMM dd, yyyy") — no further charges</text>
+                            }
+                            else
+                            {
+                                <text>Cancellation pending — no further charges</text>
+                            }
+                        </p>
+                    }
+                    else if (Model.NextBillingDate.HasValue)
+                    {
+                        <p>
+                            <span class="material-symbols-outlined" style="font-size: 16px; vertical-align: text-bottom; margin-right: 4px;">event</span>
+                            Next billing: <strong>@Model.NextBillingDate.Value.ToString("MMMM dd, yyyy")</strong> ($@Model.MonthlyAmount)
+                        </p>
+                    }
+                    @if (Model.CurrentPeriodStart.HasValue && (Model.NextBillingDate.HasValue || Model.ExpiresOn.HasValue))
+                    {
+                        var endDate = Model.ExpiresOn ?? Model.NextBillingDate;
+                        <p class="mt-1">
+                            <span class="material-symbols-outlined" style="font-size: 16px; vertical-align: text-bottom; margin-right: 4px;">date_range</span>
+                            Current period: @Model.CurrentPeriodStart.Value.ToString("MMM dd") – @endDate!.Value.ToString("MMM dd, yyyy")
+                        </p>
+                    }
+                    @if (Model.MonthlyAmount > 0 && !Model.IsCancellationPending)
+                    {
+                        <p class="mt-1">
+                            <span class="material-symbols-outlined" style="font-size: 16px; vertical-align: text-bottom; margin-right: 4px;">payments</span>
+                            $@Model.MonthlyAmount/month
+                        </p>
+                    }
                 </div>
             }
         </div>
@@ -75,10 +119,18 @@
                     Current Plan
                 </button>
             }
+            else if (Model.IsCancellationPending)
+            {
+                <button class="md3-btn-tonal w-full" disabled>
+                    Cancellation Pending
+                </button>
+            }
             else
             {
                 <form method="post" asp-page-handler="Downgrade">
-                    <button type="submit" class="md3-btn-outlined w-full">Downgrade to Free</button>
+                    <button type="submit" class="md3-btn-outlined w-full"
+                            data-tier-from="@Model.CurrentTier" data-tier-to="Free">
+                        Downgrade to Free</button>
                 </form>
             }
         </div>
@@ -115,7 +167,10 @@
             {
                 <form method="post" asp-page-handler="Upgrade">
                     <input type="hidden" name="tier" value="premium" />
-                    <button type="submit" class="md3-btn-filled w-full">Upgrade to Premium</button>
+                    <button type="submit" class="md3-btn-filled w-full"
+                            data-tier-from="@Model.CurrentTier" data-tier-to="Premium">
+                        @(Model.CurrentTier == "PremiumPlus" ? "Switch to Premium" : "Upgrade to Premium")
+                    </button>
                 </form>
             }
         </div>
@@ -145,7 +200,10 @@
             {
                 <form method="post" asp-page-handler="Upgrade">
                     <input type="hidden" name="tier" value="premium_plus" />
-                    <button type="submit" class="md3-btn-filled w-full">Upgrade to Premium Plus</button>
+                    <button type="submit" class="md3-btn-filled w-full"
+                            data-tier-from="@Model.CurrentTier" data-tier-to="PremiumPlus">
+                        @(Model.CurrentTier == "Premium" ? "Switch to Premium Plus" : "Upgrade to Premium Plus")
+                    </button>
                 </form>
             }
         </div>
@@ -178,3 +236,146 @@
         </div>
     </div>
 </div>
+
+<!-- Tier Change Confirmation Dialog -->
+<dialog id="tier-dialog" class="md3-dialog">
+    <div class="md3-dialog-header">
+        <div id="td-icon" class="md3-dialog-icon">
+            <span class="material-symbols-outlined" style="font-size: 28px;" id="td-icon-symbol"></span>
+        </div>
+        <h3 id="td-title"></h3>
+        <p id="td-subtitle"></p>
+    </div>
+    <div class="md3-dialog-body">
+        <ul id="td-features" class="md3-dialog-features"></ul>
+        <p id="td-note" class="md3-dialog-note"></p>
+    </div>
+    <div class="md3-dialog-actions">
+        <button class="md3-btn-text" id="td-cancel">Cancel</button>
+        <button class="md3-btn-filled" id="td-confirm"></button>
+    </div>
+</dialog>
+
+@section Scripts {
+<script>
+(function () {
+    const dialog = document.getElementById('tier-dialog');
+    const cancelBtn = document.getElementById('td-cancel');
+    const confirmBtn = document.getElementById('td-confirm');
+    let pendingForm = null;
+
+    const TIER_RANK = { Free: 0, Premium: 1, PremiumPlus: 2 };
+    const TIER_LABEL = { Free: 'Free', Premium: 'Premium', PremiumPlus: 'Premium Plus' };
+
+    const FEATURES = {
+        Premium: [
+            { icon: 'all_inclusive', text: 'Unlimited battles \u2014 no daily cap' },
+            { icon: 'catching_pokemon', text: '50+ units across all rarities' },
+            { icon: 'speed', text: 'Priority matchmaking' },
+            { icon: 'groups', text: '10 team slots' },
+            { icon: 'analytics', text: 'Advanced statistics' }
+        ],
+        PremiumPlus: [
+            { icon: 'code', text: 'Scripting engine (Lua) \u2014 automate strategies' },
+            { icon: 'insights', text: 'Advanced analytics \u2014 deep battle insights' },
+            { icon: 'bolt', text: '2x API rate limits \u2014 double the firepower' },
+            { icon: 'school', text: 'Monthly coaching session' }
+        ]
+    };
+
+    function buildDialog(from, to) {
+        const isUpgrade = TIER_RANK[to] > TIER_RANK[from];
+        const iconEl = document.getElementById('td-icon');
+        const iconSymbol = document.getElementById('td-icon-symbol');
+        const title = document.getElementById('td-title');
+        const subtitle = document.getElementById('td-subtitle');
+        const featureList = document.getElementById('td-features');
+        const note = document.getElementById('td-note');
+
+        featureList.innerHTML = '';
+
+        if (isUpgrade) {
+            iconEl.className = 'md3-dialog-icon md3-dialog-icon--upgrade';
+            iconSymbol.textContent = 'rocket_launch';
+
+            if (to === 'PremiumPlus' && from === 'Premium') {
+                title.textContent = 'Go all-in!';
+                subtitle.textContent = 'On top of everything you already have:';
+                FEATURES.PremiumPlus.forEach(function (f) { addFeature(featureList, f, true); });
+            } else if (to === 'PremiumPlus') {
+                title.textContent = 'The ultimate combat package';
+                subtitle.textContent = 'Everything you need to dominate:';
+                FEATURES.Premium.forEach(function (f) { addFeature(featureList, f, true); });
+                FEATURES.PremiumPlus.forEach(function (f) { addFeature(featureList, f, true); });
+            } else {
+                title.textContent = 'Ready to power up?';
+                subtitle.textContent = 'Premium unlocks:';
+                FEATURES.Premium.forEach(function (f) { addFeature(featureList, f, true); });
+            }
+
+            note.textContent = 'Your upgrade takes effect immediately.';
+            confirmBtn.textContent = 'Upgrade Now';
+            confirmBtn.className = 'md3-btn-filled';
+        } else {
+            iconEl.className = 'md3-dialog-icon md3-dialog-icon--downgrade';
+            iconSymbol.textContent = 'info';
+
+            if (to === 'Free') {
+                title.textContent = 'Downgrade to Free?';
+                subtitle.textContent = 'You\'ll lose access to:';
+                var allFeatures = from === 'PremiumPlus'
+                    ? FEATURES.Premium.concat(FEATURES.PremiumPlus)
+                    : FEATURES.Premium;
+                allFeatures.forEach(function (f) { addFeature(featureList, f, false); });
+                note.textContent = 'You\'ll be limited to 10 battles/day. Current features stay active until the end of your billing period.';
+            } else {
+                title.textContent = 'Switch to ' + TIER_LABEL[to] + '?';
+                subtitle.textContent = 'You\'ll lose these Premium Plus features:';
+                FEATURES.PremiumPlus.forEach(function (f) { addFeature(featureList, f, false); });
+                note.textContent = 'You\'ll keep all core Premium features. The change takes effect immediately with prorated billing.';
+            }
+
+            confirmBtn.textContent = to === 'Free' ? 'Downgrade' : 'Switch Plan';
+            confirmBtn.className = 'md3-btn-outlined';
+        }
+    }
+
+    function addFeature(list, feature, isGain) {
+        var li = document.createElement('li');
+        li.className = isGain ? 'feature-gain' : 'feature-lose';
+        li.innerHTML = '<span class="material-symbols-outlined">' +
+            (isGain ? 'add_circle' : 'remove_circle') +
+            '</span><span>' + feature.text + '</span>';
+        list.appendChild(li);
+    }
+
+    // Intercept tier-change buttons
+    document.querySelectorAll('[data-tier-from]').forEach(function (btn) {
+        btn.addEventListener('click', function (e) {
+            e.preventDefault();
+            pendingForm = btn.closest('form');
+            buildDialog(btn.dataset.tierFrom, btn.dataset.tierTo);
+            dialog.showModal();
+        });
+    });
+
+    cancelBtn.addEventListener('click', function () {
+        dialog.close();
+        pendingForm = null;
+    });
+
+    confirmBtn.addEventListener('click', function () {
+        dialog.close();
+        if (pendingForm) pendingForm.submit();
+    });
+
+    // Close on backdrop click
+    dialog.addEventListener('click', function (e) {
+        if (e.target === dialog) {
+            dialog.close();
+            pendingForm = null;
+        }
+    });
+})();
+</script>
+}
