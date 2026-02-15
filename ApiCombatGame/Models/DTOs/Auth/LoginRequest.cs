@@ -5,9 +5,10 @@ namespace ApiCombatGame.Models.DTOs.Auth;
 /// <summary>Credentials for authenticating an existing player.</summary>
 public class LoginRequest
 {
-    /// <summary>Your registered username (case-sensitive).</summary>
+    /// <summary>Your registered email address.</summary>
     [Required]
-    public string Username { get; set; } = string.Empty;
+    [EmailAddress]
+    public string Email { get; set; } = string.Empty;
 
     /// <summary>Your account password.</summary>
     [Required]

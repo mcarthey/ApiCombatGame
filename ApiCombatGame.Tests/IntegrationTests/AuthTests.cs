@@ -91,10 +91,11 @@ public class AuthTests : IClassFixture<WebApplicationFactory<Program>>
         var password = "SecurePass123!";
 
         // Register first
+        var email = $"login_{Guid.NewGuid():N}@example.com";
         var registerRequest = new RegisterRequest
         {
             Username = username,
-            Email = $"login_{Guid.NewGuid():N}@example.com",
+            Email = email,
             Password = password
         };
         await _client.PostAsJsonAsync("/api/v1/auth/register", registerRequest);
@@ -102,7 +103,7 @@ public class AuthTests : IClassFixture<WebApplicationFactory<Program>>
         // Login
         var loginRequest = new LoginRequest
         {
-            Username = username,
+            Email = email,
             Password = password
         };
 
@@ -120,18 +121,19 @@ public class AuthTests : IClassFixture<WebApplicationFactory<Program>>
     public async Task Login_WithInvalidPassword_ReturnsUnauthorized()
     {
         var username = $"badlogin_{Guid.NewGuid():N}";
+        var email = $"bad_{Guid.NewGuid():N}@example.com";
 
         var registerRequest = new RegisterRequest
         {
             Username = username,
-            Email = $"bad_{Guid.NewGuid():N}@example.com",
+            Email = email,
             Password = "SecurePass123!"
         };
         await _client.PostAsJsonAsync("/api/v1/auth/register", registerRequest);
 
         var loginRequest = new LoginRequest
         {
-            Username = username,
+            Email = email,
             Password = "WrongPassword!"
         };
 

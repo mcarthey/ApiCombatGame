@@ -32,10 +32,10 @@
         <form method="post">
             <div class="mb-5">
                 <div class="md3-input-wrapper">
-                    <label for="Input_Username">Username</label>
-                    <input class="md3-input" id="Input_Username" name="Input.Username" type="text" required value="@Model.Input?.Username" placeholder="Enter your username" />
+                    <label for="Input_Email">Email</label>
+                    <input class="md3-input" id="Input_Email" name="Input.Email" type="email" required value="@Model.Input?.Email" placeholder="Enter your email address" />
                 </div>
-                <span asp-validation-for="Input.Username" class="field-validation-error"></span>
+                <span asp-validation-for="Input.Email" class="field-validation-error"></span>
             </div>
 
             <div class="mb-6">

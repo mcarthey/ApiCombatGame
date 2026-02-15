@@ -63,13 +63,13 @@ public class AuthController : ControllerBase
     /// Returns a JWT Bearer token valid for 60 minutes. Include it in the Authorization header
     /// of all subsequent requests as `Bearer &lt;token&gt;`.
     /// </remarks>
-    /// <param name="request">Login credentials (username and password).</param>
+    /// <param name="request">Login credentials (email and password).</param>
     /// <response code="200">Authentication successful. Contains player ID, token, and expiration.</response>
-    /// <response code="401">Invalid username or password.</response>
+    /// <response code="401">Invalid email or password.</response>
     [ApiDifficulty("beginner")]
     [ApiGameTip("Tokens expire after 60 minutes. Set a timer or use the /auth/refresh endpoint before it lapses to avoid re-entering credentials.")]
     [ApiPrerequisite("Register an account")]
-    [ApiExample("Login with credentials", Request = "{\n  \"username\": \"DragonSlayer42\",\n  \"password\": \"SecurePass123!\"\n}", Response = "{\n  \"playerId\": \"a1b2c3d4-e5f6-7890-abcd-ef1234567890\",\n  \"username\": \"DragonSlayer42\",\n  \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\",\n  \"expiresAt\": \"2025-06-15T16:30:00Z\"\n}")]
+    [ApiExample("Login with credentials", Request = "{\n  \"email\": \"player@example.com\",\n  \"password\": \"SecurePass123!\"\n}", Response = "{\n  \"playerId\": \"a1b2c3d4-e5f6-7890-abcd-ef1234567890\",\n  \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\",\n  \"expiresAt\": \"2025-06-15T16:30:00Z\"\n}")]
     [HttpPost("login")]
     [ProducesResponseType(typeof(AuthResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]

@@ -145,10 +145,10 @@ public class FullGameFlowTests : IntegrationTestBase
         var profileResponse = await client.GetAsync("/api/v1/player/profile");
         Assert.Equal(HttpStatusCode.OK, profileResponse.StatusCode);
 
-        // Step 2: Login with same credentials
+        // Step 2: Login with same credentials (email-based)
         var loginRequest = new LoginRequest
         {
-            Username = username,
+            Email = $"{username}@test.com",
             Password = "SecurePass123!"
         };
 

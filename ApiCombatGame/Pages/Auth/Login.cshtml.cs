@@ -38,11 +38,11 @@ public class LoginModel : PageModel
             return Page();
 
         var player = await _context.Players
-            .FirstOrDefaultAsync(p => p.Username == Input.Username);
+            .FirstOrDefaultAsync(p => p.Email == Input.Email);
 
         if (player == null || !BCrypt.Net.BCrypt.Verify(Input.Password, player.PasswordHash))
         {
-            ErrorMessage = "Invalid username or password.";
+            ErrorMessage = "Invalid email or password.";
             return Page();
         }
 
@@ -84,7 +84,8 @@ public class LoginModel : PageModel
     public class LoginInputModel
     {
         [Required]
-        public string Username { get; set; } = string.Empty;
+        [EmailAddress]
+        public string Email { get; set; } = string.Empty;
 
         [Required]
         [DataType(DataType.Password)]

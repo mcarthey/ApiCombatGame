@@ -103,10 +103,10 @@ public class AuthService : IAuthService
     public async Task<AuthResponse> LoginAsync(LoginRequest request)
     {
         var player = await _context.Players
-            .FirstOrDefaultAsync(p => p.Username == request.Username);
+            .FirstOrDefaultAsync(p => p.Email == request.Email);
 
         if (player == null || !BCrypt.Net.BCrypt.Verify(request.Password, player.PasswordHash))
-            throw new UnauthorizedAccessException("Invalid username or password.");
+            throw new UnauthorizedAccessException("Invalid email or password.");
 
         player.LastLoginAt = DateTime.UtcNow;
         await _context.SaveChangesAsync();
