@@ -70,7 +70,7 @@
 
         <!-- Streaks & Performance -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-            <!-- Streaks -->
+            <!-- Streaks (Premium - Basic) -->
             <div class="md3-card p-6">
                 <h3 class="text-lg font-semibold mb-4" style="color: var(--md-sys-color-on-surface);">
                     <span class="material-symbols-outlined" style="vertical-align: middle; margin-right: 8px; color: var(--md-sys-color-primary);">trending_up</span>
@@ -80,7 +80,17 @@
                     <div class="flex justify-between items-center">
                         <div>
                             <p class="text-sm font-medium" style="color: var(--md-sys-color-on-surface);">Current Win Streak</p>
-                            <p class="text-xs mt-1" style="color: var(--md-sys-color-on-surface-variant);">Longest: @Model.Analytics.LongestWinStreak</p>
+                            @if (Model.IsPremiumPlus)
+                            {
+                                <p class="text-xs mt-1" style="color: var(--md-sys-color-on-surface-variant);">Longest: @Model.Analytics.LongestWinStreak</p>
+                            }
+                            else
+                            {
+                                <p class="text-xs mt-1" style="color: var(--md-sys-color-on-surface-variant);">
+                                    <span class="material-symbols-outlined" style="font-size: 12px; vertical-align: middle;">lock</span>
+                                    Longest: Premium Plus
+                                </p>
+                            }
                         </div>
                         <span class="text-2xl font-bold px-4 py-2 rounded-xl" style="background: color-mix(in srgb, #22c55e 15%, transparent); color: #22c55e;">
                             @Model.Analytics.CurrentWinStreak
@@ -90,7 +100,17 @@
                     <div class="flex justify-between items-center">
                         <div>
                             <p class="text-sm font-medium" style="color: var(--md-sys-color-on-surface);">Current Loss Streak</p>
-                            <p class="text-xs mt-1" style="color: var(--md-sys-color-on-surface-variant);">Longest: @Model.Analytics.LongestLossStreak</p>
+                            @if (Model.IsPremiumPlus)
+                            {
+                                <p class="text-xs mt-1" style="color: var(--md-sys-color-on-surface-variant);">Longest: @Model.Analytics.LongestLossStreak</p>
+                            }
+                            else
+                            {
+                                <p class="text-xs mt-1" style="color: var(--md-sys-color-on-surface-variant);">
+                                    <span class="material-symbols-outlined" style="font-size: 12px; vertical-align: middle;">lock</span>
+                                    Longest: Premium Plus
+                                </p>
+                            }
                         </div>
                         <span class="text-2xl font-bold px-4 py-2 rounded-xl" style="background: var(--md-sys-color-error-container); color: var(--md-sys-color-on-error-container);">
                             @Model.Analytics.CurrentLossStreak
@@ -99,8 +119,18 @@
                 </div>
             </div>
 
-            <!-- Performance Metrics -->
-            <div class="md3-card p-6">
+            <!-- Performance Metrics (Premium Plus Only) -->
+            <div class="md3-card p-6 relative" style="@(Model.IsPremiumPlus ? "" : "opacity: 0.6;")">
+                @if (!Model.IsPremiumPlus)
+                {
+                    <div class="absolute inset-0 flex items-center justify-center pointer-events-none" style="z-index: 10;">
+                        <div class="px-4 py-2 rounded-lg font-semibold text-sm"
+                             style="background: linear-gradient(135deg, var(--md-sys-color-tertiary), var(--md-sys-color-secondary)); color: var(--md-sys-color-on-tertiary); box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);">
+                            <span class="material-symbols-outlined" style="font-size: 16px; vertical-align: middle;">lock</span>
+                            PREMIUM PLUS
+                        </div>
+                    </div>
+                }
                 <h3 class="text-lg font-semibold mb-4" style="color: var(--md-sys-color-on-surface);">
                     <span class="material-symbols-outlined" style="vertical-align: middle; margin-right: 8px; color: var(--md-sys-color-primary);">leaderboard</span>
                     Performance Metrics
@@ -173,12 +203,22 @@
             </div>
         </div>
 
-        <!-- Class Analytics -->
+        <!-- Class Analytics (Premium Plus Only) -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
             <!-- Most Used Classes -->
             @if (Model.Analytics.MostUsedClasses.Count > 0)
             {
-                <div class="md3-card p-6">
+                <div class="md3-card p-6 relative" style="@(Model.IsPremiumPlus ? "" : "opacity: 0.6;")">
+                    @if (!Model.IsPremiumPlus)
+                    {
+                        <div class="absolute inset-0 flex items-center justify-center pointer-events-none" style="z-index: 10;">
+                            <div class="px-4 py-2 rounded-lg font-semibold text-sm"
+                                 style="background: linear-gradient(135deg, var(--md-sys-color-tertiary), var(--md-sys-color-secondary)); color: var(--md-sys-color-on-tertiary); box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);">
+                                <span class="material-symbols-outlined" style="font-size: 16px; vertical-align: middle;">lock</span>
+                                PREMIUM PLUS
+                            </div>
+                        </div>
+                    }
                     <h3 class="text-lg font-semibold mb-4" style="color: var(--md-sys-color-on-surface);">
                         <span class="material-symbols-outlined" style="vertical-align: middle; margin-right: 8px; color: var(--md-sys-color-primary);">catching_pokemon</span>
                         Most Used Classes
@@ -203,7 +243,17 @@
             <!-- Win Rate by Class -->
             @if (Model.Analytics.WinRateByClass.Count > 0)
             {
-                <div class="md3-card p-6">
+                <div class="md3-card p-6 relative" style="@(Model.IsPremiumPlus ? "" : "opacity: 0.6;")">
+                    @if (!Model.IsPremiumPlus)
+                    {
+                        <div class="absolute inset-0 flex items-center justify-center pointer-events-none" style="z-index: 10;">
+                            <div class="px-4 py-2 rounded-lg font-semibold text-sm"
+                                 style="background: linear-gradient(135deg, var(--md-sys-color-tertiary), var(--md-sys-color-secondary)); color: var(--md-sys-color-on-tertiary); box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);">
+                                <span class="material-symbols-outlined" style="font-size: 16px; vertical-align: middle;">lock</span>
+                                PREMIUM PLUS
+                            </div>
+                        </div>
+                    }
                     <h3 class="text-lg font-semibold mb-4" style="color: var(--md-sys-color-on-surface);">
                         <span class="material-symbols-outlined" style="vertical-align: middle; margin-right: 8px; color: var(--md-sys-color-primary);">bar_chart</span>
                         Win Rate by Class
@@ -229,11 +279,21 @@
             }
         </div>
 
-        <!-- Peak Performance -->
+        <!-- Peak Performance (Premium Plus Only) -->
         @if (Model.Analytics.BestDayDate.HasValue)
         {
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                <div class="md3-card p-6" style="background: color-mix(in srgb, var(--md-sys-color-tertiary) 5%, var(--md-sys-color-surface-container-low)); border-left: 4px solid var(--md-sys-color-tertiary);">
+                <div class="md3-card p-6 relative" style="background: color-mix(in srgb, var(--md-sys-color-tertiary) 5%, var(--md-sys-color-surface-container-low)); border-left: 4px solid var(--md-sys-color-tertiary); @(Model.IsPremiumPlus ? "" : "opacity: 0.6;")">
+                    @if (!Model.IsPremiumPlus)
+                    {
+                        <div class="absolute inset-0 flex items-center justify-center pointer-events-none" style="z-index: 10;">
+                            <div class="px-4 py-2 rounded-lg font-semibold text-sm"
+                                 style="background: linear-gradient(135deg, var(--md-sys-color-tertiary), var(--md-sys-color-secondary)); color: var(--md-sys-color-on-tertiary); box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);">
+                                <span class="material-symbols-outlined" style="font-size: 16px; vertical-align: middle;">lock</span>
+                                PREMIUM PLUS
+                            </div>
+                        </div>
+                    }
                     <div class="flex items-start justify-between">
                         <div>
                             <h3 class="text-sm font-semibold mb-1" style="color: var(--md-sys-color-tertiary);">
@@ -247,7 +307,17 @@
                     </div>
                 </div>
 
-                <div class="md3-card p-6" style="background: color-mix(in srgb, var(--md-sys-color-secondary) 5%, var(--md-sys-color-surface-container-low)); border-left: 4px solid var(--md-sys-color-secondary);">
+                <div class="md3-card p-6 relative" style="background: color-mix(in srgb, var(--md-sys-color-secondary) 5%, var(--md-sys-color-surface-container-low)); border-left: 4px solid var(--md-sys-color-secondary); @(Model.IsPremiumPlus ? "" : "opacity: 0.6;")">
+                    @if (!Model.IsPremiumPlus)
+                    {
+                        <div class="absolute inset-0 flex items-center justify-center pointer-events-none" style="z-index: 10;">
+                            <div class="px-4 py-2 rounded-lg font-semibold text-sm"
+                                 style="background: linear-gradient(135deg, var(--md-sys-color-tertiary), var(--md-sys-color-secondary)); color: var(--md-sys-color-on-tertiary); box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);">
+                                <span class="material-symbols-outlined" style="font-size: 16px; vertical-align: middle;">lock</span>
+                                PREMIUM PLUS
+                            </div>
+                        </div>
+                    }
                     <div class="flex items-start justify-between">
                         <div>
                             <h3 class="text-sm font-semibold mb-1" style="color: var(--md-sys-color-secondary);">
