@@ -45,6 +45,9 @@ public class Player
     public bool IsAdmin { get; set; } = false;
     public AdminRole AdminRole { get; set; } = AdminRole.None;
 
+    // Bot players (AI opponents for matchmaking)
+    public bool IsBot { get; set; } = false;
+
     // Notifications
     public string? NotificationPreferencesJson { get; set; }
 

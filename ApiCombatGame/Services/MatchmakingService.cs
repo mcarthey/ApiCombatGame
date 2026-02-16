@@ -10,12 +10,14 @@ public class MatchmakingService : IMatchmakingService
 {
     private readonly GameDbContext _context;
     private readonly ILogger<MatchmakingService> _logger;
+    private readonly IBotTeamGenerator _botTeamGenerator;
     private const int RatingRange = 200;
 
-    public MatchmakingService(GameDbContext context, ILogger<MatchmakingService> logger)
+    public MatchmakingService(GameDbContext context, ILogger<MatchmakingService> logger, IBotTeamGenerator botTeamGenerator)
     {
         _context = context;
         _logger = logger;
+        _botTeamGenerator = botTeamGenerator;
     }
 
     public async Task<(Battle battle1, Battle battle2)?> FindMatchAsync()
@@ -93,6 +95,81 @@ public class MatchmakingService : IMatchmakingService
             }
         }
 
+        // Bot fallback: If a single player is waiting past threshold, match them with a bot
+        if (queuedBattles.Count == 1)
+        {
+            var waitingBattle = queuedBattles[0];
+            var waitingPlayer = waitingBattle.Player1;
+            var waitTime = (DateTime.UtcNow - waitingBattle.QueuedAt).TotalSeconds;
+            var botWaitThreshold = waitingPlayer.CurrentTier == SubscriptionTier.Free ? 15 : 10; // Bot matching activates faster
+
+            if (waitTime > botWaitThreshold)
+            {
+                // Find a bot with similar rating
+                var bot = await FindSuitableBotAsync(waitingPlayer.Rating, waitingPlayer.Id);
+                if (bot != null)
+                {
+                    // Ensure bot has a team
+                    await _botTeamGenerator.EnsureBotHasTeamAsync(bot);
+
+                    // Get bot's team
+                    var botTeam = await _context.Teams.FirstOrDefaultAsync(t => t.PlayerId == bot.Id);
+                    if (botTeam != null)
+                    {
+                        // Create a battle entry for the bot
+                        var botBattle = new Battle
+                        {
+                            Id = Guid.NewGuid(),
+                            Player1Id = bot.Id,
+                            Player2Id = null,
+                            Team1Id = botTeam.Id,
+                            Status = BattleStatus.Queued,
+                            QueuedAt = DateTime.UtcNow,
+                            Mode = waitingBattle.Mode
+                        };
+
+                        _context.Battles.Add(botBattle);
+                        await _context.SaveChangesAsync();
+
+                        _logger.LogInformation("Matched player {P1} (rating: {R1}, tier: {Tier}) with bot {Bot} (rating: {R2})",
+                            waitingPlayer.Id, waitingPlayer.Rating, waitingPlayer.CurrentTier, bot.Username, bot.Rating);
+
+                        return (waitingBattle, botBattle);
+                    }
+                }
+            }
+        }
+
         return null;
+    }
+
+    /// <summary>
+    /// Finds a bot player with a rating close to the target rating.
+    /// Ensures bots that have recently battled are less likely to be matched again.
+    /// </summary>
+    private async Task<Player?> FindSuitableBotAsync(int targetRating, Guid playerIdToExclude)
+    {
+        // Find bots within rating range
+        var ratingRange = 150; // Bots can match within ±150 rating
+
+        // Get all bots in rating range, exclude those currently in queue
+        var activeBotIds = await _context.Battles
+            .Where(b => b.Status == BattleStatus.Queued && b.Player2Id == null)
+            .Select(b => b.Player1Id)
+            .ToListAsync();
+
+        var suitableBots = await _context.Players
+            .Where(p => p.IsBot &&
+                       p.Id != playerIdToExclude &&
+                       !activeBotIds.Contains(p.Id) &&
+                       Math.Abs(p.Rating - targetRating) <= ratingRange)
+            .OrderBy(p => Math.Abs(p.Rating - targetRating)) // Closest rating first
+            .Take(10)
+            .ToListAsync();
+
+        // Return random bot from top matches (adds variety)
+        return suitableBots.Count > 0
+            ? suitableBots[Random.Shared.Next(suitableBots.Count)]
+            : null;
     }
 }

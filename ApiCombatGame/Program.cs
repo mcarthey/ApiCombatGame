@@ -136,6 +136,10 @@ builder.Services.AddScoped<IContentCreatorService, ContentCreatorService>();
 // Player Analytics
 builder.Services.AddScoped<IPlayerAnalyticsService, PlayerAnalyticsService>();
 
+// Bot System
+builder.Services.AddSingleton<IBotNameGenerator, BotNameGenerator>();
+builder.Services.AddScoped<IBotTeamGenerator, BotTeamGenerator>();
+
 // Phase 3: Guild & Engagement Services
 builder.Services.AddScoped<IGuildService, GuildService>();
 builder.Services.AddScoped<IGuildTreasuryService, GuildTreasuryService>();
@@ -371,6 +375,10 @@ using (var scope = app.Services.CreateScope())
         await SeedData.InitializeAsync(context);
         await Phase3SeedData.InitializeAsync(context);
         await AdminSeedData.InitializeAsync(context, config);
+
+        // Seed bot players for matchmaking
+        var botNameGenerator = scope.ServiceProvider.GetRequiredService<IBotNameGenerator>();
+        await BotSeedData.InitializeAsync(context, botNameGenerator);
 
         // Seed weekly easter eggs (auto-generates if none exist for current week)
         var eggService = scope.ServiceProvider.GetRequiredService<IEasterEggService>();

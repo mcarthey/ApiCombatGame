@@ -2,6 +2,7 @@ using ApiCombatGame.Data;
 using ApiCombatGame.Models.Domain;
 using ApiCombatGame.Models.Enums;
 using ApiCombatGame.Services;
+using ApiCombatGame.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -19,13 +20,23 @@ public class MatchmakingServiceTests
         return new GameDbContext(options);
     }
 
+    private Mock<IBotTeamGenerator> CreateMockBotTeamGenerator()
+    {
+        var mock = new Mock<IBotTeamGenerator>();
+        // Setup default behavior - bots will have teams ready
+        mock.Setup(x => x.EnsureBotHasTeamAsync(It.IsAny<Player>()))
+            .Returns(Task.CompletedTask);
+        return mock;
+    }
+
     [Fact]
     public async Task FindMatchAsync_PremiumUserGetsMatchedFirst()
     {
         // Arrange
         var context = CreateInMemoryContext();
         var logger = new Mock<ILogger<MatchmakingService>>();
-        var service = new MatchmakingService(context, logger.Object);
+        var botTeamGenerator = CreateMockBotTeamGenerator();
+        var service = new MatchmakingService(context, logger.Object, botTeamGenerator.Object);
 
         var freePlayer = new Player
         {
@@ -103,7 +114,8 @@ public class MatchmakingServiceTests
         // Arrange
         var context = CreateInMemoryContext();
         var logger = new Mock<ILogger<MatchmakingService>>();
-        var service = new MatchmakingService(context, logger.Object);
+        var botTeamGenerator = CreateMockBotTeamGenerator();
+        var service = new MatchmakingService(context, logger.Object, botTeamGenerator.Object);
 
         var premiumPlayer = new Player
         {
@@ -158,7 +170,8 @@ public class MatchmakingServiceTests
         // Arrange
         var context = CreateInMemoryContext();
         var logger = new Mock<ILogger<MatchmakingService>>();
-        var service = new MatchmakingService(context, logger.Object);
+        var botTeamGenerator = CreateMockBotTeamGenerator();
+        var service = new MatchmakingService(context, logger.Object, botTeamGenerator.Object);
 
         var freePlayer = new Player
         {
@@ -213,7 +226,8 @@ public class MatchmakingServiceTests
         // Arrange
         var context = CreateInMemoryContext();
         var logger = new Mock<ILogger<MatchmakingService>>();
-        var service = new MatchmakingService(context, logger.Object);
+        var botTeamGenerator = CreateMockBotTeamGenerator();
+        var service = new MatchmakingService(context, logger.Object, botTeamGenerator.Object);
 
         var premiumPlayer = new Player
         {
@@ -268,7 +282,8 @@ public class MatchmakingServiceTests
         // Arrange
         var context = CreateInMemoryContext();
         var logger = new Mock<ILogger<MatchmakingService>>();
-        var service = new MatchmakingService(context, logger.Object);
+        var botTeamGenerator = CreateMockBotTeamGenerator();
+        var service = new MatchmakingService(context, logger.Object, botTeamGenerator.Object);
 
         var player = new Player
         {
@@ -305,7 +320,8 @@ public class MatchmakingServiceTests
         // Arrange
         var context = CreateInMemoryContext();
         var logger = new Mock<ILogger<MatchmakingService>>();
-        var service = new MatchmakingService(context, logger.Object);
+        var botTeamGenerator = CreateMockBotTeamGenerator();
+        var service = new MatchmakingService(context, logger.Object, botTeamGenerator.Object);
 
         var premiumPlusPlayer = new Player
         {
