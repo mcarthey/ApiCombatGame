@@ -6,7 +6,7 @@ public interface IEmailTemplateService
     string Render(string title, string bodyHtml, string? preheader = null);
 
     /// <summary>Builds the HTML body for the support-facing contact notification.</summary>
-    string ContactNotification(string senderName, string senderEmail, string subject, string message);
+    string ContactNotification(string senderName, string senderEmail, string subject, string message, string? userAgent = null, string? appVersion = null);
 
     /// <summary>Builds the HTML body for the thank-you reply sent to the contact form submitter.</summary>
     string ContactThankYou(string senderName, string subject);

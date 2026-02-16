@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.Reflection;
 using ApiCombatGame.Models;
 using ApiCombatGame.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -62,8 +63,14 @@ public class ContactModel : PageModel
 
         try
         {
+            // Extract version and user agent for support context
+            var version = System.Reflection.Assembly.GetExecutingAssembly()
+                .GetCustomAttribute<System.Reflection.AssemblyInformationalVersionAttribute>()
+                ?.InformationalVersion ?? "1.0.0";
+            var userAgent = Request.Headers.UserAgent.ToString();
+
             await _emailService.SendContactEmailAsync(
-                Input.Name, Input.Email, Input.Subject, Input.Message);
+                Input.Name, Input.Email, Input.Subject, Input.Message, userAgent, version);
 
             SuccessMessage = "Your message has been sent. We'll get back to you soon.";
             Input = new ContactInputModel();

@@ -23,7 +23,7 @@ public class EmailService : IEmailService
     }
 
     public async Task SendContactEmailAsync(
-        string senderName, string senderEmail, string subject, string message)
+        string senderName, string senderEmail, string subject, string message, string? userAgent = null, string? appVersion = null)
     {
         if (string.IsNullOrWhiteSpace(_settings.SmtpHost))
         {
@@ -33,7 +33,7 @@ public class EmailService : IEmailService
         }
 
         // 1) Branded notification to support
-        var notificationHtml = _templates.ContactNotification(senderName, senderEmail, subject, message);
+        var notificationHtml = _templates.ContactNotification(senderName, senderEmail, subject, message, userAgent, appVersion);
 
         var toSupport = new MimeMessage();
         toSupport.From.Add(new MailboxAddress(_settings.FromName, _settings.FromAddress));

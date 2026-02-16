@@ -60,8 +60,19 @@ public class EmailTemplateService : IEmailTemplateService
 """;
     }
 
-    public string ContactNotification(string senderName, string senderEmail, string subject, string message)
+    public string ContactNotification(string senderName, string senderEmail, string subject, string message, string? userAgent = null, string? appVersion = null)
     {
+        var versionInfo = "";
+        if (!string.IsNullOrEmpty(appVersion) || !string.IsNullOrEmpty(userAgent))
+        {
+            versionInfo = "<table class=\"meta-table\">";
+            if (!string.IsNullOrEmpty(appVersion))
+                versionInfo += $"<tr><td>Version</td><td>{Encode(appVersion)}</td></tr>";
+            if (!string.IsNullOrEmpty(userAgent))
+                versionInfo += $"<tr><td>Browser</td><td style=\"font-size:12px;\">{Encode(userAgent)}</td></tr>";
+            versionInfo += "</table>";
+        }
+
         var body = $"""
 <h2>New Contact Form Submission</h2>
 <table class="meta-table">
@@ -70,6 +81,7 @@ public class EmailTemplateService : IEmailTemplateService
   <tr><td>Subject</td><td>{Encode(subject)}</td></tr>
 </table>
 <div class="message-box">{Encode(message)}</div>
+{versionInfo}
 <p style="font-size:13px; color:#6b7280;">Reply directly to this email to respond to the sender (Reply-To is set).</p>
 """;
 

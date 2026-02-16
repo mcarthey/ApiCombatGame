@@ -1,3 +1,4 @@
+@using System.Reflection
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -274,12 +275,17 @@
                 </div>
             </div>
             <div class="pt-6" style="border-top: 1px solid var(--md-sys-color-outline-variant);">
-                <p class="text-xs" style="color: var(--md-sys-color-outline);">
-                    &copy; @DateTime.UtcNow.Year API Combat Game. Built for developers who think in JSON.
-                    <span style="margin-left: 0.25rem;">&mdash;</span>
-                    <a href="https://learnedgeek.com" target="_blank" rel="noopener noreferrer"
-                       class="link-underline" style="color: var(--md-sys-color-outline);">Built by LearnedGeek</a>
-                </p>
+                <div class="flex flex-col sm:flex-row justify-between gap-2">
+                    <p class="text-xs" style="color: var(--md-sys-color-outline);">
+                        &copy; @DateTime.UtcNow.Year API Combat Game. Built for developers who think in JSON.
+                        <span style="margin-left: 0.25rem;">&mdash;</span>
+                        <a href="https://learnedgeek.com" target="_blank" rel="noopener noreferrer"
+                           class="link-underline" style="color: var(--md-sys-color-outline);">Built by LearnedGeek</a>
+                    </p>
+                    <p class="text-xs" style="color: var(--md-sys-color-outline);">
+                        v@(System.Reflection.Assembly.GetExecutingAssembly().GetCustomAttribute<System.Reflection.AssemblyInformationalVersionAttribute>()?.InformationalVersion ?? "1.0.0")
+                    </p>
+                </div>
             </div>
         </div>
     </footer>
