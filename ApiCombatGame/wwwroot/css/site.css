@@ -841,6 +841,24 @@ body {
 
 .md3-input::placeholder { color: var(--md-sys-color-on-surface-variant); }
 
+/* Fix select dropdown options in dark mode */
+select.md3-input option {
+    background: var(--md-sys-color-surface-container-low);
+    color: var(--md-sys-color-on-surface);
+}
+
+.dark select.md3-input option {
+    background: var(--md-sys-color-surface-container);
+    color: var(--md-sys-color-on-surface);
+}
+
+textarea.md3-input {
+    resize: vertical;
+    min-height: 120px;
+    font-family: inherit;
+    line-height: 1.5;
+}
+
 .md3-input-wrapper {
     position: relative;
 }
