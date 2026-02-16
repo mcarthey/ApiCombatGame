@@ -31,3 +31,93 @@
         </p>
     </div>
 </div>
+
+@* Registration form with reCAPTCHA - hidden until launch date *@
+@* To activate: remove "Opening Soon" section above and uncomment this form *@
+
+@*
+<div class="auth-backdrop">
+    <div class="auth-card">
+        <div class="text-center mb-8">
+            <div class="w-12 h-12 rounded-2xl flex items-center justify-center mx-auto mb-4" style="background: color-mix(in srgb, var(--md-sys-color-primary) 12%, transparent);">
+                <span class="material-symbols-outlined" style="color: var(--md-sys-color-primary); font-size: 24px;">person_add</span>
+            </div>
+            <h1 class="text-2xl font-bold" style="color: var(--md-sys-color-on-surface); letter-spacing: -0.02em;">Create your account</h1>
+            <p class="text-sm mt-1" style="color: var(--md-sys-color-on-surface-variant);">Start battling in minutes</p>
+        </div>
+
+        @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+        {
+            <div class="md3-alert md3-alert-error mb-6">
+                <p class="text-sm">@Model.ErrorMessage</p>
+            </div>
+        }
+
+        <form method="post" id="registerForm">
+            <div class="mb-5">
+                <div class="md3-input-wrapper">
+                    <label for="Input_Username">Username</label>
+                    <input class="md3-input" id="Input_Username" name="Input.Username" type="text" required value="@Model.Input?.Username" placeholder="Choose a username" />
+                </div>
+                <span asp-validation-for="Input.Username" class="field-validation-error"></span>
+            </div>
+
+            <div class="mb-5">
+                <div class="md3-input-wrapper">
+                    <label for="Input_Email">Email</label>
+                    <input class="md3-input" id="Input_Email" name="Input.Email" type="email" required value="@Model.Input?.Email" placeholder="you@@example.com" />
+                </div>
+                <span asp-validation-for="Input.Email" class="field-validation-error"></span>
+            </div>
+
+            <div class="mb-5">
+                <div class="md3-input-wrapper">
+                    <label for="Input_Password">Password</label>
+                    <input class="md3-input" id="Input_Password" name="Input.Password" type="password" required placeholder="Minimum 8 characters" />
+                </div>
+                <span asp-validation-for="Input.Password" class="field-validation-error"></span>
+            </div>
+
+            <div class="mb-6">
+                <div class="md3-input-wrapper">
+                    <label for="Input_ConfirmPassword">Confirm Password</label>
+                    <input class="md3-input" id="Input_ConfirmPassword" name="Input.ConfirmPassword" type="password" required placeholder="Repeat your password" />
+                </div>
+                <span asp-validation-for="Input.ConfirmPassword" class="field-validation-error"></span>
+            </div>
+
+            <input type="hidden" id="recaptchaToken" name="Input.RecaptchaToken" />
+
+            <button type="submit" class="btn-glow w-full">
+                Create Account
+            </button>
+        </form>
+
+        <p class="text-center text-sm mt-6" style="color: var(--md-sys-color-on-surface-variant);">
+            Already have an account?
+            <a asp-page="/Auth/Login" class="font-semibold link-underline" style="color: var(--md-sys-color-primary);">Sign in</a>
+        </p>
+
+        <p class="text-center text-xs mt-4" style="color: var(--md-sys-color-outline);">
+            By creating an account, you agree to our
+            <a asp-page="/Privacy" class="underline" style="color: var(--md-sys-color-outline);">Privacy Policy</a>.
+        </p>
+    </div>
+</div>
+
+@if (!string.IsNullOrEmpty(Model.RecaptchaSiteKey))
+{
+    <script src="https://www.google.com/recaptcha/api.js?render=@Model.RecaptchaSiteKey"></script>
+    <script>
+        document.getElementById('registerForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            grecaptcha.ready(function() {
+                grecaptcha.execute('@Model.RecaptchaSiteKey', {action: 'register'}).then(function(token) {
+                    document.getElementById('recaptchaToken').value = token;
+                    document.getElementById('registerForm').submit();
+                });
+            });
+        });
+    </script>
+}
+*@

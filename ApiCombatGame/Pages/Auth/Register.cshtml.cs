@@ -1,19 +1,29 @@
 using System.ComponentModel.DataAnnotations;
+using ApiCombatGame.Models;
 using ApiCombatGame.Models.DTOs.Auth;
 using ApiCombatGame.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.Extensions.Options;
 
 namespace ApiCombatGame.Pages.Auth;
 
 public class RegisterModel : PageModel
 {
     private readonly IAuthService _authService;
+    private readonly IRecaptchaService _recaptchaService;
+    private readonly RecaptchaSettings _recaptchaSettings;
     private readonly ILogger<RegisterModel> _logger;
 
-    public RegisterModel(IAuthService authService, ILogger<RegisterModel> logger)
+    public RegisterModel(
+        IAuthService authService,
+        IRecaptchaService recaptchaService,
+        IOptions<RecaptchaSettings> recaptchaSettings,
+        ILogger<RegisterModel> logger)
     {
         _authService = authService;
+        _recaptchaService = recaptchaService;
+        _recaptchaSettings = recaptchaSettings.Value;
         _logger = logger;
     }
 
@@ -21,6 +31,7 @@ public class RegisterModel : PageModel
     public RegisterInputModel Input { get; set; } = new();
 
     public string? ErrorMessage { get; set; }
+    public string RecaptchaSiteKey => _recaptchaSettings.SiteKey;
 
     public void OnGet()
     {
@@ -34,6 +45,16 @@ public class RegisterModel : PageModel
 
         if (!ModelState.IsValid)
             return Page();
+
+        // Validate reCAPTCHA
+        var recaptchaResult = await _recaptchaService.ValidateAsync(Input.RecaptchaToken);
+        if (!recaptchaResult.Success)
+        {
+            _logger.LogWarning("reCAPTCHA validation failed during registration: score {Score} for {Email}",
+                recaptchaResult.Score, Input.Email);
+            ErrorMessage = recaptchaResult.ErrorMessage ?? "Please try again.";
+            return Page();
+        }
 
         if (Input.Password != Input.ConfirmPassword)
         {
@@ -85,5 +106,8 @@ public class RegisterModel : PageModel
         [DataType(DataType.Password)]
         [Compare("Password", ErrorMessage = "Passwords do not match.")]
         public string ConfirmPassword { get; set; } = string.Empty;
+
+        /// <summary>reCAPTCHA v3 token populated by JavaScript.</summary>
+        public string RecaptchaToken { get; set; } = string.Empty;
     }
 }
