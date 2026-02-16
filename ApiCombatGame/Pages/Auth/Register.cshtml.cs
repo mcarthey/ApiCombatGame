@@ -43,6 +43,7 @@ public class RegisterModel : PageModel
         ErrorMessage = "Registration is not yet open. Please check back on February 16, 2026.";
         return Page();
 
+#pragma warning disable CS0162 // Unreachable code - remove this pragma when registration opens Feb 16
         if (!ModelState.IsValid)
             return Page();
 
@@ -82,6 +83,7 @@ public class RegisterModel : PageModel
             ErrorMessage = ex.Message;
             return Page();
         }
+#pragma warning restore CS0162
     }
 
     public class RegisterInputModel
