@@ -362,17 +362,21 @@ public class PlayerAnalyticsServiceTests
         await context.SaveChangesAsync();
 
         var now = DateTime.UtcNow;
+        var today = now.Date;
+        var yesterday = today.AddDays(-1);
+        var weekStart = today.AddDays(-(int)today.DayOfWeek); // Start of this week (Sunday)
+
         var battles = new List<Battle>
         {
             // Today - 2 battles, 1 win
             CreateBattle(player.Id, opponent.Id, player.Id, now.AddHours(-2)),
             CreateBattle(player.Id, opponent.Id, opponent.Id, now.AddHours(-1)),
 
-            // This week (but not today) - 1 battle, 1 win
-            CreateBattle(player.Id, opponent.Id, player.Id, now.AddDays(-2)),
+            // This week but not today (yesterday if within this week, otherwise early this week) - 1 battle, 1 win
+            CreateBattle(player.Id, opponent.Id, player.Id, yesterday >= weekStart ? yesterday.AddHours(10) : weekStart.AddDays(1).AddHours(10)),
 
             // This month (but not this week) - 1 battle, 0 wins
-            CreateBattle(player.Id, opponent.Id, opponent.Id, now.AddDays(-15)),
+            CreateBattle(player.Id, opponent.Id, opponent.Id, weekStart.AddDays(-10)),
 
             // Older - 1 battle, 1 win
             CreateBattle(player.Id, opponent.Id, player.Id, now.AddMonths(-2))
@@ -390,11 +394,11 @@ public class PlayerAnalyticsServiceTests
         Assert.Equal(2, result.BattlesToday);
         Assert.Equal(1, result.WinsToday);
 
-        Assert.True(result.BattlesThisWeek >= 3); // At least today + this week
-        Assert.True(result.WinsThisWeek >= 2); // At least today's win + this week's win
+        Assert.True(result.BattlesThisWeek >= 3, $"Expected at least 3 battles this week, got {result.BattlesThisWeek}");
+        Assert.True(result.WinsThisWeek >= 2, $"Expected at least 2 wins this week, got {result.WinsThisWeek}");
 
-        Assert.True(result.BattlesThisMonth >= 4); // At least today + week + month
-        Assert.True(result.WinsThisMonth >= 2);
+        Assert.True(result.BattlesThisMonth >= 4, $"Expected at least 4 battles this month, got {result.BattlesThisMonth}");
+        Assert.True(result.WinsThisMonth >= 2, $"Expected at least 2 wins this month, got {result.WinsThisMonth}");
     }
 
     [Fact]
