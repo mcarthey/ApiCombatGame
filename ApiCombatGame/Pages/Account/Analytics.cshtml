@@ -1,0 +1,301 @@
+@page
+@model ApiCombatGame.Pages.Account.AnalyticsModel
+@{
+    ViewData["Title"] = "Battle Analytics";
+    ViewData["Description"] = "Advanced battle analytics and performance insights for your API Combat Game career.";
+}
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold" style="color: var(--md-sys-color-on-surface);">Battle Analytics</h1>
+        <p class="mt-1 text-sm" style="color: var(--md-sys-color-on-surface-variant);">
+            Deep insights into your performance and battle history
+        </p>
+    </div>
+
+    @if (Model.Analytics.TotalBattles == 0)
+    {
+        <div class="md3-card p-12 text-center">
+            <span class="material-symbols-outlined" style="font-size: 64px; color: var(--md-sys-color-on-surface-variant); opacity: 0.5;">insights</span>
+            <h2 class="text-xl font-bold mt-4" style="color: var(--md-sys-color-on-surface);">No Battle Data Yet</h2>
+            <p class="mt-2 text-sm" style="color: var(--md-sys-color-on-surface-variant);">
+                Complete some battles to see your analytics here!
+            </p>
+            <a asp-page="/Index" class="md3-btn-filled mt-6 inline-flex">
+                <span class="material-symbols-outlined" style="font-size: 18px;">swords</span>
+                Start Battling
+            </a>
+        </div>
+    }
+    else
+    {
+        <!-- Overview Stats -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+            <div class="md3-card p-5">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="material-symbols-outlined" style="color: var(--md-sys-color-primary); font-size: 28px;">casino</span>
+                    <span class="text-xs font-semibold px-2 py-1 rounded-full" style="background: var(--md-sys-color-primary-container); color: var(--md-sys-color-on-primary-container);">ALL TIME</span>
+                </div>
+                <p class="text-3xl font-bold" style="color: var(--md-sys-color-on-surface);">@Model.Analytics.TotalBattles</p>
+                <p class="text-xs mt-1" style="color: var(--md-sys-color-on-surface-variant);">Total Battles</p>
+            </div>
+
+            <div class="md3-card p-5">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="material-symbols-outlined" style="color: #22c55e; font-size: 28px;">military_tech</span>
+                    <span class="text-xs font-semibold px-2 py-1 rounded-full" style="background: color-mix(in srgb, #22c55e 15%, transparent); color: #22c55e;">WIN</span>
+                </div>
+                <p class="text-3xl font-bold" style="color: var(--md-sys-color-on-surface);">@Model.Analytics.TotalWins</p>
+                <p class="text-xs mt-1" style="color: var(--md-sys-color-on-surface-variant);">@Model.Analytics.WinRate.ToString("F1")% Win Rate</p>
+            </div>
+
+            <div class="md3-card p-5">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="material-symbols-outlined" style="color: var(--md-sys-color-error); font-size: 28px;">cancel</span>
+                    <span class="text-xs font-semibold px-2 py-1 rounded-full" style="background: var(--md-sys-color-error-container); color: var(--md-sys-color-on-error-container);">LOSS</span>
+                </div>
+                <p class="text-3xl font-bold" style="color: var(--md-sys-color-on-surface);">@Model.Analytics.TotalLosses</p>
+                <p class="text-xs mt-1" style="color: var(--md-sys-color-on-surface-variant);">Battles Lost</p>
+            </div>
+
+            <div class="md3-card p-5">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="material-symbols-outlined" style="color: var(--md-sys-color-tertiary); font-size: 28px;">paid</span>
+                    <span class="text-xs font-semibold px-2 py-1 rounded-full" style="background: var(--md-sys-color-tertiary-container); color: var(--md-sys-color-on-tertiary-container);">EARNED</span>
+                </div>
+                <p class="text-3xl font-bold" style="color: var(--md-sys-color-on-surface);">@Model.Analytics.TotalCurrencyEarned.ToString("N0")</p>
+                <p class="text-xs mt-1" style="color: var(--md-sys-color-on-surface-variant);">Total Currency</p>
+            </div>
+        </div>
+
+        <!-- Streaks & Performance -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <!-- Streaks -->
+            <div class="md3-card p-6">
+                <h3 class="text-lg font-semibold mb-4" style="color: var(--md-sys-color-on-surface);">
+                    <span class="material-symbols-outlined" style="vertical-align: middle; margin-right: 8px; color: var(--md-sys-color-primary);">trending_up</span>
+                    Streaks
+                </h3>
+                <div class="space-y-4">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <p class="text-sm font-medium" style="color: var(--md-sys-color-on-surface);">Current Win Streak</p>
+                            <p class="text-xs mt-1" style="color: var(--md-sys-color-on-surface-variant);">Longest: @Model.Analytics.LongestWinStreak</p>
+                        </div>
+                        <span class="text-2xl font-bold px-4 py-2 rounded-xl" style="background: color-mix(in srgb, #22c55e 15%, transparent); color: #22c55e;">
+                            @Model.Analytics.CurrentWinStreak
+                        </span>
+                    </div>
+                    <div class="md3-divider"></div>
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <p class="text-sm font-medium" style="color: var(--md-sys-color-on-surface);">Current Loss Streak</p>
+                            <p class="text-xs mt-1" style="color: var(--md-sys-color-on-surface-variant);">Longest: @Model.Analytics.LongestLossStreak</p>
+                        </div>
+                        <span class="text-2xl font-bold px-4 py-2 rounded-xl" style="background: var(--md-sys-color-error-container); color: var(--md-sys-color-on-error-container);">
+                            @Model.Analytics.CurrentLossStreak
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Performance Metrics -->
+            <div class="md3-card p-6">
+                <h3 class="text-lg font-semibold mb-4" style="color: var(--md-sys-color-on-surface);">
+                    <span class="material-symbols-outlined" style="vertical-align: middle; margin-right: 8px; color: var(--md-sys-color-primary);">leaderboard</span>
+                    Performance Metrics
+                </h3>
+                <div class="space-y-3">
+                    <div class="flex justify-between">
+                        <span class="text-sm" style="color: var(--md-sys-color-on-surface-variant);">Avg. Turns/Battle</span>
+                        <span class="text-sm font-semibold" style="color: var(--md-sys-color-on-surface);">@Model.Analytics.AverageTurnsPerBattle.ToString("F1")</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-sm" style="color: var(--md-sys-color-on-surface-variant);">Avg. Rating/Win</span>
+                        <span class="text-sm font-semibold" style="color: #22c55e;">+@Model.Analytics.AverageRatingChangePerWin.ToString("F1")</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-sm" style="color: var(--md-sys-color-on-surface-variant);">Avg. Rating/Loss</span>
+                        <span class="text-sm font-semibold" style="color: var(--md-sys-color-error);">@Model.Analytics.AverageRatingChangePerLoss.ToString("F1")</span>
+                    </div>
+                    <div class="md3-divider"></div>
+                    <div class="flex justify-between">
+                        <span class="text-sm" style="color: var(--md-sys-color-on-surface-variant);">Highest Rating Gain</span>
+                        <span class="text-sm font-semibold" style="color: #22c55e;">+@Model.Analytics.HighestRatingChange</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-sm" style="color: var(--md-sys-color-on-surface-variant);">Lowest Rating Loss</span>
+                        <span class="text-sm font-semibold" style="color: var(--md-sys-color-error);">@Model.Analytics.LowestRatingChange</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Activity Timeline -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <div class="md3-card p-5">
+                <div class="flex items-center gap-3 mb-3">
+                    <div class="w-10 h-10 rounded-full flex items-center justify-center" style="background: color-mix(in srgb, var(--md-sys-color-primary) 15%, transparent);">
+                        <span class="material-symbols-outlined" style="color: var(--md-sys-color-primary); font-size: 20px;">today</span>
+                    </div>
+                    <div>
+                        <p class="text-xs font-semibold" style="color: var(--md-sys-color-on-surface-variant);">TODAY</p>
+                        <p class="text-xl font-bold" style="color: var(--md-sys-color-on-surface);">@Model.Analytics.BattlesToday</p>
+                    </div>
+                </div>
+                <p class="text-xs" style="color: var(--md-sys-color-on-surface-variant);">@Model.Analytics.WinsToday wins</p>
+            </div>
+
+            <div class="md3-card p-5">
+                <div class="flex items-center gap-3 mb-3">
+                    <div class="w-10 h-10 rounded-full flex items-center justify-center" style="background: color-mix(in srgb, var(--md-sys-color-secondary) 15%, transparent);">
+                        <span class="material-symbols-outlined" style="color: var(--md-sys-color-secondary); font-size: 20px;">date_range</span>
+                    </div>
+                    <div>
+                        <p class="text-xs font-semibold" style="color: var(--md-sys-color-on-surface-variant);">THIS WEEK</p>
+                        <p class="text-xl font-bold" style="color: var(--md-sys-color-on-surface);">@Model.Analytics.BattlesThisWeek</p>
+                    </div>
+                </div>
+                <p class="text-xs" style="color: var(--md-sys-color-on-surface-variant);">@Model.Analytics.WinsThisWeek wins</p>
+            </div>
+
+            <div class="md3-card p-5">
+                <div class="flex items-center gap-3 mb-3">
+                    <div class="w-10 h-10 rounded-full flex items-center justify-center" style="background: color-mix(in srgb, var(--md-sys-color-tertiary) 15%, transparent);">
+                        <span class="material-symbols-outlined" style="color: var(--md-sys-color-tertiary); font-size: 20px;">calendar_month</span>
+                    </div>
+                    <div>
+                        <p class="text-xs font-semibold" style="color: var(--md-sys-color-on-surface-variant);">THIS MONTH</p>
+                        <p class="text-xl font-bold" style="color: var(--md-sys-color-on-surface);">@Model.Analytics.BattlesThisMonth</p>
+                    </div>
+                </div>
+                <p class="text-xs" style="color: var(--md-sys-color-on-surface-variant);">@Model.Analytics.WinsThisMonth wins</p>
+            </div>
+        </div>
+
+        <!-- Class Analytics -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            <!-- Most Used Classes -->
+            @if (Model.Analytics.MostUsedClasses.Count > 0)
+            {
+                <div class="md3-card p-6">
+                    <h3 class="text-lg font-semibold mb-4" style="color: var(--md-sys-color-on-surface);">
+                        <span class="material-symbols-outlined" style="vertical-align: middle; margin-right: 8px; color: var(--md-sys-color-primary);">catching_pokemon</span>
+                        Most Used Classes
+                    </h3>
+                    <div class="space-y-3">
+                        @foreach (var classData in Model.Analytics.MostUsedClasses)
+                        {
+                            <div>
+                                <div class="flex justify-between mb-1">
+                                    <span class="text-sm font-medium" style="color: var(--md-sys-color-on-surface);">@classData.ClassName</span>
+                                    <span class="text-xs font-semibold" style="color: var(--md-sys-color-on-surface-variant);">@classData.TimesUsed × (@classData.Percentage.ToString("F1")%)</span>
+                                </div>
+                                <div class="md3-progress">
+                                    <div class="md3-progress-bar" style="width: @classData.Percentage.ToString("F1")%"></div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+
+            <!-- Win Rate by Class -->
+            @if (Model.Analytics.WinRateByClass.Count > 0)
+            {
+                <div class="md3-card p-6">
+                    <h3 class="text-lg font-semibold mb-4" style="color: var(--md-sys-color-on-surface);">
+                        <span class="material-symbols-outlined" style="vertical-align: middle; margin-right: 8px; color: var(--md-sys-color-primary);">bar_chart</span>
+                        Win Rate by Class
+                    </h3>
+                    <div class="space-y-2">
+                        @foreach (var classData in Model.Analytics.WinRateByClass.Take(5))
+                        {
+                            <div class="flex items-center justify-between py-2">
+                                <div class="flex-1">
+                                    <span class="text-sm font-medium" style="color: var(--md-sys-color-on-surface);">@classData.ClassName</span>
+                                    <span class="text-xs ml-2" style="color: var(--md-sys-color-on-surface-variant);">(@classData.Wins-@classData.Losses)</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <div class="w-16 h-1.5 rounded-full" style="background: var(--md-sys-color-surface-container-highest); overflow: hidden;">
+                                        <div style="width: @classData.WinRate%%; height: 100%; background: @(classData.WinRate >= 50 ? "#22c55e" : "var(--md-sys-color-error)"); border-radius: 9999px;"></div>
+                                    </div>
+                                    <span class="text-xs font-semibold w-10 text-right" style="color: @(classData.WinRate >= 50 ? "#22c55e" : "var(--md-sys-color-error)");">@classData.WinRate.ToString("F0")%</span>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Peak Performance -->
+        @if (Model.Analytics.BestDayDate.HasValue)
+        {
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div class="md3-card p-6" style="background: color-mix(in srgb, var(--md-sys-color-tertiary) 5%, var(--md-sys-color-surface-container-low)); border-left: 4px solid var(--md-sys-color-tertiary);">
+                    <div class="flex items-start justify-between">
+                        <div>
+                            <h3 class="text-sm font-semibold mb-1" style="color: var(--md-sys-color-tertiary);">
+                                <span class="material-symbols-outlined" style="vertical-align: middle; font-size: 18px; margin-right: 4px;">emoji_events</span>
+                                BEST DAY
+                            </h3>
+                            <p class="text-2xl font-bold" style="color: var(--md-sys-color-on-surface);">@Model.Analytics.BestDayWins Wins</p>
+                            <p class="text-xs mt-1" style="color: var(--md-sys-color-on-surface-variant);">@Model.Analytics.BestDayDate.Value.ToString("MMMM dd, yyyy")</p>
+                        </div>
+                        <span class="material-symbols-outlined" style="font-size: 48px; color: var(--md-sys-color-tertiary); opacity: 0.2;">trophy</span>
+                    </div>
+                </div>
+
+                <div class="md3-card p-6" style="background: color-mix(in srgb, var(--md-sys-color-secondary) 5%, var(--md-sys-color-surface-container-low)); border-left: 4px solid var(--md-sys-color-secondary);">
+                    <div class="flex items-start justify-between">
+                        <div>
+                            <h3 class="text-sm font-semibold mb-1" style="color: var(--md-sys-color-secondary);">
+                                <span class="material-symbols-outlined" style="vertical-align: middle; font-size: 18px; margin-right: 4px;">local_fire_department</span>
+                                MOST ACTIVE DAY
+                            </h3>
+                            <p class="text-2xl font-bold" style="color: var(--md-sys-color-on-surface);">@Model.Analytics.MostActiveDayBattles Battles</p>
+                            <p class="text-xs mt-1" style="color: var(--md-sys-color-on-surface-variant);">@Model.Analytics.MostActiveDayDate!.Value.ToString("MMMM dd, yyyy")</p>
+                        </div>
+                        <span class="material-symbols-outlined" style="font-size: 48px; color: var(--md-sys-color-secondary); opacity: 0.2;">whatshot</span>
+                    </div>
+                </div>
+            </div>
+        }
+
+        <!-- Recent Battles -->
+        @if (Model.Analytics.RecentBattles.Count > 0)
+        {
+            <div class="md3-card p-6">
+                <h3 class="text-lg font-semibold mb-4" style="color: var(--md-sys-color-on-surface);">
+                    <span class="material-symbols-outlined" style="vertical-align: middle; margin-right: 8px; color: var(--md-sys-color-primary);">history</span>
+                    Recent Battles
+                </h3>
+                <div class="space-y-2">
+                    @foreach (var battle in Model.Analytics.RecentBattles.Take(10))
+                    {
+                        <div class="flex items-center justify-between py-2 px-3 rounded-lg transition-all" style="background: var(--md-sys-color-surface-container-lowest);">
+                            <div class="flex items-center gap-3 flex-1">
+                                <span class="material-symbols-outlined" style="color: @(battle.IsWin ? "#22c55e" : "var(--md-sys-color-error)"); font-size: 20px;">
+                                    @(battle.IsWin ? "check_circle" : "cancel")
+                                </span>
+                                <div class="flex-1">
+                                    <p class="text-sm font-medium" style="color: var(--md-sys-color-on-surface);">vs @battle.OpponentName</p>
+                                    <p class="text-xs" style="color: var(--md-sys-color-on-surface-variant);">@battle.CompletedAt.ToString("MMM dd, yyyy h:mm tt")</p>
+                                </div>
+                            </div>
+                            <div class="text-right flex items-center gap-2">
+                                <span class="text-xs px-2 py-1 rounded-md font-semibold" style="background: var(--md-sys-color-surface-container-high); color: var(--md-sys-color-on-surface-variant);">
+                                    @battle.Turns turns
+                                </span>
+                                <span class="text-sm font-bold w-12 text-right" style="color: @(battle.RatingChange >= 0 ? "#22c55e" : "var(--md-sys-color-error)");">
+                                    @(battle.RatingChange >= 0 ? "+" : "")@battle.RatingChange
+                                </span>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+    }
+</div>

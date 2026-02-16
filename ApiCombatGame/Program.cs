@@ -133,6 +133,9 @@ builder.Services.AddScoped<IDiscordService, DiscordService>();
 // Content Creators
 builder.Services.AddScoped<IContentCreatorService, ContentCreatorService>();
 
+// Player Analytics
+builder.Services.AddScoped<IPlayerAnalyticsService, PlayerAnalyticsService>();
+
 // Phase 3: Guild & Engagement Services
 builder.Services.AddScoped<IGuildService, GuildService>();
 builder.Services.AddScoped<IGuildTreasuryService, GuildTreasuryService>();
