@@ -17,6 +17,9 @@ obj/
 ## VS Code
 .vscode/
 
+## Claude Code
+.claude/
+
 ## Build results
 [Dd]ebug/
 [Rr]elease/
