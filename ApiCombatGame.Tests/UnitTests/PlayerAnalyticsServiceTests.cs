@@ -361,25 +361,32 @@ public class PlayerAnalyticsServiceTests
         context.Players.AddRange(player, opponent);
         await context.SaveChangesAsync();
 
-        var now = DateTime.UtcNow;
-        var today = now.Date;
-        var yesterday = today.AddDays(-1);
+        var today = DateTime.UtcNow.Date;
         var weekStart = today.AddDays(-(int)today.DayOfWeek); // Start of this week (Sunday)
+
+        // Use explicit times relative to today's date to avoid UTC early-morning edge cases
+        var todayNoon = today.AddHours(12);
+        var todayMorning = today.AddHours(9);
+
+        // "Yesterday" for this-week test: pick a day this week that isn't today
+        var thisWeekNotToday = today.DayOfWeek == DayOfWeek.Sunday
+            ? weekStart.AddDays(1).AddHours(10)  // If Sunday, use Monday
+            : weekStart.AddHours(10);             // Otherwise use Sunday (start of week)
 
         var battles = new List<Battle>
         {
             // Today - 2 battles, 1 win
-            CreateBattle(player.Id, opponent.Id, player.Id, now.AddHours(-2)),
-            CreateBattle(player.Id, opponent.Id, opponent.Id, now.AddHours(-1)),
+            CreateBattle(player.Id, opponent.Id, player.Id, todayMorning),
+            CreateBattle(player.Id, opponent.Id, opponent.Id, todayNoon),
 
-            // This week but not today (yesterday if within this week, otherwise early this week) - 1 battle, 1 win
-            CreateBattle(player.Id, opponent.Id, player.Id, yesterday >= weekStart ? yesterday.AddHours(10) : weekStart.AddDays(1).AddHours(10)),
+            // This week but not today - 1 battle, 1 win
+            CreateBattle(player.Id, opponent.Id, player.Id, thisWeekNotToday),
 
             // This month (but not this week) - 1 battle, 0 wins
-            CreateBattle(player.Id, opponent.Id, opponent.Id, weekStart.AddDays(-10)),
+            CreateBattle(player.Id, opponent.Id, opponent.Id, weekStart.AddDays(-3)),
 
             // Older - 1 battle, 1 win
-            CreateBattle(player.Id, opponent.Id, player.Id, now.AddMonths(-2))
+            CreateBattle(player.Id, opponent.Id, player.Id, today.AddMonths(-2))
         };
 
         context.Battles.AddRange(battles);
