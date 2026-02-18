@@ -568,4 +568,117 @@ public class MatchmakingServiceTests
             match.Value.battle2.Player1Id == bot.Id,
             "Premium solo player should get bot match at 10s threshold");
     }
+
+    // ==================== Additional Coverage ====================
+
+    [Fact]
+    public async Task FindMatch_TwoPlayers_RatingWithinRange_Matches()
+    {
+        var context = CreateInMemoryContext();
+        var logger = new Mock<ILogger<MatchmakingService>>();
+        var botTeamGenerator = CreateMockBotTeamGenerator();
+        var service = new MatchmakingService(context, logger.Object, botTeamGenerator.Object);
+
+        var p1 = new Player { Id = Guid.NewGuid(), Username = "p1", Email = "p1@test.com", Rating = 1000, CurrentTier = SubscriptionTier.Free };
+        var p2 = new Player { Id = Guid.NewGuid(), Username = "p2", Email = "p2@test.com", Rating = 1100, CurrentTier = SubscriptionTier.Free };
+
+        context.Players.AddRange(p1, p2);
+        context.Battles.Add(new Battle { Id = Guid.NewGuid(), Player1Id = p1.Id, Player1 = p1, Status = BattleStatus.Queued, QueuedAt = DateTime.UtcNow.AddSeconds(-5) });
+        context.Battles.Add(new Battle { Id = Guid.NewGuid(), Player1Id = p2.Id, Player1 = p2, Status = BattleStatus.Queued, QueuedAt = DateTime.UtcNow.AddSeconds(-5) });
+        await context.SaveChangesAsync();
+
+        var match = await service.FindMatchAsync();
+
+        Assert.NotNull(match);
+    }
+
+    [Fact]
+    public async Task FindMatch_TwoPlayers_RatingTooFar_NoMatch()
+    {
+        var context = CreateInMemoryContext();
+        var logger = new Mock<ILogger<MatchmakingService>>();
+        var botTeamGenerator = CreateMockBotTeamGenerator();
+        var service = new MatchmakingService(context, logger.Object, botTeamGenerator.Object);
+
+        var p1 = new Player { Id = Guid.NewGuid(), Username = "close", Email = "close@test.com", Rating = 500, CurrentTier = SubscriptionTier.Free };
+        var p2 = new Player { Id = Guid.NewGuid(), Username = "far", Email = "far@test.com", Rating = 2000, CurrentTier = SubscriptionTier.Free };
+
+        context.Players.AddRange(p1, p2);
+        context.Battles.Add(new Battle { Id = Guid.NewGuid(), Player1Id = p1.Id, Player1 = p1, Status = BattleStatus.Queued, QueuedAt = DateTime.UtcNow.AddSeconds(-2) });
+        context.Battles.Add(new Battle { Id = Guid.NewGuid(), Player1Id = p2.Id, Player1 = p2, Status = BattleStatus.Queued, QueuedAt = DateTime.UtcNow.AddSeconds(-2) });
+        await context.SaveChangesAsync();
+
+        var match = await service.FindMatchAsync();
+
+        // Rating difference of 1500 should exceed all ranges at short wait time
+        Assert.Null(match);
+    }
+
+    [Fact]
+    public async Task FindMatch_WaitExpansion_ExpandsRangeOverTime()
+    {
+        var context = CreateInMemoryContext();
+        var logger = new Mock<ILogger<MatchmakingService>>();
+        var botTeamGenerator = CreateMockBotTeamGenerator();
+        var service = new MatchmakingService(context, logger.Object, botTeamGenerator.Object);
+
+        var p1 = new Player { Id = Guid.NewGuid(), Username = "waiting", Email = "waiting@test.com", Rating = 1000, CurrentTier = SubscriptionTier.Free };
+        var p2 = new Player { Id = Guid.NewGuid(), Username = "far_opp", Email = "far_opp@test.com", Rating = 1400, CurrentTier = SubscriptionTier.Free };
+
+        context.Players.AddRange(p1, p2);
+        // Long wait time = expanded range (base 300 + wait bonus)
+        context.Battles.Add(new Battle { Id = Guid.NewGuid(), Player1Id = p1.Id, Player1 = p1, Status = BattleStatus.Queued, QueuedAt = DateTime.UtcNow.AddSeconds(-25) });
+        context.Battles.Add(new Battle { Id = Guid.NewGuid(), Player1Id = p2.Id, Player1 = p2, Status = BattleStatus.Queued, QueuedAt = DateTime.UtcNow.AddSeconds(-25) });
+        await context.SaveChangesAsync();
+
+        var match = await service.FindMatchAsync();
+
+        // 25s wait → waitBonus = (25/10) * 50 = 100, effectiveRange = 300 + 100 = 400
+        // Rating diff = 400, should match
+        Assert.NotNull(match);
+    }
+
+    [Fact]
+    public async Task FindMatch_ForceMatch_After30sForFree()
+    {
+        var context = CreateInMemoryContext();
+        var logger = new Mock<ILogger<MatchmakingService>>();
+        var botTeamGenerator = CreateMockBotTeamGenerator();
+        var service = new MatchmakingService(context, logger.Object, botTeamGenerator.Object);
+
+        var p1 = new Player { Id = Guid.NewGuid(), Username = "long_wait", Email = "long@test.com", Rating = 500, CurrentTier = SubscriptionTier.Free };
+        var p2 = new Player { Id = Guid.NewGuid(), Username = "also_long", Email = "also@test.com", Rating = 2500, CurrentTier = SubscriptionTier.Free };
+
+        context.Players.AddRange(p1, p2);
+        context.Battles.Add(new Battle { Id = Guid.NewGuid(), Player1Id = p1.Id, Player1 = p1, Status = BattleStatus.Queued, QueuedAt = DateTime.UtcNow.AddSeconds(-35) });
+        context.Battles.Add(new Battle { Id = Guid.NewGuid(), Player1Id = p2.Id, Player1 = p2, Status = BattleStatus.Queued, QueuedAt = DateTime.UtcNow.AddSeconds(-35) });
+        await context.SaveChangesAsync();
+
+        var match = await service.FindMatchAsync();
+
+        // After 30s, Free tier gets force-matched regardless of rating
+        Assert.NotNull(match);
+    }
+
+    [Fact]
+    public async Task FindMatch_SamePlayerTwice_Skipped()
+    {
+        var context = CreateInMemoryContext();
+        var logger = new Mock<ILogger<MatchmakingService>>();
+        var botTeamGenerator = CreateMockBotTeamGenerator();
+        var service = new MatchmakingService(context, logger.Object, botTeamGenerator.Object);
+
+        var p1 = new Player { Id = Guid.NewGuid(), Username = "duper", Email = "duper@test.com", Rating = 1000, CurrentTier = SubscriptionTier.Free };
+
+        context.Players.Add(p1);
+        // Same player queued twice (shouldn't happen but defensive check)
+        context.Battles.Add(new Battle { Id = Guid.NewGuid(), Player1Id = p1.Id, Player1 = p1, Status = BattleStatus.Queued, QueuedAt = DateTime.UtcNow.AddSeconds(-5) });
+        context.Battles.Add(new Battle { Id = Guid.NewGuid(), Player1Id = p1.Id, Player1 = p1, Status = BattleStatus.Queued, QueuedAt = DateTime.UtcNow.AddSeconds(-3) });
+        await context.SaveChangesAsync();
+
+        var match = await service.FindMatchAsync();
+
+        // Should not match player against themselves
+        Assert.Null(match);
+    }
 }
