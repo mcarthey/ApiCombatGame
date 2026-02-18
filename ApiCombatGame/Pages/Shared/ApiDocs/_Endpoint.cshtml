@@ -145,7 +145,7 @@
                                 @foreach (var (code, response) in Model.Responses)
                                 {
                                     var codeColor = code.StartsWith("2") ? "var(--md-sys-color-primary)" :
-                                                    code.StartsWith("4") ? "var(--md-sys-color-tertiary-container)" :
+                                                    code.StartsWith("4") ? "var(--md-sys-color-tertiary)" :
                                                     code.StartsWith("5") ? "var(--md-sys-color-error)" : "var(--md-sys-color-on-surface-variant)";
                                     <div class="flex items-start gap-3 text-sm">
                                         <code class="font-mono font-bold min-w-[2.5rem]" style="color: @codeColor;">@code</code>
@@ -189,7 +189,7 @@
                     @foreach (var (code, response) in Model.Responses)
                     {
                         var codeColor = code.StartsWith("2") ? "var(--md-sys-color-primary)" :
-                                        code.StartsWith("4") ? "var(--md-sys-color-tertiary-container)" :
+                                        code.StartsWith("4") ? "var(--md-sys-color-tertiary)" :
                                         code.StartsWith("5") ? "var(--md-sys-color-error)" : "var(--md-sys-color-on-surface-variant)";
                         <div class="flex items-start gap-3 text-sm">
                             <code class="font-mono font-bold min-w-[2.5rem]" style="color: @codeColor;">@code</code>
