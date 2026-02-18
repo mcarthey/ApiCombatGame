@@ -19,6 +19,25 @@
 
     var (bg, text) = methodColors.GetValueOrDefault(Model.Method, ("var(--md-sys-color-surface-container-high)", "var(--md-sys-color-on-surface)"));
     var anchorId = $"{Model.Method.ToLower()}-{Model.Path.TrimStart('/').Replace("/", "-").Replace("{", "").Replace("}", "")}";
+
+    // Lightweight markdown→HTML for XML doc comments
+    string RenderMarkdown(string md)
+    {
+        var encoded = System.Net.WebUtility.HtmlEncode(md);
+        // **bold**
+        encoded = System.Text.RegularExpressions.Regex.Replace(encoded, @"\*\*(.+?)\*\*", "<strong>$1</strong>");
+        // `code`
+        encoded = System.Text.RegularExpressions.Regex.Replace(encoded, @"`([^`]+)`",
+            "<code style=\"background:var(--md-sys-color-surface-container-high);padding:1px 4px;border-radius:3px;font-size:0.85em;\">$1</code>");
+        // Bullet lines: "- text" → list items
+        encoded = System.Text.RegularExpressions.Regex.Replace(encoded, @"(?m)^- (.+)$", "<li>$1</li>");
+        encoded = System.Text.RegularExpressions.Regex.Replace(encoded, @"(<li>.*?</li>(\s*<li>.*?</li>)*)", "<ul class=\"list-disc ml-4 space-y-0.5\">$1</ul>");
+        // Double newlines → paragraph breaks
+        encoded = System.Text.RegularExpressions.Regex.Replace(encoded, @"\n\n+", "</p><p>");
+        // Single newlines within paragraphs
+        encoded = encoded.Replace("\n", "<br/>");
+        return $"<p>{encoded}</p>";
+    }
 }
 
 <details id="@anchorId" class="group md3-card overflow-hidden stat-card">
@@ -61,7 +80,7 @@
 
         @if (!string.IsNullOrEmpty(Model.Description) && Model.Description != Model.Summary)
         {
-            <p class="text-sm" style="color: var(--md-sys-color-on-surface-variant);">@Model.Description</p>
+            <div class="text-sm" style="color: var(--md-sys-color-on-surface-variant);">@Html.Raw(RenderMarkdown(Model.Description))</div>
         }
 
         @* Prerequisites *@
