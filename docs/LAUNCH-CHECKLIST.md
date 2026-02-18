@@ -2,7 +2,8 @@
 
 Pre-flight checks before advertising and accepting public players.
 
-> **Status:** All technical items verified ✓ (February 17, 2026)
+> **Status:** Technical items verified, HN launch prep in progress (February 18, 2026)
+> **Target:** Hacker News launch Friday February 20, 2026
 > **Marketing action items:** See [MARKETING-STRATEGY.md](MARKETING-STRATEGY.md) § "Immediate Action Plan"
 
 ---
@@ -69,19 +70,34 @@ Pre-flight checks before advertising and accepting public players.
 - [x] About page live at `/About`
 - [x] Domain `apicombat.com` resolves to production server
 
-## Monitoring
+## Monitoring & Support
 
 - [x] Application logs writing to AppLog table
 - [x] Admin log viewer accessible at `/Admin/Logs`
 - [x] Error pages configured (404, 500)
 - [x] Admin dashboard overview metrics accurate (DAU, MRR, signups)
+- [x] Activity ledger tracking all numeric state changes (46 audit points across 17 services)
+- [x] Support timeline on admin PlayerDetail page (filterable by property)
+- [x] Rating reconciliation tool on Admin/Tools (preview + execute)
+- [ ] Verify admin can monitor errors in real-time during launch (keep `/Admin/Logs` open)
 
-## Final Verification
+## HN Traffic Readiness
+
+- [ ] Verify site4now SQL Server connection limit (EF Core defaults to 100 pool)
+- [ ] Test cold start time after app pool recycle (MigrateAsync + seed data under load)
+- [ ] Confirm rate limiting holds under concurrent requests (Free: 60/min)
+- [ ] Have a plan for scaling if traffic exceeds shared hosting capacity
+
+## Pre-Launch Smoke Test
 
 - [x] `dotnet build` — 0 errors, 0 warnings
-- [x] All automated tests pass (457 tests)
-- [ ] Manual smoke test sequence completed (see [MANUAL_TEST.md](MANUAL_TEST.md))
+- [x] All automated tests pass (574 tests)
 - [ ] Deploy to production via MSDeploy (recycle app pool first)
 - [ ] Verify production health check after deploy
+- [ ] Verify LedgerEntries migration applied on production
+- [ ] Manual smoke test: register → fight battle → check Support Timeline shows entries
+- [ ] Manual smoke test: buy cosmetic → admin PlayerDetail → filter Currency → verify ledger
+- [ ] Manual smoke test: admin adjust rating → verify in Support Timeline as "AdminAction"
 - [ ] Test registration flow on production
 - [ ] Test password reset flow on production
+- [ ] Full manual smoke test sequence (see [MANUAL_TEST.md](MANUAL_TEST.md))
