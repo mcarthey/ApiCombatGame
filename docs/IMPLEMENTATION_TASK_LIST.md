@@ -862,10 +862,91 @@ After each battle resolves, the following hooks execute (in order):
 
 ---
 
+## Pre-Launch Features ✅ COMPLETE
+
+### Password Reset ✅ COMPLETE
+
+- [x] Player model: PasswordResetToken, PasswordResetExpiresAt fields
+- [x] IAuthService: RequestPasswordResetAsync, ResetPasswordAsync
+- [x] AuthService: URL-safe base64 token, 1-hour expiry, no email leak
+- [x] IEmailTemplateService: PasswordResetEmail template
+- [x] IEmailService: SendPasswordResetEmailAsync
+- [x] ForgotPassword page (email input, always shows "check inbox")
+- [x] ResetPassword page (token from URL, new password + confirm)
+- [x] Login page: "Forgot password?" link, success message handling
+
+### Terms of Service ✅ COMPLETE
+
+- [x] Terms page (static, Privacy.cshtml pattern)
+- [x] Footer: Terms of Service link in Legal section
+- [x] Register page: references both Terms and Privacy Policy
+
+### Account Deletion (GDPR) ✅ COMPLETE
+
+- [x] Player model: IsDeleted, DeletedAt fields
+- [x] IAuthService: DeleteAccountAsync (password verification)
+- [x] AuthService: soft delete, PII anonymization, confirmation email
+- [x] IEmailTemplateService: AccountDeletionEmail template
+- [x] IEmailService: SendAccountDeletionEmailAsync
+- [x] Settings page: Danger Zone card with password confirm + JS dialog
+- [x] Login: rejects deleted accounts
+
+### Cookie Consent Banner ✅ COMPLETE
+
+- [x] _Layout.cshtml: fixed-bottom banner with "Got it" button
+- [x] Sets cookie_consent cookie (365-day, SameSite=Lax)
+- [x] Only shown when cookie not set
+- [x] Links to Privacy Policy
+
+### Email Verification ✅ COMPLETE
+
+- [x] Player model: EmailConfirmed, EmailConfirmationToken fields
+- [x] IAuthService: SendVerificationEmailAsync, VerifyEmailAsync
+- [x] AuthService: token generation, verification, auto-send on registration
+- [x] IEmailTemplateService: VerificationEmail template
+- [x] IEmailService: SendVerificationEmailAsync
+- [x] VerifyEmail page (success/error display)
+- [x] Dashboard: verification banner with "Resend Link" button
+
+### Public Leaderboard ✅ COMPLETE
+
+- [x] Leaderboard page (no auth required)
+- [x] Top 50 non-bot non-deleted players by rating
+- [x] RatingTierHelper tier badges
+- [x] Top 3 gold/silver/bronze icons
+- [x] Navbar: "Leaderboard" link (public)
+
+### Favicon ✅ COMPLETE
+
+- [x] SVG favicon (primary blue circle + white crossed swords)
+- [x] _Layout.cshtml: `<link rel="icon" type="image/svg+xml">`
+
+### About Page ✅ COMPLETE
+
+- [x] About page (static, Privacy.cshtml pattern)
+- [x] Content: mission, how it works, fair play, open to all, CTAs
+- [x] Footer: About link in Resources section
+
+### Advertising Landing Page ✅ COMPLETE
+
+- [x] _LandingLayout.cshtml (minimal: logo, no nav/footer)
+- [x] Landing page with social proof (real player count, battle count)
+- [x] UTM param passthrough to Register CTA
+- [x] noindex/nofollow meta tag
+- [x] Selling points grid + hero section
+
+### Documentation ✅ COMPLETE
+
+- [x] MANUAL_TEST.md: test cases for all pre-launch features (sections 22-29)
+- [x] LAUNCH-CHECKLIST.md: production launch checklist
+- [x] IMPLEMENTATION_TASK_LIST.md: pre-launch features section
+
+---
+
 ## Build Status
 
 - **Build**: 0 errors, 0 warnings
-- **Tests**: 306 passing, 0 failing, 0 skipped
+- **Tests**: 457+ passing, 0 failing, 0 skipped
 - **API Endpoints**: 100+ across 28 tagged controllers
 - **Background Jobs**: 10 hosted services
 - **OpenAPI Tags**: 28 (Auth, Player, Team, Battle, Leaderboard, Strategy Marketplace, Guild, Guild Boss, Challenges, Mastery, Modifiers, Replays, AI Practice, Ranked Seasons, Loot, Referral, Unit Customization, Rival, Battle Pass, Guild Wars, Tournament, Cosmetics, Premium Plus, Activity Feed, Education, SDK, Discord, Creators)

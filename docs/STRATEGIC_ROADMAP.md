@@ -205,9 +205,12 @@ This is the **Learned Geek LLC** differentiator — sell to coding bootcamps and
    - "Battle of the Day" — auto-featured exciting close match
 
 9. **Discord Integration**
-   - Discord bot: `/rank`, `/challenge @player`, `/guild-status`
-   - Battle result notifications posted to guild Discord channel
-   - Discord role sync with subscription tier
+   - **Account Linking (OAuth2)**: "Link Discord" button on Settings page → Discord OAuth2 flow → store `DiscordId` on Player model → maps Discord user to API Combat player
+   - **Automatic Tier Role Sync**: Discord bot with "Manage Roles" permission. When a player's rating crosses a tier threshold after a battle, bot calls Discord API to swap their role (Rubber Duck → Copy Pasta → ... → I Use Arch btw)
+   - **Bot Commands**: `/rank`, `/challenge @player`, `/guild-status`, `/leaderboard`
+   - **Battle result notifications** posted to guild Discord channel via webhook
+   - **Discord role sync** with both rating tier and subscription tier
+   - Server: https://discord.gg (invite link TBD) — channels, roles, and welcome embed already configured
 
 10. **Tournament System**
     - Weekly auto-brackets: 16/32/64 player single elimination

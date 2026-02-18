@@ -2892,6 +2892,217 @@ The game markets itself through:
 
 ---
 
-*Document Version: 1.0*  
-*Last Updated: February 10, 2026*  
+## Pre-Launch Analysis & Reality Checks (February 2026)
+
+### Critical Reality Checks
+
+#### "Why Steam is Wrong" — Confirmed
+Steam users want executables and graphics. Our audience wants APIs and automation. Don't waste time there.
+
+#### Best Platforms Ranked by ROI
+
+**Tier 1 — Do These First:**
+1. **Product Hunt** — Tuesday launch, prepared assets, all-day engagement
+2. **Hacker News (Show HN)** — Perfect audience, could hit front page
+3. **GitHub** — Permanent home, organic discovery
+4. **Dev.to** — Blog series drives sustained traffic
+
+**Tier 2 — After Initial Traction:**
+5. **Reddit** (r/programming, r/dotnet, r/csharp)
+6. **Twitter/X** — Build in public, daily updates
+7. **Discord** — Community hub (launch day 1)
+
+**Tier 3 — After 1K Users:**
+8. Universities (WCTC connection already in place)
+9. YouTube tutorials
+10. Newsletter
+
+---
+
+### Immediate Action Plan (Next 7 Days)
+
+#### Day 1-2: Foundation
+- [ ] Register combatgame.dev domain
+- [ ] Set up GitHub org: api-combat-game
+- [ ] Create Discord server (10 channels max to start)
+- [ ] Write killer README.md (use PH description)
+- [ ] Set up Plausible analytics
+
+#### Day 3-4: Content Prep
+- [ ] Write Show HN post (save as draft)
+- [ ] Write Product Hunt description (save as draft)
+- [ ] Record 90-second demo video (Loom is fine)
+- [ ] Take 5 screenshots for PH gallery
+- [ ] Write Dev.to article #1: "Why I Built a Game With No Graphics"
+
+#### Day 5-7: Assets & Testing
+- [ ] Build simple CLI client example (Python, <100 lines)
+- [ ] Create curl command cheat sheet
+- [ ] Test all links work
+- [ ] Soft launch to 5 friends, get feedback
+- [ ] Schedule PH launch for next Tuesday
+
+---
+
+### Quick Wins
+
+#### SSL & URLs
+- All URLs must use `https://apicombat.com`
+- Update all JSON-LD schemas
+- Update og:url and og:image paths
+- Submit to Google Search Console and Bing Webmaster Tools
+
+#### WCTC Connection is GOLD
+Use immediately for credibility:
+- "As seen in Computer Science courses at WCTC"
+- "Designed by a WCTC instructor"
+- Case study: "How WCTC students use API Combat for final projects"
+
+This gives instant credibility for other university pitches.
+
+---
+
+### Revenue Reality Check (Adjusted Projections)
+
+**Year 1 Conservative (More Realistic):**
+- Freemium: $1,500/mo x 12 = $18,000
+- Educational (2 schools): $2,000
+- Consulting leads: $10,000
+- **Total: $30,000**
+
+**Year 1 Optimistic (If PH/HN hit):**
+- Freemium: $4,000/mo x 12 = $48,000
+- Educational (5 schools): $5,000
+- Battle Pass (2 seasons): $10,000
+- Consulting leads: $25,000
+- **Total: $88,000**
+
+The original $100K-150K projection is achievable **if** there's viral traction on PH or HN.
+
+---
+
+### Template Refinements
+
+#### Product Hunt — Shorter Description
+The original description (~500 words) is too long. PH descriptions should be ~200 words max. People skim.
+
+**Tighter version:**
+```
+API Combat is a PvP strategy game with no GUI.
+
+Interact entirely through REST API. Build your own client
+(web, CLI, mobile), configure battle AI in JSON, and compete
+on global leaderboards.
+
+WHY?
+- Backend devs love automation
+- Perfect for learning API design
+- Used in CS courses at universities
+
+FEATURES:
+- RESTful API for all actions
+- Async battles (queue and go)
+- Official SDKs (C#, Python, JS)
+- Open source game engine
+
+FREE TIER: 10 battles/day
+PREMIUM ($5/mo): Unlimited + scripting
+
+Try: [link]
+GitHub: [link]
+Discord: [link]
+
+Built with .NET 8, MSSQL, SmarterASP.NET.
+```
+
+#### Show HN — No Changes Needed
+The existing Show HN template is exactly the right tone and length.
+
+#### University Email — Lead with Social Proof
+Move the "being used at" list higher:
+```
+Hi Professor [Name],
+
+I'm Mark, a .NET consultant and instructor at WCTC.
+
+I built an API-only game that's being used at [University 1],
+[University 2], and [Bootcamp] to teach REST API consumption.
+
+I'd love to offer [Your University] a free educational license...
+```
+
+Lead with proof, then explain.
+
+---
+
+### Refined Launch Week Schedule
+
+**Monday (Pre-Launch):**
+- Final testing
+- Alert personal network
+- Prepare responses to common questions
+
+**Tuesday:**
+- 12:01 AM: Submit to Product Hunt
+- 6:00 AM: Tweet announcement
+- All day: Monitor PH, respond to every comment
+- Evening: Write down what you learned
+
+**Wednesday:**
+- Morning: Publish Dev.to article #1
+- 8:00 AM: Submit Show HN
+- All day: Monitor HN, respond immediately
+- Evening: Cross-post article to Medium, Hashnode
+
+**Thursday:**
+- Morning: Post to r/programming
+- Afternoon: Post to r/dotnet
+- Evening: Engage in comments
+
+**Friday:**
+- Morning: Post to r/csharp
+- Afternoon: Analyze week's metrics
+- Evening: Write "Launch Week Results" thread on Twitter
+
+**Weekend:**
+- Rest
+- Plan next week
+- Start writing article #2
+
+---
+
+### Consulting Angle — Secret Weapon
+
+The game is a living portfolio piece that demonstrates:
+- API design at scale
+- Rate limiting strategies
+- JWT authentication
+- Async processing
+- MSSQL optimization
+- Production deployment
+
+Every client who asks "Can you build an API?" gets shown this.
+
+**Consulting pitch:**
+```
+"I built a game serving 10,000 developers with 99.9% uptime.
+I can architect your API to the same standard."
+```
+
+---
+
+### This Week's Priority Actions
+
+1. **SSL setup**
+2. **Product Hunt submission prep** (Tuesday launch)
+3. **Show HN draft** (ready for Wednesday)
+4. **Discord setup** (launch day)
+5. **One example client** (Python CLI, dead simple)
+
+**Don't overthink it.** The game is ready. The SEO is solid. The marketing doc is comprehensive. Hit "launch" and be ready to engage like crazy for 72 hours.
+
+---
+
+*Document Version: 2.0*
+*Last Updated: February 17, 2026*
 *Maintained by: Mark @ Learned Geek Consulting*

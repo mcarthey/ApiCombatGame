@@ -448,6 +448,95 @@ Use a tool like **curl**, **Postman**, or the built-in Swagger UI at `/swagger` 
 
 ---
 
+## 22. Password Reset
+
+### 22.1 Forgot Password
+- [ ] `GET /Auth/ForgotPassword` renders email input form
+- [ ] Submit valid email shows "check your inbox" success message (no email leak)
+- [ ] Submit invalid/nonexistent email shows same success message (no email leak)
+- [ ] Reset email received with valid link (check spam folder)
+
+### 22.2 Reset Password
+- [ ] Click reset link in email -> `GET /Auth/ResetPassword?token=...` renders password form
+- [ ] Submit matching passwords (8+ chars) -> redirects to Login with success message
+- [ ] Submit mismatched passwords -> shows error
+- [ ] Use expired token (>1 hour) -> shows "expired" error with link to request new one
+- [ ] Reuse already-used token -> shows "invalid" error
+- [ ] Login with new password succeeds
+
+---
+
+## 23. Account Deletion (GDPR)
+
+- [ ] `GET /Account/Settings` shows "Danger Zone" section at bottom
+- [ ] Click "Delete My Account" without password -> shows validation error
+- [ ] Enter wrong password -> shows "Incorrect password" error
+- [ ] Enter correct password + confirm dialog -> redirects to Login with "deleted" message
+- [ ] Try to login with deleted account credentials -> "Invalid email or password"
+- [ ] Deletion confirmation email received
+- [ ] Deleted player data is anonymized in database (`deleted-*` username/email)
+
+---
+
+## 24. Cookie Consent
+
+- [ ] First visit (incognito): cookie consent banner visible at bottom
+- [ ] Click "Got it" -> banner disappears, `cookie_consent` cookie set
+- [ ] Subsequent page loads: banner not shown
+- [ ] Privacy Policy link in banner works
+
+---
+
+## 25. Email Verification
+
+- [ ] New registration triggers verification email
+- [ ] Dashboard shows "email not verified" banner with "Resend Link" button
+- [ ] Click verification link in email -> `GET /Auth/VerifyEmail?token=...` shows success
+- [ ] Dashboard no longer shows verification banner after verifying
+- [ ] "Resend Link" button sends new verification email
+- [ ] Invalid/expired token shows error page with dashboard link
+
+---
+
+## 26. Public Leaderboard
+
+- [ ] `GET /Leaderboard` accessible without authentication
+- [ ] Shows top 50 non-bot players by rating
+- [ ] Top 3 have gold/silver/bronze icons
+- [ ] Rating tier badges display correctly
+- [ ] Win rate color-coded (green >55%, red <45%)
+- [ ] "Leaderboard" nav link visible to all visitors
+- [ ] Empty state shown when no players exist
+
+---
+
+## 27. Static Pages
+
+- [ ] `GET /Terms` renders Terms of Service page
+- [ ] `GET /About` renders About page with CTAs
+- [ ] Footer shows "Terms of Service" link
+- [ ] Footer shows "About" link
+- [ ] Register page references both Terms and Privacy Policy
+
+---
+
+## 28. Landing Page (Advertising)
+
+- [ ] `GET /Landing` renders with minimal layout (logo only, no nav/footer)
+- [ ] `noindex, nofollow` meta tag present
+- [ ] Real player count and battle count displayed
+- [ ] UTM params preserved in Register CTA link (`?utm_source=...`)
+- [ ] CTA buttons link to registration
+
+---
+
+## 29. Favicon
+
+- [ ] Favicon visible in browser tab (blue circle with crossed swords)
+- [ ] `<link rel="icon" type="image/svg+xml">` present in page source
+
+---
+
 ## Quick Smoke Test Sequence
 
 A minimal end-to-end flow to verify the system works:
