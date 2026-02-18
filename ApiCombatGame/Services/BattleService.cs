@@ -240,6 +240,8 @@ public class BattleService : IBattleService
             {
                 battle1.Status = BattleStatus.Cancelled;
                 await RefundDailyBattleUsageAsync(battle1.Player1Id, cancellationToken);
+                if (battle1.Player2Id.HasValue)
+                    await RefundDailyBattleUsageAsync(battle1.Player2Id.Value, cancellationToken);
                 await _context.SaveChangesAsync(cancellationToken);
                 return;
             }
@@ -256,6 +258,19 @@ public class BattleService : IBattleService
                 .Include(u => u.Abilities)
                 .Where(u => team2UnitIds.Contains(u.Id))
                 .ToListAsync(cancellationToken);
+
+            if (team1Units.Count == 0 || team2Units.Count == 0 ||
+                team1Units.Any(u => !u.Abilities.Any()) || team2Units.Any(u => !u.Abilities.Any()))
+            {
+                _logger.LogError("Battle {BattleId} cancelled: units missing or have no abilities (T1: {T1Count} units, T2: {T2Count} units)",
+                    battle1.Id, team1Units.Count, team2Units.Count);
+                battle1.Status = BattleStatus.Cancelled;
+                await RefundDailyBattleUsageAsync(battle1.Player1Id, cancellationToken);
+                if (battle1.Player2Id.HasValue)
+                    await RefundDailyBattleUsageAsync(battle1.Player2Id.Value, cancellationToken);
+                await _context.SaveChangesAsync(cancellationToken);
+                return;
+            }
 
             // Store team class compositions for challenge checking
             battle1.Team1ClassesJson = JsonSerializer.Serialize(
@@ -326,6 +341,8 @@ public class BattleService : IBattleService
             _logger.LogError(ex, "Error processing battle {BattleId}", battle1.Id);
             battle1.Status = BattleStatus.Cancelled;
             await RefundDailyBattleUsageAsync(battle1.Player1Id, cancellationToken);
+            if (battle1.Player2Id.HasValue)
+                await RefundDailyBattleUsageAsync(battle1.Player2Id.Value, cancellationToken);
             await _context.SaveChangesAsync(cancellationToken);
         }
     }

@@ -49,6 +49,7 @@ public class AuthService : IAuthService
 
         // Give the player 3 free starter units (one cheap from each of 3 random classes)
         var starterTemplates = await _context.Units
+            .Include(u => u.Abilities)
             .Where(u => u.IsTemplate && u.UnlockCost == 200)
             .ToListAsync();
 
@@ -245,6 +246,7 @@ public class AuthService : IAuthService
             .Replace("+", "-").Replace("/", "_").TrimEnd('=');
 
         player.EmailConfirmationToken = token;
+        player.EmailConfirmationExpiresAt = DateTime.UtcNow.AddHours(24);
         await _context.SaveChangesAsync();
 
         var configUrl = _config["AppSettings:BaseUrl"]?.TrimEnd('/');
@@ -260,11 +262,12 @@ public class AuthService : IAuthService
         var player = await _context.Players
             .FirstOrDefaultAsync(p => p.EmailConfirmationToken == token && !p.IsDeleted);
 
-        if (player == null)
+        if (player == null || (player.EmailConfirmationExpiresAt.HasValue && player.EmailConfirmationExpiresAt < DateTime.UtcNow))
             return false;
 
         player.EmailConfirmed = true;
         player.EmailConfirmationToken = null;
+        player.EmailConfirmationExpiresAt = null;
         await _context.SaveChangesAsync();
 
         _logger.LogInformation("Email verified for {Username} ({PlayerId})", player.Username, player.Id);

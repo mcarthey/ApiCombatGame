@@ -424,6 +424,47 @@ using (var scope = app.Services.CreateScope())
         // Seed weekly easter eggs (auto-generates if none exist for current week)
         var eggService = scope.ServiceProvider.GetRequiredService<IEasterEggService>();
         await eggService.GenerateWeeklyEggsAsync(DateTime.UtcNow);
+
+        // Backfill: copy abilities from templates to player-owned units that are missing them
+        // (fixes registration bug where .Include(u => u.Abilities) was missing)
+        var unitsWithoutAbilities = await context.Units
+            .Where(u => !u.IsTemplate && !u.Abilities.Any())
+            .ToListAsync();
+
+        if (unitsWithoutAbilities.Count > 0)
+        {
+            var templates = await context.Units
+                .Include(u => u.Abilities)
+                .Where(u => u.IsTemplate)
+                .ToListAsync();
+
+            foreach (var unit in unitsWithoutAbilities)
+            {
+                var template = templates.FirstOrDefault(t => t.Name == unit.Name && t.Class == unit.Class);
+                if (template != null)
+                {
+                    foreach (var a in template.Abilities)
+                    {
+                        context.Abilities.Add(new ApiCombatGame.Models.Domain.Ability
+                        {
+                            Id = Guid.NewGuid(),
+                            UnitId = unit.Id,
+                            Name = a.Name,
+                            Type = a.Type,
+                            Damage = a.Damage,
+                            Healing = a.Healing,
+                            CooldownTurns = a.CooldownTurns,
+                            Description = a.Description,
+                            TargetsAllies = a.TargetsAllies,
+                            IsAoE = a.IsAoE
+                        });
+                    }
+                }
+            }
+
+            await context.SaveChangesAsync();
+            startupLogger.LogInformation("Backfilled abilities for {Count} player units", unitsWithoutAbilities.Count);
+        }
     }
     catch (Exception ex)
     {
