@@ -21,16 +21,16 @@ public class DailyChallengeGenerationJob : BackgroundService
     {
         while (!stoppingToken.IsCancellationRequested)
         {
-            var now = DateTime.UtcNow;
-            var nextMidnight = now.Date.AddDays(1);
-            var delay = nextMidnight - now;
-
-            _logger.LogInformation("Next challenge generation at {NextMidnight}", nextMidnight);
-
-            await Task.Delay(delay, stoppingToken);
-
             try
             {
+                var now = DateTime.UtcNow;
+                var nextMidnight = now.Date.AddDays(1);
+                var delay = nextMidnight - now;
+
+                _logger.LogInformation("Next challenge generation at {NextMidnight}", nextMidnight);
+
+                await Task.Delay(delay, stoppingToken);
+
                 using var scope = _serviceProvider.CreateScope();
                 var context = scope.ServiceProvider.GetRequiredService<GameDbContext>();
                 var challengeService = scope.ServiceProvider.GetRequiredService<IChallengeService>();

@@ -21,17 +21,17 @@ public class GuildBossSpawnJob : BackgroundService
     {
         while (!stoppingToken.IsCancellationRequested)
         {
-            // Run once per week on Monday at 00:00 UTC
-            var now = DateTime.UtcNow;
-            var nextMonday = GetNextMonday(now);
-            var delay = nextMonday - now;
-
-            _logger.LogInformation("Next boss spawn scheduled for {NextMonday}", nextMonday);
-
-            await Task.Delay(delay, stoppingToken);
-
             try
             {
+                // Run once per week on Monday at 00:00 UTC
+                var now = DateTime.UtcNow;
+                var nextMonday = GetNextMonday(now);
+                var delay = nextMonday - now;
+
+                _logger.LogInformation("Next boss spawn scheduled for {NextMonday}", nextMonday);
+
+                await Task.Delay(delay, stoppingToken);
+
                 using var scope = _serviceProvider.CreateScope();
                 var context = scope.ServiceProvider.GetRequiredService<GameDbContext>();
                 var bossService = scope.ServiceProvider.GetRequiredService<IGuildBossService>();

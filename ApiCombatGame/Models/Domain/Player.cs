@@ -83,6 +83,7 @@ public class Player
     public bool EmailConfirmed { get; set; } = false;
     [MaxLength(100)]
     public string? EmailConfirmationToken { get; set; }
+    public DateTime? EmailConfirmationExpiresAt { get; set; }
 
     // Account deletion (soft delete)
     public bool IsDeleted { get; set; } = false;

@@ -19,16 +19,16 @@ public class WeeklyModifierRotationJob : BackgroundService
     {
         while (!stoppingToken.IsCancellationRequested)
         {
-            var now = DateTime.UtcNow;
-            var nextMonday = GetNextMonday(now);
-            var delay = nextMonday - now;
-
-            _logger.LogInformation("Next modifier rotation scheduled for {NextMonday}", nextMonday);
-
-            await Task.Delay(delay, stoppingToken);
-
             try
             {
+                var now = DateTime.UtcNow;
+                var nextMonday = GetNextMonday(now);
+                var delay = nextMonday - now;
+
+                _logger.LogInformation("Next modifier rotation scheduled for {NextMonday}", nextMonday);
+
+                await Task.Delay(delay, stoppingToken);
+
                 using var scope = _serviceProvider.CreateScope();
                 var modifierService = scope.ServiceProvider.GetRequiredService<IModifierService>();
 

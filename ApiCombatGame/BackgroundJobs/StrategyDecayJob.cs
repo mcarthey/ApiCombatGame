@@ -19,19 +19,19 @@ public class StrategyDecayJob : BackgroundService
     {
         while (!stoppingToken.IsCancellationRequested)
         {
-            // Run once per day at 2 AM UTC
-            var now = DateTime.UtcNow;
-            var next2AM = now.Date.AddHours(2);
-            if (now.Hour >= 2) next2AM = next2AM.AddDays(1);
-
-            var delay = next2AM - now;
-
-            _logger.LogInformation("Next strategy decay at {Next2AM}", next2AM);
-
-            await Task.Delay(delay, stoppingToken);
-
             try
             {
+                // Run once per day at 2 AM UTC
+                var now = DateTime.UtcNow;
+                var next2AM = now.Date.AddHours(2);
+                if (now.Hour >= 2) next2AM = next2AM.AddDays(1);
+
+                var delay = next2AM - now;
+
+                _logger.LogInformation("Next strategy decay at {Next2AM}", next2AM);
+
+                await Task.Delay(delay, stoppingToken);
+
                 using var scope = _serviceProvider.CreateScope();
                 var marketplace = scope.ServiceProvider.GetRequiredService<IStrategyMarketplaceService>();
 
