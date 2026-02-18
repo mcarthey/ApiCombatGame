@@ -42,16 +42,16 @@ public class EmailTemplateService : IEmailTemplateService
 {{preheaderBlock}}
 <div class="wrapper">
   <div class="card">
-    <div class="header">
-      <h1>&#9876; API Combat Game</h1>
-      <div class="subtitle">The API IS the game</div>
+    <div class="header" style="background:#2563eb; padding:24px 32px; text-align:center;">
+      <h1 style="margin:0; color:#ffffff; font-size:20px; font-weight:700; letter-spacing:-0.02em;">&#9876; API Combat Game</h1>
+      <div class="subtitle" style="margin:4px 0 0; color:rgba(255,255,255,0.85); font-size:13px;">The API IS the game</div>
     </div>
-    <div class="body">
+    <div class="body" style="padding:28px 32px; color:#1f2937; font-size:15px; line-height:1.6;">
       {{bodyHtml}}
     </div>
-    <div class="footer">
-      <p>&copy; {{DateTime.UtcNow.Year}} API Combat Game &mdash; <a href="https://apicombat.com">apicombat.com</a></p>
-      <p style="margin-top:4px;">Built by <a href="https://learnedgeek.com">LearnedGeek</a></p>
+    <div class="footer" style="padding:20px 32px; text-align:center; font-size:12px; color:#9ca3af; border-top:1px solid #f3f4f6;">
+      <p>&copy; {{DateTime.UtcNow.Year}} API Combat Game &mdash; <a href="https://apicombat.com" style="color:#6b7280; text-decoration:underline;">apicombat.com</a></p>
+      <p style="margin-top:4px;">Built by <a href="https://learnedgeek.com" style="color:#6b7280; text-decoration:underline;">LearnedGeek</a></p>
     </div>
   </div>
 </div>

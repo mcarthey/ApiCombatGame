@@ -169,7 +169,8 @@ public class AuthService : IAuthService
         player.PasswordResetExpiresAt = DateTime.UtcNow.AddHours(1);
         await _context.SaveChangesAsync();
 
-        var baseUrl = _config["AppSettings:BaseUrl"]?.TrimEnd('/') ?? "https://apicombat.com";
+        var configUrl = _config["AppSettings:BaseUrl"]?.TrimEnd('/');
+        var baseUrl = string.IsNullOrEmpty(configUrl) ? "https://apicombat.com" : configUrl;
         var resetLink = $"{baseUrl}/Auth/ResetPassword?token={token}";
 
         try { await _emailService.SendPasswordResetEmailAsync(player.Email, player.Username, resetLink); }
@@ -246,7 +247,8 @@ public class AuthService : IAuthService
         player.EmailConfirmationToken = token;
         await _context.SaveChangesAsync();
 
-        var baseUrl = _config["AppSettings:BaseUrl"]?.TrimEnd('/') ?? "https://apicombat.com";
+        var configUrl = _config["AppSettings:BaseUrl"]?.TrimEnd('/');
+        var baseUrl = string.IsNullOrEmpty(configUrl) ? "https://apicombat.com" : configUrl;
         var verifyLink = $"{baseUrl}/Auth/VerifyEmail?token={token}";
 
         try { await _emailService.SendVerificationEmailAsync(player.Email, player.Username, verifyLink); }

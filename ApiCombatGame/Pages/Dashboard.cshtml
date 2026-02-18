@@ -49,17 +49,30 @@
 @if (!Model.EmailVerified)
 {
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
-        <div class="md3-card p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3" style="border: 1px solid var(--md-sys-color-tertiary); background: color-mix(in srgb, var(--md-sys-color-tertiary) 8%, transparent);">
-            <div class="flex items-center gap-3">
-                <span class="material-symbols-outlined" style="color: var(--md-sys-color-tertiary);">mail</span>
+        @if (TempData["VerificationResent"] != null)
+        {
+            <div class="md3-card p-4 flex items-center gap-3" style="border: 1px solid var(--md-sys-color-primary); background: color-mix(in srgb, var(--md-sys-color-primary) 8%, transparent);">
+                <span class="material-symbols-outlined" style="color: var(--md-sys-color-primary);">check_circle</span>
                 <p class="text-sm" style="color: var(--md-sys-color-on-surface);">
-                    Your email isn't verified yet. Check your inbox for the verification link.
+                    Verification email sent! Check your inbox.
                 </p>
             </div>
-            <form method="post" asp-page-handler="ResendVerification">
-                <button type="submit" class="md3-btn-outlined text-sm" style="white-space: nowrap;">Resend Link</button>
-            </form>
-        </div>
+        }
+        else
+        {
+            <div class="md3-card p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3" style="border: 1px solid var(--md-sys-color-tertiary); background: color-mix(in srgb, var(--md-sys-color-tertiary) 8%, transparent);">
+                <div class="flex items-center gap-3">
+                    <span class="material-symbols-outlined" style="color: var(--md-sys-color-tertiary);">mail</span>
+                    <p class="text-sm" style="color: var(--md-sys-color-on-surface);">
+                        Your email isn't verified yet. Check your inbox for the verification link.
+                    </p>
+                </div>
+                <form method="post" asp-page-handler="ResendVerification">
+                    <button type="submit" class="md3-btn-outlined text-sm" style="white-space: nowrap;"
+                            onclick="this.disabled=true;this.textContent='Sending...';this.form.submit();">Resend Link</button>
+                </form>
+            </div>
+        }
     </div>
 }
 

@@ -434,6 +434,7 @@ public class DashboardPageModel : PageModel
     {
         var playerId = GetPlayerId();
         await _authService.SendVerificationEmailAsync(playerId);
+        TempData["VerificationResent"] = true;
         return RedirectToPage();
     }
 
