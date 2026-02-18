@@ -118,8 +118,9 @@ builder.Services.AddScoped<ICosmeticService, CosmeticService>();
 // Premium Plus
 builder.Services.AddScoped<IPremiumPlusService, PremiumPlusService>();
 
-// Activity Feed
+// Activity Feed & Ledger
 builder.Services.AddScoped<IActivityFeedService, ActivityFeedService>();
+builder.Services.AddScoped<IActivityLedger, ActivityLedger>();
 
 // Education
 builder.Services.AddScoped<IEducationService, EducationService>();

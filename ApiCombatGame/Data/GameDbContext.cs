@@ -94,6 +94,7 @@ public class GameDbContext : DbContext
     public DbSet<AdminAlert> AdminAlerts => Set<AdminAlert>();
     public DbSet<AppLog> AppLogs => Set<AppLog>();
     public DbSet<SubscriptionEvent> SubscriptionEvents => Set<SubscriptionEvent>();
+    public DbSet<LedgerEntry> LedgerEntries => Set<LedgerEntry>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -728,6 +729,15 @@ public class GameDbContext : DbContext
                 .WithMany(e => e.Claims)
                 .HasForeignKey(c => c.EasterEggId)
                 .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // ── LedgerEntry (support audit trail) ──
+        modelBuilder.Entity<LedgerEntry>(entity =>
+        {
+            entity.HasIndex(e => new { e.EntityId, e.CreatedAt });
+            entity.HasIndex(e => new { e.EntityId, e.Property, e.CreatedAt });
+            entity.HasIndex(e => e.RelatedEntityId);
+            entity.HasIndex(e => e.CreatedAt);
         });
     }
 }
