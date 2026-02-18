@@ -338,6 +338,30 @@ var app = builder.Build();
 app.UseStatusCodePagesWithReExecute("/Error", "?code={0}");
 app.UseMiddleware<GlobalExceptionMiddleware>();
 
+// API routes: return JSON for error status codes (401, 403, 404, etc.)
+// Runs inside StatusCodePagesMiddleware so writing a body prevents HTML re-execute
+app.Use(async (context, next) =>
+{
+    await next();
+
+    if (!context.Response.HasStarted
+        && context.Response.StatusCode >= 400
+        && context.Request.Path.StartsWithSegments("/api"))
+    {
+        context.Response.ContentType = "application/json";
+        var error = context.Response.StatusCode switch
+        {
+            401 => "Unauthorized. Provide a valid Bearer token via the Authorization header.",
+            403 => "Forbidden. You don't have permission to access this resource.",
+            404 => "The requested endpoint was not found.",
+            405 => "HTTP method not allowed for this endpoint.",
+            429 => "Too many requests. Please slow down.",
+            _ => $"Request failed with status {context.Response.StatusCode}."
+        };
+        await context.Response.WriteAsync(System.Text.Json.JsonSerializer.Serialize(new { error }));
+    }
+});
+
 app.UseHttpsRedirection();
 
 app.UseSwagger(options =>
