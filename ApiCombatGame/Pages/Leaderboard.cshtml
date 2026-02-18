@@ -44,9 +44,9 @@
                             var (tierName, tierFlavor, tierCss) = RatingTierHelper.GetTier(player.Rating);
                             var rankColor = rank switch
                             {
-                                1 => "color: #FFD700;",  // Gold
-                                2 => "color: #C0C0C0;",  // Silver
-                                3 => "color: #CD7F32;",  // Bronze
+                                1 => "color: #f59e0b;",  // Gold (amber-500, visible in both modes)
+                                2 => "color: #94a3b8;",  // Silver (slate-400, visible in both modes)
+                                3 => "color: #d97706;",  // Bronze (amber-600, visible in both modes)
                                 _ => "color: var(--md-sys-color-on-surface-variant);"
                             };
                             var rankIcon = rank switch

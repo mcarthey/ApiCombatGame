@@ -40,6 +40,7 @@ public class LeaderboardController : ControllerBase
         limit = Math.Clamp(limit, 1, 500);
 
         var players = await _context.Players
+            .Where(p => !p.IsBot && !p.IsDeleted)
             .OrderByDescending(p => p.Rating)
             .Take(limit)
             .Select(p => new
@@ -90,11 +91,11 @@ public class LeaderboardController : ControllerBase
     public async Task<IActionResult> GetPlayerRanking(Guid playerId)
     {
         var player = await _context.Players.FindAsync(playerId);
-        if (player == null)
+        if (player == null || player.IsBot || player.IsDeleted)
             return NotFound(new { error = "Player not found." });
 
         var rank = await _context.Players
-            .CountAsync(p => p.Rating > player.Rating) + 1;
+            .CountAsync(p => !p.IsBot && !p.IsDeleted && p.Rating > player.Rating) + 1;
 
         var winCount = await _context.Battles.CountAsync(b => b.WinnerId == playerId);
         var totalBattles = await _context.Battles.CountAsync(b =>
