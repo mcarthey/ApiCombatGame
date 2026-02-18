@@ -300,3 +300,76 @@
         }
     </div>
 </div>
+
+<!-- Support Timeline -->
+<div class="md3-card overflow-hidden mt-6">
+    <div class="px-6 py-4 flex items-center justify-between" style="border-bottom: 1px solid var(--md-sys-color-outline-variant);">
+        <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined" style="color: var(--md-sys-color-primary);">history</span>
+            <h3 class="text-lg font-semibold" style="color: var(--md-sys-color-on-surface);">Support Timeline</h3>
+        </div>
+        <form method="get" class="flex items-center gap-2">
+            <input type="hidden" name="id" value="@p.Id" />
+            <select name="ledgerProperty" class="md3-select text-sm" onchange="this.form.submit()">
+                <option value="">All Properties</option>
+                <option value="Rating" selected="@(Model.LedgerProperty == "Rating")">Rating</option>
+                <option value="Currency" selected="@(Model.LedgerProperty == "Currency")">Currency</option>
+                <option value="ExperiencePoints" selected="@(Model.LedgerProperty == "ExperiencePoints")">XP</option>
+                <option value="Level" selected="@(Model.LedgerProperty == "Level")">Level</option>
+                <option value="WinStreak" selected="@(Model.LedgerProperty == "WinStreak")">Win Streak</option>
+                <option value="Gems" selected="@(Model.LedgerProperty == "Gems")">Gems</option>
+                <option value="AchievementPoints" selected="@(Model.LedgerProperty == "AchievementPoints")">Achievement Pts</option>
+            </select>
+        </form>
+    </div>
+    <div class="overflow-x-auto">
+        @if (Model.LedgerEntries.Any())
+        {
+            <table class="w-full text-sm">
+                <thead>
+                    <tr style="background: var(--md-sys-color-surface-container); border-bottom: 1px solid var(--md-sys-color-outline-variant);">
+                        <th class="px-4 py-2 text-left font-medium" style="color: var(--md-sys-color-on-surface-variant);">Timestamp</th>
+                        <th class="px-4 py-2 text-left font-medium" style="color: var(--md-sys-color-on-surface-variant);">Source</th>
+                        <th class="px-4 py-2 text-left font-medium" style="color: var(--md-sys-color-on-surface-variant);">Action</th>
+                        <th class="px-4 py-2 text-left font-medium" style="color: var(--md-sys-color-on-surface-variant);">Property</th>
+                        <th class="px-4 py-2 text-right font-medium" style="color: var(--md-sys-color-on-surface-variant);">Old</th>
+                        <th class="px-4 py-2 text-center font-medium" style="color: var(--md-sys-color-on-surface-variant);"></th>
+                        <th class="px-4 py-2 text-left font-medium" style="color: var(--md-sys-color-on-surface-variant);">New</th>
+                        <th class="px-4 py-2 text-right font-medium" style="color: var(--md-sys-color-on-surface-variant);">Delta</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var entry in Model.LedgerEntries)
+                    {
+                        <tr style="border-bottom: 1px solid var(--md-sys-color-outline-variant);">
+                            <td class="px-4 py-2" style="color: var(--md-sys-color-on-surface-variant); white-space: nowrap;">
+                                @entry.Timestamp.ToString("MMM dd, HH:mm:ss")
+                            </td>
+                            <td class="px-4 py-2">
+                                <span class="text-xs px-2 py-0.5 rounded-full font-medium"
+                                      style="background: color-mix(in srgb, var(--md-sys-color-tertiary) 15%, transparent); color: var(--md-sys-color-tertiary);">
+                                    @entry.Source
+                                </span>
+                            </td>
+                            <td class="px-4 py-2" style="color: var(--md-sys-color-on-surface);">@entry.Action</td>
+                            <td class="px-4 py-2" style="color: var(--md-sys-color-on-surface);">@entry.Property</td>
+                            <td class="px-4 py-2 text-right font-mono" style="color: var(--md-sys-color-on-surface-variant);">@entry.OldValue.ToString("N0")</td>
+                            <td class="px-4 py-2 text-center" style="color: var(--md-sys-color-outline);">→</td>
+                            <td class="px-4 py-2 font-mono" style="color: var(--md-sys-color-on-surface);">@entry.NewValue.ToString("N0")</td>
+                            <td class="px-4 py-2 text-right font-mono font-bold"
+                                style="color: @(entry.Delta > 0 ? "var(--md-sys-color-primary)" : entry.Delta < 0 ? "var(--md-sys-color-error)" : "var(--md-sys-color-on-surface)");">
+                                @(entry.Delta > 0 ? "+" : "")@entry.Delta.ToString("N0")
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <div class="px-6 py-8 text-center" style="color: var(--md-sys-color-on-surface-variant);">
+                No ledger entries recorded yet.
+            </div>
+        }
+    </div>
+</div>
