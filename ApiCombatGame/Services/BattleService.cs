@@ -239,6 +239,7 @@ public class BattleService : IBattleService
             if (team1 == null || team2 == null)
             {
                 battle1.Status = BattleStatus.Cancelled;
+                await RefundDailyBattleUsageAsync(battle1.Player1Id, cancellationToken);
                 await _context.SaveChangesAsync(cancellationToken);
                 return;
             }
@@ -324,7 +325,18 @@ public class BattleService : IBattleService
         {
             _logger.LogError(ex, "Error processing battle {BattleId}", battle1.Id);
             battle1.Status = BattleStatus.Cancelled;
+            await RefundDailyBattleUsageAsync(battle1.Player1Id, cancellationToken);
             await _context.SaveChangesAsync(cancellationToken);
+        }
+    }
+
+    private async Task RefundDailyBattleUsageAsync(Guid playerId, CancellationToken ct)
+    {
+        var player = await _context.Players.FindAsync(new object[] { playerId }, ct);
+        if (player != null && player.CurrentTier == SubscriptionTier.Free && player.DailyBattlesUsed > 0)
+        {
+            player.DailyBattlesUsed--;
+            _logger.LogInformation("Refunded daily battle usage for player {PlayerId} (now {Used})", playerId, player.DailyBattlesUsed);
         }
     }
 
