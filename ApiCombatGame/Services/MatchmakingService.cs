@@ -28,6 +28,48 @@ public class MatchmakingService : IMatchmakingService
             .ThenInclude(p => p.Subscription)
             .ToListAsync();
 
+        // Bot fallback: single player waiting past threshold gets matched with a bot
+        if (queuedBattles.Count == 1)
+        {
+            var waitingBattle = queuedBattles[0];
+            var waitingPlayer = waitingBattle.Player1;
+            var waitTime = (DateTime.UtcNow - waitingBattle.QueuedAt).TotalSeconds;
+            var botWaitThreshold = waitingPlayer.CurrentTier == SubscriptionTier.Free ? 15 : 10;
+
+            if (waitTime > botWaitThreshold)
+            {
+                var bot = await FindSuitableBotAsync(waitingPlayer.Rating, waitingPlayer.Id);
+                if (bot != null)
+                {
+                    await _botTeamGenerator.EnsureBotHasTeamAsync(bot);
+                    var botTeam = await _context.Teams.FirstOrDefaultAsync(t => t.PlayerId == bot.Id);
+                    if (botTeam != null)
+                    {
+                        var botBattle = new Battle
+                        {
+                            Id = Guid.NewGuid(),
+                            Player1Id = bot.Id,
+                            Player2Id = null,
+                            Team1Id = botTeam.Id,
+                            Status = BattleStatus.Queued,
+                            QueuedAt = DateTime.UtcNow,
+                            Mode = waitingBattle.Mode
+                        };
+
+                        _context.Battles.Add(botBattle);
+                        await _context.SaveChangesAsync();
+
+                        _logger.LogInformation("Matched player {P1} (rating: {R1}, tier: {Tier}) with bot {Bot} (rating: {R2})",
+                            waitingPlayer.Id, waitingPlayer.Rating, waitingPlayer.CurrentTier, bot.Username, bot.Rating);
+
+                        return (waitingBattle, botBattle);
+                    }
+                }
+            }
+
+            return null; // Single player, bot threshold not met or no bot available
+        }
+
         if (queuedBattles.Count < 2)
             return null;
 
@@ -91,51 +133,6 @@ public class MatchmakingService : IMatchmakingService
                     _logger.LogInformation("Force-matched players after timeout: {P1} ({Tier1}) vs {P2} ({Tier2})",
                         oldest.Player1Id, oldest.Player1.CurrentTier, opponent.Player1Id, opponent.Player1.CurrentTier);
                     return (oldest, opponent);
-                }
-            }
-        }
-
-        // Bot fallback: If a single player is waiting past threshold, match them with a bot
-        if (queuedBattles.Count == 1)
-        {
-            var waitingBattle = queuedBattles[0];
-            var waitingPlayer = waitingBattle.Player1;
-            var waitTime = (DateTime.UtcNow - waitingBattle.QueuedAt).TotalSeconds;
-            var botWaitThreshold = waitingPlayer.CurrentTier == SubscriptionTier.Free ? 15 : 10; // Bot matching activates faster
-
-            if (waitTime > botWaitThreshold)
-            {
-                // Find a bot with similar rating
-                var bot = await FindSuitableBotAsync(waitingPlayer.Rating, waitingPlayer.Id);
-                if (bot != null)
-                {
-                    // Ensure bot has a team
-                    await _botTeamGenerator.EnsureBotHasTeamAsync(bot);
-
-                    // Get bot's team
-                    var botTeam = await _context.Teams.FirstOrDefaultAsync(t => t.PlayerId == bot.Id);
-                    if (botTeam != null)
-                    {
-                        // Create a battle entry for the bot
-                        var botBattle = new Battle
-                        {
-                            Id = Guid.NewGuid(),
-                            Player1Id = bot.Id,
-                            Player2Id = null,
-                            Team1Id = botTeam.Id,
-                            Status = BattleStatus.Queued,
-                            QueuedAt = DateTime.UtcNow,
-                            Mode = waitingBattle.Mode
-                        };
-
-                        _context.Battles.Add(botBattle);
-                        await _context.SaveChangesAsync();
-
-                        _logger.LogInformation("Matched player {P1} (rating: {R1}, tier: {Tier}) with bot {Bot} (rating: {R2})",
-                            waitingPlayer.Id, waitingPlayer.Rating, waitingPlayer.CurrentTier, bot.Username, bot.Rating);
-
-                        return (waitingBattle, botBattle);
-                    }
                 }
             }
         }

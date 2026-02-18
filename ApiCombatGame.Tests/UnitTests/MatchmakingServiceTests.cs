@@ -392,4 +392,180 @@ public class MatchmakingServiceTests
             match.Value.battle2.Player1Id == premiumPlusPlayer.Id,
             "Premium Plus player should get matched with priority");
     }
+
+    [Fact]
+    public async Task FindMatchAsync_SinglePlayerGetsBot_AfterWaitThreshold()
+    {
+        // Arrange
+        var context = CreateInMemoryContext();
+        var logger = new Mock<ILogger<MatchmakingService>>();
+        var botTeamGenerator = CreateMockBotTeamGenerator();
+        var service = new MatchmakingService(context, logger.Object, botTeamGenerator.Object);
+
+        var player = new Player
+        {
+            Id = Guid.NewGuid(),
+            Username = "solo_player",
+            Email = "solo@test.com",
+            Rating = 1000,
+            CurrentTier = SubscriptionTier.Free
+        };
+
+        var bot = new Player
+        {
+            Id = Guid.NewGuid(),
+            Username = "BotWarrior",
+            Email = "bot@test.com",
+            Rating = 1050,
+            IsBot = true,
+            CurrentTier = SubscriptionTier.Free
+        };
+
+        var botTeam = new Team
+        {
+            Id = Guid.NewGuid(),
+            PlayerId = bot.Id,
+            Name = "Bot Team"
+        };
+
+        var battle = new Battle
+        {
+            Id = Guid.NewGuid(),
+            Player1Id = player.Id,
+            Player1 = player,
+            Status = BattleStatus.Queued,
+            QueuedAt = DateTime.UtcNow.AddSeconds(-20) // Past the 15s Free threshold
+        };
+
+        context.Players.AddRange(player, bot);
+        context.Teams.Add(botTeam);
+        context.Battles.Add(battle);
+        await context.SaveChangesAsync();
+
+        // Act
+        var match = await service.FindMatchAsync();
+
+        // Assert - Single player waiting > 15s should be matched with a bot
+        Assert.NotNull(match);
+        Assert.True(
+            match.Value.battle1.Player1Id == bot.Id ||
+            match.Value.battle2.Player1Id == bot.Id,
+            "Solo player should be matched with a bot after wait threshold");
+    }
+
+    [Fact]
+    public async Task FindMatchAsync_SinglePlayerNoBot_BelowWaitThreshold()
+    {
+        // Arrange
+        var context = CreateInMemoryContext();
+        var logger = new Mock<ILogger<MatchmakingService>>();
+        var botTeamGenerator = CreateMockBotTeamGenerator();
+        var service = new MatchmakingService(context, logger.Object, botTeamGenerator.Object);
+
+        var player = new Player
+        {
+            Id = Guid.NewGuid(),
+            Username = "solo_player",
+            Email = "solo@test.com",
+            Rating = 1000,
+            CurrentTier = SubscriptionTier.Free
+        };
+
+        var bot = new Player
+        {
+            Id = Guid.NewGuid(),
+            Username = "BotWarrior",
+            Email = "bot@test.com",
+            Rating = 1050,
+            IsBot = true,
+            CurrentTier = SubscriptionTier.Free
+        };
+
+        var botTeam = new Team
+        {
+            Id = Guid.NewGuid(),
+            PlayerId = bot.Id,
+            Name = "Bot Team"
+        };
+
+        var battle = new Battle
+        {
+            Id = Guid.NewGuid(),
+            Player1Id = player.Id,
+            Player1 = player,
+            Status = BattleStatus.Queued,
+            QueuedAt = DateTime.UtcNow.AddSeconds(-5) // Only 5s, below 15s threshold
+        };
+
+        context.Players.AddRange(player, bot);
+        context.Teams.Add(botTeam);
+        context.Battles.Add(battle);
+        await context.SaveChangesAsync();
+
+        // Act
+        var match = await service.FindMatchAsync();
+
+        // Assert - Should NOT match yet, wait threshold not met
+        Assert.Null(match);
+    }
+
+    [Fact]
+    public async Task FindMatchAsync_PremiumSinglePlayer_FasterBotThreshold()
+    {
+        // Arrange
+        var context = CreateInMemoryContext();
+        var logger = new Mock<ILogger<MatchmakingService>>();
+        var botTeamGenerator = CreateMockBotTeamGenerator();
+        var service = new MatchmakingService(context, logger.Object, botTeamGenerator.Object);
+
+        var premiumPlayer = new Player
+        {
+            Id = Guid.NewGuid(),
+            Username = "premium_solo",
+            Email = "premium@test.com",
+            Rating = 1000,
+            CurrentTier = SubscriptionTier.Premium
+        };
+
+        var bot = new Player
+        {
+            Id = Guid.NewGuid(),
+            Username = "BotDefender",
+            Email = "bot@test.com",
+            Rating = 1100,
+            IsBot = true,
+            CurrentTier = SubscriptionTier.Free
+        };
+
+        var botTeam = new Team
+        {
+            Id = Guid.NewGuid(),
+            PlayerId = bot.Id,
+            Name = "Bot Team"
+        };
+
+        var battle = new Battle
+        {
+            Id = Guid.NewGuid(),
+            Player1Id = premiumPlayer.Id,
+            Player1 = premiumPlayer,
+            Status = BattleStatus.Queued,
+            QueuedAt = DateTime.UtcNow.AddSeconds(-12) // 12s: past Premium threshold (10s) but below Free (15s)
+        };
+
+        context.Players.AddRange(premiumPlayer, bot);
+        context.Teams.Add(botTeam);
+        context.Battles.Add(battle);
+        await context.SaveChangesAsync();
+
+        // Act
+        var match = await service.FindMatchAsync();
+
+        // Assert - Premium player should get bot match faster (10s threshold)
+        Assert.NotNull(match);
+        Assert.True(
+            match.Value.battle1.Player1Id == bot.Id ||
+            match.Value.battle2.Player1Id == bot.Id,
+            "Premium solo player should get bot match at 10s threshold");
+    }
 }
