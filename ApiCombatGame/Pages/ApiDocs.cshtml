@@ -94,8 +94,8 @@
             @{
                 var steps = new[] {
                     ("1", "Register", "POST /api/v1/auth/register", "Create an account with username, email, and password. Get your JWT token.", "#3b82f6"),
-                    ("2", "Browse Units", "GET /api/v1/player/roster/available", "Explore the unit shop. Five classes, each with unique abilities.", "#8b5cf6"),
-                    ("3", "Unlock Units", "POST /api/v1/player/roster/unlock", "Spend your starting 1000 currency to recruit combatants.", "#06b6d4"),
+                    ("2", "Browse Units", "GET /api/v1/player/roster/available", "Explore the unit shop. You start with 3 free units across five classes.", "#8b5cf6"),
+                    ("3", "Unlock Units", "POST /api/v1/player/roster/unlock", "Spend your starting 1000 currency to add to your roster.", "#06b6d4"),
                     ("4", "Build a Team", "POST /api/v1/team/configure", "Assemble up to 5 units with a declarative battle strategy.", "#10b981"),
                     ("5", "Enter Battle", "POST /api/v1/battle/queue", "Queue for matchmaking. The system pairs you by API rating.", "#ef4444"),
                     ("6", "Check Results", "GET /api/v1/battle/results/{id}", "Get the full turn-by-turn combat log and rewards.", "#f59e0b")
@@ -216,6 +216,150 @@ curl /api/v1/player/profile \
         </div>
     </div>
 
+    @* ==================== STRATEGY GUIDE ==================== *@
+    <div id="strategy-guide" class="py-16 scroll-mt-20" style="border-bottom: 1px solid var(--md-sys-color-outline-variant);">
+        <h2 class="text-2xl font-bold mb-2" style="color: var(--md-sys-color-on-surface);">Strategy Guide</h2>
+        <p class="mb-8" style="color: var(--md-sys-color-on-surface-variant);">The <code class="text-xs px-1.5 py-0.5" style="background: var(--md-sys-color-surface-container-high); border-radius: var(--md-sys-shape-corner-small);">strategy</code> field on your team is <strong>optional</strong>. Without one, units use default AI. With one, you control exactly how they fight.</p>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div class="space-y-6">
+                @* Formations *@
+                <div>
+                    <h3 class="font-semibold mb-3 flex items-center gap-2" style="color: var(--md-sys-color-on-surface);">
+                        <span class="material-symbols-outlined" style="font-size: 20px; color: #10b981;">shield</span>
+                        Formations
+                    </h3>
+                    <div class="overflow-hidden" style="border-radius: var(--md-sys-shape-corner-medium);">
+                        <table class="md3-table w-full text-sm">
+                            <thead>
+                                <tr>
+                                    <th class="px-4 py-2 text-left text-xs font-medium uppercase">Value</th>
+                                    <th class="px-4 py-2 text-left text-xs font-medium uppercase">Effect</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr><td class="px-4 py-2.5 font-mono text-xs">aggressive</td><td class="px-4 py-2.5 text-xs" style="color: var(--md-sys-color-on-surface-variant);">+Attack bonus, less survivability</td></tr>
+                                <tr><td class="px-4 py-2.5 font-mono text-xs">defensive</td><td class="px-4 py-2.5 text-xs" style="color: var(--md-sys-color-on-surface-variant);">+Defense bonus, tankier but slower damage</td></tr>
+                                <tr><td class="px-4 py-2.5 font-mono text-xs">balanced</td><td class="px-4 py-2.5 text-xs" style="color: var(--md-sys-color-on-surface-variant);">No bonus &mdash; the safe default</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                @* Target Priority *@
+                <div>
+                    <h3 class="font-semibold mb-3 flex items-center gap-2" style="color: var(--md-sys-color-on-surface);">
+                        <span class="material-symbols-outlined" style="font-size: 20px; color: #ef4444;">target</span>
+                        Target Priority
+                    </h3>
+                    <p class="text-sm mb-3" style="color: var(--md-sys-color-on-surface-variant);">An ordered array evaluated top-to-bottom. Units attack the first matching target.</p>
+                    <div class="overflow-hidden" style="border-radius: var(--md-sys-shape-corner-medium);">
+                        <table class="md3-table w-full text-sm">
+                            <thead>
+                                <tr>
+                                    <th class="px-4 py-2 text-left text-xs font-medium uppercase">Value</th>
+                                    <th class="px-4 py-2 text-left text-xs font-medium uppercase">Targets</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr><td class="px-4 py-2.5 font-mono text-xs">lowest_hp</td><td class="px-4 py-2.5 text-xs" style="color: var(--md-sys-color-on-surface-variant);">Enemy with lowest current HP</td></tr>
+                                <tr><td class="px-4 py-2.5 font-mono text-xs">highest_hp</td><td class="px-4 py-2.5 text-xs" style="color: var(--md-sys-color-on-surface-variant);">Enemy with highest current HP</td></tr>
+                                <tr><td class="px-4 py-2.5 font-mono text-xs">healers</td><td class="px-4 py-2.5 text-xs" style="color: var(--md-sys-color-on-surface-variant);">Enemy Healers first</td></tr>
+                                <tr><td class="px-4 py-2.5 font-mono text-xs">highest_threat</td><td class="px-4 py-2.5 text-xs" style="color: var(--md-sys-color-on-surface-variant);">Enemy with highest Attack stat</td></tr>
+                                <tr><td class="px-4 py-2.5 font-mono text-xs">random</td><td class="px-4 py-2.5 text-xs" style="color: var(--md-sys-color-on-surface-variant);">Random enemy each turn</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                @* Ability Conditions *@
+                <div>
+                    <h3 class="font-semibold mb-3 flex items-center gap-2" style="color: var(--md-sys-color-on-surface);">
+                        <span class="material-symbols-outlined" style="font-size: 20px; color: #8b5cf6;">bolt</span>
+                        Ability Rules
+                    </h3>
+                    <p class="text-sm mb-3" style="color: var(--md-sys-color-on-surface-variant);">A dictionary keyed by ability name. Each rule has a <code class="text-xs px-1 py-0.5" style="background: var(--md-sys-color-surface-container-high); border-radius: var(--md-sys-shape-corner-small);">when</code> condition and a <code class="text-xs px-1 py-0.5" style="background: var(--md-sys-color-surface-container-high); border-radius: var(--md-sys-shape-corner-small);">target</code>.</p>
+                    <div class="overflow-hidden mb-3" style="border-radius: var(--md-sys-shape-corner-medium);">
+                        <table class="md3-table w-full text-sm">
+                            <thead><tr><th class="px-4 py-2 text-left text-xs font-medium uppercase">when</th><th class="px-4 py-2 text-left text-xs font-medium uppercase">Fires if...</th></tr></thead>
+                            <tbody>
+                                <tr><td class="px-4 py-2.5 font-mono text-xs">always</td><td class="px-4 py-2.5 text-xs" style="color: var(--md-sys-color-on-surface-variant);">Always use when off cooldown</td></tr>
+                                <tr><td class="px-4 py-2.5 font-mono text-xs">ally_hp_below_50</td><td class="px-4 py-2.5 text-xs" style="color: var(--md-sys-color-on-surface-variant);">Any ally below 50% HP</td></tr>
+                                <tr><td class="px-4 py-2.5 font-mono text-xs">ally_hp_below_25</td><td class="px-4 py-2.5 text-xs" style="color: var(--md-sys-color-on-surface-variant);">Any ally below 25% HP</td></tr>
+                                <tr><td class="px-4 py-2.5 font-mono text-xs">enemy_count_gte_2</td><td class="px-4 py-2.5 text-xs" style="color: var(--md-sys-color-on-surface-variant);">2+ enemies alive (good for AoE)</td></tr>
+                                <tr><td class="px-4 py-2.5 font-mono text-xs">enemy_count_gte_3</td><td class="px-4 py-2.5 text-xs" style="color: var(--md-sys-color-on-surface-variant);">3+ enemies alive</td></tr>
+                                <tr><td class="px-4 py-2.5 font-mono text-xs">cooldown_ready</td><td class="px-4 py-2.5 text-xs" style="color: var(--md-sys-color-on-surface-variant);">Ability is off cooldown</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="overflow-hidden" style="border-radius: var(--md-sys-shape-corner-medium);">
+                        <table class="md3-table w-full text-sm">
+                            <thead><tr><th class="px-4 py-2 text-left text-xs font-medium uppercase">target</th><th class="px-4 py-2 text-left text-xs font-medium uppercase">Hits...</th></tr></thead>
+                            <tbody>
+                                <tr><td class="px-4 py-2.5 font-mono text-xs">priority</td><td class="px-4 py-2.5 text-xs" style="color: var(--md-sys-color-on-surface-variant);">Uses your targetPriority list</td></tr>
+                                <tr><td class="px-4 py-2.5 font-mono text-xs">lowest_ally_hp</td><td class="px-4 py-2.5 text-xs" style="color: var(--md-sys-color-on-surface-variant);">Ally with lowest HP (for heals)</td></tr>
+                                <tr><td class="px-4 py-2.5 font-mono text-xs">self</td><td class="px-4 py-2.5 text-xs" style="color: var(--md-sys-color-on-surface-variant);">The casting unit itself</td></tr>
+                                <tr><td class="px-4 py-2.5 font-mono text-xs">all_enemies</td><td class="px-4 py-2.5 text-xs" style="color: var(--md-sys-color-on-surface-variant);">All enemies (AoE abilities)</td></tr>
+                                <tr><td class="px-4 py-2.5 font-mono text-xs">all_allies</td><td class="px-4 py-2.5 text-xs" style="color: var(--md-sys-color-on-surface-variant);">All allies (AoE heals/buffs)</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            @* Full example *@
+            <div>
+                <h3 class="font-semibold mb-3 flex items-center gap-2" style="color: var(--md-sys-color-on-surface);">
+                    <span class="material-symbols-outlined" style="font-size: 20px; color: #f59e0b;">code</span>
+                    Full Example
+                </h3>
+                <div class="relative group/code">
+                    <button class="md3-btn-icon absolute top-1 right-1 opacity-0 group-hover/code:opacity-100 transition-all"
+                            onclick="copyToClipboard(document.getElementById('strategy-example').textContent, this)"
+                            title="Copy to clipboard">
+                        <span class="material-symbols-outlined copy-icon">content_copy</span>
+                        <span class="material-symbols-outlined check-icon hidden">check</span>
+                    </button>
+                    <pre id="strategy-example" class="p-4 overflow-x-auto text-sm" style="background: var(--md-sys-color-inverse-surface); color: var(--md-sys-color-inverse-on-surface); border-radius: var(--md-sys-shape-corner-large);"><code>{
+  "name": "404 Fighters",
+  "unitIds": ["unit-id-1", "unit-id-2", "..."],
+  "strategy": {
+    "formation": "balanced",
+    "targetPriority": ["healers", "lowest_hp"],
+    "abilities": {
+      "Fireball": {
+        "when": "always",
+        "target": "priority"
+      },
+      "Meteor Storm": {
+        "when": "enemy_count_gte_2",
+        "target": "all_enemies"
+      },
+      "Fortify": {
+        "when": "ally_hp_below_50",
+        "target": "self"
+      }
+    }
+  }
+}</code></pre>
+                </div>
+                <div class="mt-4 p-4 md3-card" style="border: 1px solid var(--md-sys-color-outline-variant);">
+                    <p class="text-sm font-medium mb-2" style="color: var(--md-sys-color-on-surface);">What this does:</p>
+                    <ul class="text-sm space-y-1" style="color: var(--md-sys-color-on-surface-variant);">
+                        <li class="flex items-start gap-2"><span style="color: #10b981;">&#8226;</span> Balanced formation &mdash; no stat bonuses, no penalties</li>
+                        <li class="flex items-start gap-2"><span style="color: #ef4444;">&#8226;</span> Kill enemy healers first, then focus lowest HP</li>
+                        <li class="flex items-start gap-2"><span style="color: #8b5cf6;">&#8226;</span> Fireball fires every turn at the priority target</li>
+                        <li class="flex items-start gap-2"><span style="color: #f59e0b;">&#8226;</span> Meteor Storm (AoE) only fires when 2+ enemies remain</li>
+                        <li class="flex items-start gap-2"><span style="color: #3b82f6;">&#8226;</span> Fortify self-heals when any ally drops below 50% HP</li>
+                    </ul>
+                </div>
+                <p class="mt-4 text-sm" style="color: var(--md-sys-color-on-surface-variant);">
+                    <strong>Tip:</strong> Start simple &mdash; just <code class="text-xs px-1 py-0.5" style="background: var(--md-sys-color-surface-container-high); border-radius: var(--md-sys-shape-corner-small);">formation</code> and <code class="text-xs px-1 py-0.5" style="background: var(--md-sys-color-surface-container-high); border-radius: var(--md-sys-shape-corner-small);">targetPriority</code> go a long way. Add ability rules later once you see how battles play out.
+                </p>
+            </div>
+        </div>
+    </div>
+
     @* ==================== WHAT'S NEXT? ==================== *@
     <div id="whats-next" class="py-16 scroll-mt-20" style="border-bottom: 1px solid var(--md-sys-color-outline-variant);">
         <h2 class="text-2xl font-bold text-center mb-2" style="color: var(--md-sys-color-on-surface);">What's Next After Your First Battle?</h2>
@@ -255,7 +399,7 @@ curl /api/v1/player/profile \
 
             @* Sticky Table of Contents sidebar *@
             <nav class="hidden lg:block w-56 shrink-0">
-                <div class="sticky top-24 space-y-1">
+                <div class="sticky top-24 space-y-1 overflow-y-auto" style="max-height: calc(100vh - 7rem);">
                     <p class="text-xs font-semibold uppercase tracking-wider mb-3" style="color: var(--md-sys-color-on-surface-variant);">API Reference</p>
 
                     @* Search filter *@
@@ -315,7 +459,7 @@ curl /api/v1/player/profile \
                         <div class="space-y-4">
                             @foreach (var (name, schema) in Model.Schemas.Where(s => s.Value.Properties.Any()))
                             {
-                                <details class="group md3-card overflow-hidden">
+                                <details id="schema-@name" class="group md3-card overflow-hidden scroll-mt-24">
                                     <summary class="flex items-center gap-3 px-5 py-3 cursor-pointer select-none list-none [&::-webkit-details-marker]:hidden">
                                         <span class="md3-badge-tertiary font-mono text-xs">object</span>
                                         <span class="font-mono text-sm font-semibold" style="color: var(--md-sys-color-on-surface);">@name</span>
@@ -405,6 +549,14 @@ curl /api/v1/player/profile \
                 });
             });
         })();
+
+        // Open a schema details element and scroll to it
+        function openSchemaDetails(anchorId) {
+            const el = document.getElementById(anchorId);
+            if (el && el.tagName === 'DETAILS') {
+                el.open = true;
+            }
+        }
 
         // Enhanced copy button with visual feedback
         function copyToClipboard(text, button) {

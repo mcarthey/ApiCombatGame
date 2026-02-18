@@ -1,5 +1,38 @@
 @model SchemaInfo
 
+@{
+    var primitives = new HashSet<string> { "string", "integer", "number", "boolean", "object", "array", "unknown" };
+
+    bool IsSchemaRef(string type)
+    {
+        if (primitives.Contains(type)) return false;
+        // Handle array<SchemaName> — extract inner type
+        if (type.StartsWith("array<") && type.EndsWith(">"))
+        {
+            var inner = type[6..^1];
+            return !primitives.Contains(inner);
+        }
+        return char.IsUpper(type[0]);
+    }
+
+    string GetSchemaAnchor(string type)
+    {
+        if (type.StartsWith("array<") && type.EndsWith(">"))
+            return $"schema-{type[6..^1]}";
+        return $"schema-{type}";
+    }
+
+    string GetDisplayType(string type)
+    {
+        if (type.StartsWith("array<") && type.EndsWith(">"))
+        {
+            var inner = type[6..^1];
+            return $"array<{inner}>";
+        }
+        return type;
+    }
+}
+
 <div class="overflow-hidden" style="border-radius: var(--md-sys-shape-corner-medium);">
     <table class="md3-table w-full text-sm">
         <thead>
@@ -19,9 +52,21 @@
                         {
                             <span class="ml-0.5" style="color: var(--md-sys-color-error);">*</span>
                         }
+                        else
+                        {
+                            <span class="ml-0.5 text-xs" style="color: var(--md-sys-color-outline); font-style: italic; font-family: sans-serif;">optional</span>
+                        }
                     </td>
                     <td class="px-4 py-2.5">
-                        <span class="text-xs px-1.5 py-0.5 font-mono" style="background: var(--md-sys-color-surface-container-high); color: var(--md-sys-color-on-surface); border-radius: var(--md-sys-shape-corner-small);">@prop.Type</span>
+                        @if (IsSchemaRef(prop.Type))
+                        {
+                            <a href="#@GetSchemaAnchor(prop.Type)" onclick="openSchemaDetails('@GetSchemaAnchor(prop.Type)')"
+                               class="text-xs px-1.5 py-0.5 font-mono" style="background: var(--md-sys-color-primary-container); color: var(--md-sys-color-on-primary-container); border-radius: var(--md-sys-shape-corner-small); text-decoration: none; cursor: pointer;">@GetDisplayType(prop.Type) &#8599;</a>
+                        }
+                        else
+                        {
+                            <span class="text-xs px-1.5 py-0.5 font-mono" style="background: var(--md-sys-color-surface-container-high); color: var(--md-sys-color-on-surface); border-radius: var(--md-sys-shape-corner-small);">@prop.Type</span>
+                        }
                         @if (prop.Format != null)
                         {
                             <span class="text-xs ml-1" style="color: var(--md-sys-color-outline);">(@prop.Format)</span>

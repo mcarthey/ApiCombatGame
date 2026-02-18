@@ -123,18 +123,66 @@
             </div>
         }
 
-        @* Request Body Schema *@
-        @if (Model.RequestBody?.Properties?.Any() == true)
+        @* Request Body Schema + Examples side-by-side *@
+        @if (Model.RequestBody?.Properties?.Any() == true || Model.Examples.Any())
         {
-            <div>
-                <h4 class="text-sm font-semibold mb-2" style="color: var(--md-sys-color-on-surface);">Request Body</h4>
-                <partial name="ApiDocs/_SchemaTable" model="Model.RequestBody" />
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                @* Left: Schema + Responses *@
+                <div class="space-y-4">
+                    @if (Model.RequestBody?.Properties?.Any() == true)
+                    {
+                        <div>
+                            <h4 class="text-sm font-semibold mb-2" style="color: var(--md-sys-color-on-surface);">Request Body</h4>
+                            <partial name="ApiDocs/_SchemaTable" model="Model.RequestBody" />
+                        </div>
+                    }
+
+                    @if (Model.Responses.Any())
+                    {
+                        <div>
+                            <h4 class="text-sm font-semibold mb-2" style="color: var(--md-sys-color-on-surface);">Responses</h4>
+                            <div class="space-y-1.5">
+                                @foreach (var (code, response) in Model.Responses)
+                                {
+                                    var codeColor = code.StartsWith("2") ? "var(--md-sys-color-primary)" :
+                                                    code.StartsWith("4") ? "var(--md-sys-color-tertiary-container)" :
+                                                    code.StartsWith("5") ? "var(--md-sys-color-error)" : "var(--md-sys-color-on-surface-variant)";
+                                    <div class="flex items-start gap-3 text-sm">
+                                        <code class="font-mono font-bold min-w-[2.5rem]" style="color: @codeColor;">@code</code>
+                                        <span style="color: var(--md-sys-color-on-surface-variant);">@response.Description</span>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                @* Right: Examples *@
+                <div>
+                    @if (Model.Examples.Any())
+                    {
+                        <h4 class="text-sm font-semibold mb-2" style="color: var(--md-sys-color-on-surface);">Examples</h4>
+                        @foreach (var example in Model.Examples)
+                        {
+                            <div class="space-y-2">
+                                <span class="text-xs font-medium uppercase tracking-wide" style="color: var(--md-sys-color-on-surface-variant);">@example.Name</span>
+                                @if (example.Request != null)
+                                {
+                                    <partial name="ApiDocs/_CodeBlock" model="@(new CodeBlockModel { Label = "Request", Code = example.Request, Language = "json" })" />
+                                }
+                                @if (example.Response != null)
+                                {
+                                    <partial name="ApiDocs/_CodeBlock" model="@(new CodeBlockModel { Label = "Response", Code = example.Response, Language = "json" })" />
+                                }
+                            </div>
+                        }
+                    }
+                </div>
             </div>
         }
-
-        @* Response Codes *@
-        @if (Model.Responses.Any())
+        else if (Model.Responses.Any())
         {
+            @* Responses only (no schema or examples) *@
             <div>
                 <h4 class="text-sm font-semibold mb-2" style="color: var(--md-sys-color-on-surface);">Responses</h4>
                 <div class="space-y-1.5">
@@ -149,28 +197,6 @@
                         </div>
                     }
                 </div>
-            </div>
-        }
-
-        @* Code Examples *@
-        @if (Model.Examples.Any())
-        {
-            <div>
-                <h4 class="text-sm font-semibold mb-2" style="color: var(--md-sys-color-on-surface);">Examples</h4>
-                @foreach (var example in Model.Examples)
-                {
-                    <div class="space-y-2">
-                        <span class="text-xs font-medium uppercase tracking-wide" style="color: var(--md-sys-color-on-surface-variant);">@example.Name</span>
-                        @if (example.Request != null)
-                        {
-                            <partial name="ApiDocs/_CodeBlock" model="@(new CodeBlockModel { Label = "Request", Code = example.Request, Language = "json" })" />
-                        }
-                        @if (example.Response != null)
-                        {
-                            <partial name="ApiDocs/_CodeBlock" model="@(new CodeBlockModel { Label = "Response", Code = example.Response, Language = "json" })" />
-                        }
-                    </div>
-                }
             </div>
         }
 

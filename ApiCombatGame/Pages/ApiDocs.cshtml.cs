@@ -18,11 +18,13 @@ public class ApiDocsModel : PageModel
     public List<TagGroup> TagGroups { get; private set; } = new();
     public Dictionary<string, SchemaInfo> Schemas { get; private set; } = new();
 
+    private OpenApiDocument _spec = null!;
+
     public void OnGet()
     {
-        var spec = _swaggerProvider.GetSwagger("v1");
-        TagGroups = BuildTagGroups(spec);
-        Schemas = BuildSchemas(spec);
+        _spec = _swaggerProvider.GetSwagger("v1");
+        TagGroups = BuildTagGroups(_spec);
+        Schemas = BuildSchemas(_spec);
     }
 
     private List<TagGroup> BuildTagGroups(OpenApiDocument spec)
@@ -129,6 +131,14 @@ public class ApiDocsModel : PageModel
     private SchemaInfo BuildSchemaInfo(OpenApiSchema? schema, int depth = 0)
     {
         if (schema == null) return new SchemaInfo { Type = "unknown" };
+
+        // Resolve $ref schemas from components
+        if (schema.Reference != null && (schema.Properties == null || !schema.Properties.Any()))
+        {
+            if (_spec.Components?.Schemas?.TryGetValue(schema.Reference.Id, out var resolved) == true)
+                schema = resolved;
+        }
+
         if (depth > 3) return new SchemaInfo { Type = schema.Type ?? "object", Description = "(nested)" };
 
         var info = new SchemaInfo
