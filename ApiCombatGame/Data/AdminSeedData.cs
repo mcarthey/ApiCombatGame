@@ -19,13 +19,21 @@ public static class AdminSeedData
 
         if (existingPlayer != null)
         {
-            // Ensure admin flag is set
+            // Ensure admin flag and email verification are set
+            var changed = false;
             if (!existingPlayer.IsAdmin)
             {
                 existingPlayer.IsAdmin = true;
                 existingPlayer.AdminRole = AdminRole.SuperAdmin;
-                await context.SaveChangesAsync();
+                changed = true;
             }
+            if (!existingPlayer.EmailConfirmed)
+            {
+                existingPlayer.EmailConfirmed = true;
+                changed = true;
+            }
+            if (changed)
+                await context.SaveChangesAsync();
             return;
         }
 
@@ -40,6 +48,7 @@ public static class AdminSeedData
             Rating = 1500,
             IsAdmin = true,
             AdminRole = AdminRole.SuperAdmin,
+            EmailConfirmed = true,
             CreatedAt = DateTime.UtcNow,
             LastLoginAt = DateTime.UtcNow
         };
