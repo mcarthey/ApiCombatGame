@@ -399,6 +399,25 @@ public class AdminAnalyticsService : IAdminAnalyticsService
         var challengeCount = await _context.DailyChallenges.CountAsync();
         var achievementUnlocks = await _context.PlayerAchievements.CountAsync(a => a.IsUnlocked);
 
+        // Queue details for admin visibility
+        var queueDetails = (await _context.Battles
+            .Where(b => b.Status == BattleStatus.Queued)
+            .Include(b => b.Player1)
+            .OrderBy(b => b.QueuedAt)
+            .Take(50)
+            .Select(b => new QueuedBattleInfo
+            {
+                BattleId = b.Id,
+                PlayerName = b.Player1.Username,
+                PlayerRating = b.Player1.Rating,
+                IsBot = b.Player1.IsBot,
+                QueuedAt = b.QueuedAt,
+                Mode = b.Mode
+            })
+            .ToListAsync())
+            .Select(b => { b.WaitSeconds = (now - b.QueuedAt).TotalSeconds; return b; })
+            .ToList();
+
         return new AdminTechnicalData
         {
             QueuedBattles = queuedBattles,
@@ -412,7 +431,8 @@ public class AdminAnalyticsService : IAdminAnalyticsService
             TotalGuilds = guildCount,
             TotalStrategies = strategyCount,
             TotalChallenges = challengeCount,
-            TotalAchievementUnlocks = achievementUnlocks
+            TotalAchievementUnlocks = achievementUnlocks,
+            QueuedBattleDetails = queueDetails
         };
     }
 

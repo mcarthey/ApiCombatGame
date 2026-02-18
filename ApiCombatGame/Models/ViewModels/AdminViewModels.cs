@@ -190,4 +190,16 @@ public class AdminTechnicalData
     public int TotalStrategies { get; set; }
     public int TotalChallenges { get; set; }
     public int TotalAchievementUnlocks { get; set; }
+    public List<QueuedBattleInfo> QueuedBattleDetails { get; set; } = new();
+}
+
+public class QueuedBattleInfo
+{
+    public Guid BattleId { get; set; }
+    public string PlayerName { get; set; } = "";
+    public int PlayerRating { get; set; }
+    public bool IsBot { get; set; }
+    public DateTime QueuedAt { get; set; }
+    public double WaitSeconds { get; set; }
+    public string Mode { get; set; } = "";
 }

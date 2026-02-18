@@ -79,16 +79,77 @@
     <!-- Continuous -->
     <div class="text-xs font-semibold uppercase tracking-wider mb-2 mt-4" style="color: var(--md-sys-color-primary);">Continuous</div>
     <div class="space-y-3 mb-6">
-        <div class="p-4" style="background: var(--md-sys-color-surface-container-high); border-radius: var(--md-sys-shape-corner-medium);">
-            <div class="flex items-center justify-between mb-1">
-                <div class="flex items-center">
-                    <span class="material-symbols-outlined mr-3" style="color: var(--md-sys-color-primary);">swords</span>
-                    <span class="font-medium" style="color: var(--md-sys-color-on-surface);">BackgroundBattleProcessor</span>
+        <details class="group" style="background: var(--md-sys-color-surface-container-high); border-radius: var(--md-sys-shape-corner-medium);">
+            <summary class="p-4 cursor-pointer select-none list-none [&::-webkit-details-marker]:hidden">
+                <div class="flex items-center justify-between mb-1">
+                    <div class="flex items-center">
+                        <span class="material-symbols-outlined mr-3" style="color: var(--md-sys-color-primary);">swords</span>
+                        <span class="font-medium" style="color: var(--md-sys-color-on-surface);">BackgroundBattleProcessor</span>
+                        @if (Model.Data.QueuedBattleDetails.Any())
+                        {
+                            <span class="ml-2 text-xs font-bold px-1.5 py-0.5" style="background: var(--md-sys-color-tertiary-container); color: var(--md-sys-color-on-tertiary-container); border-radius: var(--md-sys-shape-corner-small);">@Model.Data.QueuedBattleDetails.Count in queue</span>
+                        }
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs font-medium px-2 py-1" style="background: var(--md-sys-color-primary-container); color: var(--md-sys-color-on-primary-container); border-radius: var(--md-sys-shape-corner-small);">Every 5s</span>
+                        <span class="material-symbols-outlined transition-transform group-open:rotate-180" style="color: var(--md-sys-color-on-surface-variant); font-size: 18px;">expand_more</span>
+                    </div>
                 </div>
-                <span class="text-xs font-medium px-2 py-1" style="background: var(--md-sys-color-primary-container); color: var(--md-sys-color-on-primary-container); border-radius: var(--md-sys-shape-corner-small);">Every 5s</span>
+                <div class="text-sm ml-10" style="color: var(--md-sys-color-on-surface-variant);">Processes queued battles through the combat engine, resolves matches, and updates ratings.</div>
+            </summary>
+            <div class="px-4 pb-4" style="border-top: 1px solid var(--md-sys-color-outline-variant);">
+                @if (Model.Data.QueuedBattleDetails.Any())
+                {
+                    <div class="overflow-hidden mt-3" style="border-radius: var(--md-sys-shape-corner-medium);">
+                        <table class="md3-table w-full text-sm">
+                            <thead>
+                                <tr>
+                                    <th class="px-3 py-2 text-left text-xs font-medium uppercase">Player</th>
+                                    <th class="px-3 py-2 text-left text-xs font-medium uppercase">Rating</th>
+                                    <th class="px-3 py-2 text-left text-xs font-medium uppercase">Mode</th>
+                                    <th class="px-3 py-2 text-left text-xs font-medium uppercase">Waiting</th>
+                                    <th class="px-3 py-2 text-left text-xs font-medium uppercase">Battle ID</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var battle in Model.Data.QueuedBattleDetails)
+                                {
+                                    var waitColor = battle.WaitSeconds > 60 ? "var(--md-sys-color-error)" :
+                                                    battle.WaitSeconds > 15 ? "var(--md-sys-color-tertiary-container)" :
+                                                    "var(--md-sys-color-on-surface-variant)";
+                                    <tr>
+                                        <td class="px-3 py-2">
+                                            @battle.PlayerName
+                                            @if (battle.IsBot)
+                                            {
+                                                <span class="text-xs ml-1 px-1 py-0.5" style="background: var(--md-sys-color-surface-container-highest); color: var(--md-sys-color-on-surface-variant); border-radius: var(--md-sys-shape-corner-small);">BOT</span>
+                                            }
+                                        </td>
+                                        <td class="px-3 py-2 font-mono text-xs">@battle.PlayerRating</td>
+                                        <td class="px-3 py-2 text-xs">@battle.Mode</td>
+                                        <td class="px-3 py-2 font-mono text-xs" style="color: @waitColor;">
+                                            @if (battle.WaitSeconds >= 60)
+                                            {
+                                                @($"{battle.WaitSeconds / 60:F0}m {battle.WaitSeconds % 60:F0}s")
+                                            }
+                                            else
+                                            {
+                                                @($"{battle.WaitSeconds:F0}s")
+                                            }
+                                        </td>
+                                        <td class="px-3 py-2 font-mono text-xs" style="color: var(--md-sys-color-on-surface-variant);">@battle.BattleId.ToString()[..8]...</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <p class="text-sm mt-3" style="color: var(--md-sys-color-on-surface-variant);">No battles currently in queue.</p>
+                }
             </div>
-            <div class="text-sm ml-10" style="color: var(--md-sys-color-on-surface-variant);">Processes queued battles through the combat engine, resolves matches, and updates ratings.</div>
-        </div>
+        </details>
     </div>
 
     <!-- Hourly -->
