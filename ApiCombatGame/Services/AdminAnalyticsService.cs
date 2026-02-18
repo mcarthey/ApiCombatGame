@@ -55,9 +55,10 @@ public class AdminAnalyticsService : IAdminAnalyticsService
         var prevWau = await realPlayers.CountAsync(p => p.LastLoginAt >= weekAgo.AddDays(-7) && p.LastLoginAt < weekAgo);
         var prevMau = await realPlayers.CountAsync(p => p.LastLoginAt >= prevMonthStart && p.LastLoginAt < prevMonthEnd);
 
-        // Revenue: sum actual Stripe subscription amounts for active/past-due subscriptions
+        // Revenue: sum actual Stripe subscription amounts — exclude admin/bot accounts
         var mrr = await _context.Subscriptions
-            .Where(s => s.Status == SubscriptionStatus.Active || s.Status == SubscriptionStatus.PastDue)
+            .Where(s => (s.Status == SubscriptionStatus.Active || s.Status == SubscriptionStatus.PastDue)
+                && !s.Player.IsAdmin && !s.Player.IsBot)
             .SumAsync(s => s.AmountUsd);
 
         // Battles today
@@ -68,11 +69,13 @@ public class AdminAnalyticsService : IAdminAnalyticsService
         var signupsToday = await realPlayers.CountAsync(p => p.CreatedAt >= today);
         var signupsThisWeek = await realPlayers.CountAsync(p => p.CreatedAt >= weekAgo);
 
-        // Tier breakdown (real players only)
-        var freeCount = await realPlayers.CountAsync(p => p.CurrentTier == SubscriptionTier.Free);
-        var premiumCount = await realPlayers.CountAsync(p => p.CurrentTier == SubscriptionTier.Premium);
-        var premiumPlusCount = await realPlayers.CountAsync(p => p.CurrentTier == SubscriptionTier.PremiumPlus);
-        var conversionRate = totalPlayers > 0 ? Math.Round((double)(premiumCount + premiumPlusCount) / totalPlayers * 100, 1) : 0;
+        // Tier breakdown (real non-admin players only — admin subs skew business metrics)
+        var payingPlayers = realPlayers.Where(p => !p.IsAdmin);
+        var payingPlayerCount = await payingPlayers.CountAsync();
+        var freeCount = await payingPlayers.CountAsync(p => p.CurrentTier == SubscriptionTier.Free);
+        var premiumCount = await payingPlayers.CountAsync(p => p.CurrentTier == SubscriptionTier.Premium);
+        var premiumPlusCount = await payingPlayers.CountAsync(p => p.CurrentTier == SubscriptionTier.PremiumPlus);
+        var conversionRate = payingPlayerCount > 0 ? Math.Round((double)(premiumCount + premiumPlusCount) / payingPlayerCount * 100, 1) : 0;
 
         // Guild stats
         var totalGuilds = await _context.Guilds.CountAsync();
