@@ -22,5 +22,6 @@ public class RecentBattleInfo
     public string OpponentName { get; set; } = string.Empty;
     public bool IsWin { get; set; }
     public int RatingChange { get; set; }
+    public string Mode { get; set; } = "ranked";
     public DateTime CompletedAt { get; set; }
 }

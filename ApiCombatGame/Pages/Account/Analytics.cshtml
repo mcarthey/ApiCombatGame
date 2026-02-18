@@ -355,6 +355,10 @@
                                 </div>
                             </div>
                             <div class="text-right flex items-center gap-2">
+                                @if (battle.Mode == "casual")
+                                {
+                                    <span class="text-xs px-2 py-0.5 rounded-full font-medium" style="background: color-mix(in srgb, var(--md-sys-color-tertiary) 15%, transparent); color: var(--md-sys-color-tertiary);">casual</span>
+                                }
                                 <span class="text-xs px-2 py-1 rounded-md font-semibold" style="background: var(--md-sys-color-surface-container-high); color: var(--md-sys-color-on-surface-variant);">
                                     @battle.Turns turns
                                 </span>

@@ -125,6 +125,10 @@
                             <div class="text-sm" style="color: var(--md-sys-color-on-surface-variant);">@battle.CompletedAt.ToString("MMM dd, yyyy HH:mm")</div>
                         </div>
                         <div class="flex items-center space-x-3">
+                            @if (battle.Mode == "casual")
+                            {
+                                <span class="text-xs px-2 py-0.5 rounded-full font-medium" style="background: color-mix(in srgb, var(--md-sys-color-tertiary) 15%, transparent); color: var(--md-sys-color-tertiary);">casual</span>
+                            }
                             @if (battle.RatingChange >= 0)
                             {
                                 <span class="text-sm" style="color: var(--md-sys-color-primary);">

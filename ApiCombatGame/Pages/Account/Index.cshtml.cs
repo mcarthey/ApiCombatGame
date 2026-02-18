@@ -57,6 +57,7 @@ public class DashboardModel : PageModel
                 b.WinnerId,
                 b.Player1RatingChange,
                 b.Player2RatingChange,
+                b.Mode,
                 b.CompletedAt
             })
             .ToListAsync();
@@ -101,6 +102,7 @@ public class DashboardModel : PageModel
                     OpponentName = opponentName,
                     IsWin = b.WinnerId == playerId,
                     RatingChange = ratingChange,
+                    Mode = b.Mode,
                     CompletedAt = b.CompletedAt ?? DateTime.UtcNow
                 };
             }).ToList()

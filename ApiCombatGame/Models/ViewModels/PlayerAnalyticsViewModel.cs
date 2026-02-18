@@ -56,6 +56,7 @@ public class BattleResultData
     public DateTime CompletedAt { get; set; }
     public bool IsWin { get; set; }
     public int RatingChange { get; set; }
+    public string Mode { get; set; } = "ranked";
     public int Turns { get; set; }
     public string OpponentName { get; set; } = string.Empty;
 }

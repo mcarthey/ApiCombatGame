@@ -143,6 +143,7 @@ public class PlayerAnalyticsService : IPlayerAnalyticsService
                 RatingChange = b.Player1Id == playerId
                     ? b.Player1RatingChange ?? 0
                     : b.Player2RatingChange ?? 0,
+                Mode = b.Mode,
                 Turns = b.Turns,
                 OpponentName = b.Player1Id == playerId
                     ? (b.Player2?.Username ?? "Unknown")
