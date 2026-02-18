@@ -33,6 +33,117 @@
     </div>
 </div>
 
+<!-- Rating Reconciliation -->
+<div class="md3-card p-6 mb-8">
+    <div class="flex items-center gap-3 mb-4">
+        <span class="material-symbols-outlined" style="font-size: 28px; color: var(--md-sys-color-primary);">sync</span>
+        <div>
+            <h3 class="text-lg font-semibold" style="color: var(--md-sys-color-on-surface);">Rating Reconciliation</h3>
+            <p class="text-sm" style="color: var(--md-sys-color-on-surface-variant);">
+                Replay battle history and recalculate ELO ratings. Fixes bugs where casual battles incorrectly affected ratings.
+            </p>
+        </div>
+    </div>
+
+    @if (!Model.ShowReconciliationPreview)
+    {
+        <form method="post" asp-page-handler="PreviewGlobalReconcile" class="flex gap-3 items-end">
+            <div class="md3-input-wrapper">
+                <label for="since">Replay since (optional)</label>
+                <input class="md3-input" id="since" name="Since" type="datetime-local" />
+            </div>
+            <button class="md3-btn-tonal" type="submit">
+                Preview Reconciliation
+            </button>
+        </form>
+        <p class="text-xs mt-2" style="color: var(--md-sys-color-outline);">
+            Leave empty for full replay from starting rating (1000). Set a date to only replay battles after that point.
+        </p>
+    }
+    else if (Model.Reconciliation != null)
+    {
+        var r = Model.Reconciliation;
+        <div class="p-4 rounded-lg mb-4" style="background: var(--md-sys-color-surface-container-high);">
+            <div class="grid grid-cols-3 gap-4 mb-4">
+                <div class="text-center">
+                    <div class="text-2xl font-bold" style="color: var(--md-sys-color-on-surface);">@r.TotalPlayersAffected</div>
+                    <div class="text-xs" style="color: var(--md-sys-color-on-surface-variant);">Players Affected</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-2xl font-bold" style="color: var(--md-sys-color-on-surface);">@r.TotalBattlesReprocessed</div>
+                    <div class="text-xs" style="color: var(--md-sys-color-on-surface-variant);">Battles Reprocessed</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-2xl font-bold" style="color: var(--md-sys-color-on-surface);">@r.CasualBattlesFixed</div>
+                    <div class="text-xs" style="color: var(--md-sys-color-on-surface-variant);">Casual Battles Fixed</div>
+                </div>
+            </div>
+
+            @if (r.PlayerDeltas.Any())
+            {
+                <div class="overflow-auto" style="max-height: 400px;">
+                    <table class="w-full text-sm">
+                        <thead>
+                            <tr style="border-bottom: 1px solid var(--md-sys-color-outline-variant);">
+                                <th class="text-left py-2 px-3" style="color: var(--md-sys-color-on-surface-variant);">Player</th>
+                                <th class="text-right py-2 px-3" style="color: var(--md-sys-color-on-surface-variant);">Current</th>
+                                <th class="text-right py-2 px-3" style="color: var(--md-sys-color-on-surface-variant);">Corrected</th>
+                                <th class="text-right py-2 px-3" style="color: var(--md-sys-color-on-surface-variant);">Delta</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var d in r.PlayerDeltas.Take(50))
+                            {
+                                <tr style="border-bottom: 1px solid var(--md-sys-color-outline-variant);">
+                                    <td class="py-2 px-3">
+                                        <a href="/Admin/PlayerDetail?id=@d.PlayerId" style="color: var(--md-sys-color-primary);">@d.Username</a>
+                                    </td>
+                                    <td class="text-right py-2 px-3" style="color: var(--md-sys-color-on-surface);">@d.CurrentRating</td>
+                                    <td class="text-right py-2 px-3" style="color: var(--md-sys-color-on-surface);">@d.RecalculatedRating</td>
+                                    <td class="text-right py-2 px-3 font-bold" style="color: @(d.Delta > 0 ? "var(--md-sys-color-primary)" : "var(--md-sys-color-error)");">
+                                        @(d.Delta > 0 ? "+" : "")@d.Delta
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                @if (r.PlayerDeltas.Count > 50)
+                {
+                    <p class="text-sm mt-2" style="color: var(--md-sys-color-on-surface-variant);">
+                        Showing top 50 of @r.PlayerDeltas.Count affected players.
+                    </p>
+                }
+            }
+            else
+            {
+                <p class="text-center py-4" style="color: var(--md-sys-color-on-surface-variant);">
+                    No rating discrepancies found. All ratings match expected values.
+                </p>
+            }
+        </div>
+
+        <div class="flex gap-3">
+            <form method="post" asp-page-handler="PreviewGlobalReconcile">
+                <input type="hidden" name="Since" value="@r.Since?.ToString("o")" />
+                <button class="md3-btn-tonal" type="submit">
+                    Refresh Preview
+                </button>
+            </form>
+            @if (r.TotalPlayersAffected > 0)
+            {
+                <form method="post" asp-page-handler="ExecuteGlobalReconcile"
+                      onsubmit="return confirm('This will update ratings for @r.TotalPlayersAffected players and fix @r.CasualBattlesFixed casual battles. All affected players will be notified. Proceed?');">
+                    <input type="hidden" name="Since" value="@r.Since?.ToString("o")" />
+                    <button class="md3-btn-filled" type="submit">
+                        Apply Reconciliation (@r.TotalPlayersAffected players)
+                    </button>
+                </form>
+            }
+        </div>
+    }
+</div>
+
 <!-- Admin Actions -->
 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
     <!-- Grant Admin -->

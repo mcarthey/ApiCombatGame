@@ -24,6 +24,12 @@ public interface IAdminAnalyticsService
     // Admin actions (adminPlayerId is the admin performing the action, for audit logging)
     Task<bool> ToggleAdminAsync(Guid adminPlayerId, Guid playerId, bool isAdmin, AdminRole role = AdminRole.SuperAdmin);
     Task<bool> AdjustCurrencyAsync(Guid adminPlayerId, Guid playerId, int amount);
+    Task<bool> AdjustRatingAsync(Guid adminPlayerId, Guid playerId, int amount);
     Task<bool> SetTierAsync(Guid adminPlayerId, Guid playerId, SubscriptionTier tier);
     Task<bool> ResetPasswordAsync(Guid adminPlayerId, Guid playerId, string newPassword);
+
+    // Rating reconciliation (replays battle history to recalculate ELO)
+    Task<ReconciliationPreview> PreviewReconciliationAsync(DateTime? since = null);
+    Task<ReconciliationPreview> PreviewPlayerReconciliationAsync(Guid playerId, DateTime? since = null);
+    Task<ReconciliationPreview> ExecuteReconciliationAsync(Guid adminPlayerId, DateTime? since = null);
 }

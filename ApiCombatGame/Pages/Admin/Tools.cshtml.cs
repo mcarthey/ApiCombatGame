@@ -1,5 +1,7 @@
+using System.Security.Claims;
 using ApiCombatGame.Data;
 using ApiCombatGame.Models.Enums;
+using ApiCombatGame.Models.ViewModels;
 using ApiCombatGame.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -25,6 +27,14 @@ public class ToolsModel : PageModel
 
     public int AdminCount { get; set; }
     public int TotalPlayers { get; set; }
+
+    public ReconciliationPreview? Reconciliation { get; set; }
+    public bool ShowReconciliationPreview { get; set; }
+
+    [BindProperty]
+    public DateTime? Since { get; set; }
+
+    private Guid GetAdminId() => Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
 
     public async Task OnGetAsync(string? message)
     {
@@ -59,5 +69,23 @@ public class ToolsModel : PageModel
         await Phase3SeedData.InitializeAsync(_context);
 
         return RedirectToPage("Tools", new { message = "success" });
+    }
+
+    public async Task OnPostPreviewGlobalReconcileAsync()
+    {
+        Reconciliation = await _analytics.PreviewReconciliationAsync(Since);
+        ShowReconciliationPreview = true;
+        AdminCount = await _context.Players.CountAsync(p => p.IsAdmin);
+        TotalPlayers = await _context.Players.CountAsync();
+    }
+
+    public async Task OnPostExecuteGlobalReconcileAsync()
+    {
+        var result = await _analytics.ExecuteReconciliationAsync(GetAdminId(), Since);
+        SuccessMessage = $"Reconciliation complete: {result.TotalPlayersAffected} players corrected, " +
+                         $"{result.TotalBattlesReprocessed} battles reprocessed, " +
+                         $"{result.CasualBattlesFixed} casual battles fixed.";
+        AdminCount = await _context.Players.CountAsync(p => p.IsAdmin);
+        TotalPlayers = await _context.Players.CountAsync();
     }
 }

@@ -87,7 +87,22 @@ public class AdminBattleInfo
     public string OpponentName { get; set; } = "Unknown";
     public bool IsWin { get; set; }
     public int RatingChange { get; set; }
+    public string Mode { get; set; } = "ranked";
     public DateTime CompletedAt { get; set; }
+}
+
+// Support Timeline (Activity Ledger)
+public class LedgerTimelineEntry
+{
+    public DateTime Timestamp { get; set; }
+    public string Source { get; set; } = string.Empty;
+    public string Action { get; set; } = string.Empty;
+    public string Property { get; set; } = string.Empty;
+    public long OldValue { get; set; }
+    public long NewValue { get; set; }
+    public long Delta { get; set; }
+    public Guid? RelatedEntityId { get; set; }
+    public string? ContextJson { get; set; }
 }
 
 // Meta/Balance
@@ -202,4 +217,25 @@ public class QueuedBattleInfo
     public DateTime QueuedAt { get; set; }
     public double WaitSeconds { get; set; }
     public string Mode { get; set; } = "";
+}
+
+// Rating Reconciliation
+public class ReconciliationPreview
+{
+    public int TotalPlayersAffected { get; set; }
+    public int TotalBattlesReprocessed { get; set; }
+    public int CasualBattlesFixed { get; set; }
+    public DateTime? Since { get; set; }
+    public List<PlayerReconciliationDelta> PlayerDeltas { get; set; } = new();
+}
+
+public class PlayerReconciliationDelta
+{
+    public Guid PlayerId { get; set; }
+    public string Username { get; set; } = string.Empty;
+    public int CurrentRating { get; set; }
+    public int RecalculatedRating { get; set; }
+    public int Delta => RecalculatedRating - CurrentRating;
+    public int RankedBattlesReplayed { get; set; }
+    public int CasualBattlesFixed { get; set; }
 }

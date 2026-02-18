@@ -146,6 +146,18 @@
                 </button>
             </form>
 
+            <!-- Adjust Rating -->
+            <form method="post" asp-page-handler="AdjustRating" class="flex gap-2 items-end">
+                <input type="hidden" name="playerId" value="@p.Id" />
+                <div class="md3-input-wrapper" style="flex: 1;">
+                    <label for="ratingAmount">Rating (+/-)</label>
+                    <input class="md3-input" id="ratingAmount" name="amount" type="number" />
+                </div>
+                <button class="md3-btn-filled" type="submit">
+                    Adjust Rating
+                </button>
+            </form>
+
             <!-- Set Tier -->
             <form method="post" asp-page-handler="SetTier" class="flex gap-2 items-end">
                 <input type="hidden" name="playerId" value="@p.Id" />
@@ -191,6 +203,58 @@
                     Reset Password
                 </button>
             </form>
+
+            <!-- Rating Reconciliation -->
+            <div class="mt-4 pt-4" style="border-top: 1px solid var(--md-sys-color-outline-variant);">
+                <div class="flex items-center gap-2 mb-2">
+                    <span class="material-symbols-outlined" style="color: var(--md-sys-color-primary);">sync</span>
+                    <span class="font-medium" style="color: var(--md-sys-color-on-surface);">Rating Reconciliation</span>
+                </div>
+                <p class="text-sm mb-3" style="color: var(--md-sys-color-on-surface-variant);">
+                    Preview what this player's rating would be after replaying all battle history.
+                </p>
+                <form method="post" asp-page-handler="PreviewReconcile">
+                    <input type="hidden" name="playerId" value="@p.Id" />
+                    <button class="md3-btn-tonal w-full" type="submit">
+                        Preview Rating Reconciliation
+                    </button>
+                </form>
+
+                @if (Model.ReconciliationPreview != null)
+                {
+                    var rp = Model.ReconciliationPreview;
+                    <div class="mt-3 p-4 rounded-lg" style="background: var(--md-sys-color-surface-container-high);">
+                        <div class="flex justify-between mb-2">
+                            <span style="color: var(--md-sys-color-on-surface-variant);">Current Rating</span>
+                            <span class="font-bold" style="color: var(--md-sys-color-on-surface);">@rp.CurrentRating</span>
+                        </div>
+                        <div class="flex justify-between mb-2">
+                            <span style="color: var(--md-sys-color-on-surface-variant);">Recalculated Rating</span>
+                            <span class="font-bold" style="color: var(--md-sys-color-on-surface);">@rp.RecalculatedRating</span>
+                        </div>
+                        <div class="flex justify-between mb-2">
+                            <span style="color: var(--md-sys-color-on-surface-variant);">Delta</span>
+                            <span class="font-bold" style="color: @(rp.Delta > 0 ? "var(--md-sys-color-primary)" : rp.Delta < 0 ? "var(--md-sys-color-error)" : "var(--md-sys-color-on-surface)");">
+                                @(rp.Delta > 0 ? "+" : "")@rp.Delta
+                            </span>
+                        </div>
+                        <div class="flex justify-between mb-2">
+                            <span style="color: var(--md-sys-color-on-surface-variant);">Ranked Battles Replayed</span>
+                            <span style="color: var(--md-sys-color-on-surface);">@rp.RankedBattlesReplayed</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span style="color: var(--md-sys-color-on-surface-variant);">Casual Battles Fixed</span>
+                            <span style="color: var(--md-sys-color-on-surface);">@rp.CasualBattlesFixed</span>
+                        </div>
+                        @if (rp.Delta != 0)
+                        {
+                            <p class="text-sm mt-3" style="color: var(--md-sys-color-on-surface-variant);">
+                                To apply corrections, use <a href="/Admin/Tools" style="color: var(--md-sys-color-primary);">Global Reconcile</a> on the Tools page.
+                            </p>
+                        }
+                    </div>
+                }
+            </div>
         </div>
     </div>
 </div>
@@ -211,6 +275,10 @@
                         <span class="text-sm ml-2" style="color: var(--md-sys-color-on-surface-variant);">@battle.CompletedAt.ToString("MMM dd, HH:mm")</span>
                     </div>
                     <div class="flex items-center space-x-3">
+                        @if (battle.Mode == "casual")
+                        {
+                            <span class="text-xs px-2 py-0.5 rounded-full font-medium" style="background: color-mix(in srgb, var(--md-sys-color-tertiary) 15%, transparent); color: var(--md-sys-color-tertiary);">casual</span>
+                        }
                         <span class="text-sm" style="color: @(battle.RatingChange >= 0 ? "var(--md-sys-color-primary)" : "var(--md-sys-color-error)");">
                             @(battle.RatingChange >= 0 ? "+" : "")@battle.RatingChange
                         </span>
