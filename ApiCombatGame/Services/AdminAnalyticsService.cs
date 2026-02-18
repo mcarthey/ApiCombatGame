@@ -621,6 +621,7 @@ public class AdminAnalyticsService : IAdminAnalyticsService
         }
 
         int totalCasualFixed = 0;
+        var involvedPlayerIds = new HashSet<Guid>();
 
         // Replay each in-scope battle
         foreach (var battle in replayBattles)
@@ -630,6 +631,9 @@ public class AdminAnalyticsService : IAdminAnalyticsService
 
             if (!simulatedRatings.ContainsKey(p1Id) || !simulatedRatings.ContainsKey(p2Id))
                 continue;
+
+            involvedPlayerIds.Add(p1Id);
+            involvedPlayerIds.Add(p2Id);
 
             if (battle.Mode == "casual")
             {
@@ -696,6 +700,11 @@ public class AdminAnalyticsService : IAdminAnalyticsService
 
         foreach (var player in allPlayers)
         {
+            // Skip players who weren't in any replayed battle — their ratings
+            // may come from seed data or admin adjustments, not battle history
+            if (!involvedPlayerIds.Contains(player.Id) && player.Id != filterPlayerId)
+                continue;
+
             var recalculated = simulatedRatings.GetValueOrDefault(player.Id, startingRating);
             var current = player.Rating;
             var delta = recalculated - current;

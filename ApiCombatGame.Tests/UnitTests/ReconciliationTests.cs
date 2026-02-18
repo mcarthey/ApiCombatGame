@@ -224,6 +224,29 @@ public class ReconciliationTests : IDisposable
     }
 
     [Fact]
+    public async Task Preview_PlayersWithNoBattles_ExcludedFromResults()
+    {
+        var p1 = TestDbContextFactory.CreatePlayer(_context, "fighter1");
+        var p2 = TestDbContextFactory.CreatePlayer(_context, "fighter2");
+        var bystander = TestDbContextFactory.CreatePlayer(_context, "bystander");
+
+        // Bystander has a non-default rating (e.g. from seed data) but no battles
+        bystander.Rating = 1200;
+
+        // Only p1 and p2 fought
+        p1.Rating = 1016;
+        p2.Rating = 984;
+        CreateBattle(p1.Id, p2.Id, p1.Id, "casual", 16, -16, DateTime.UtcNow);
+        await _context.SaveChangesAsync();
+
+        var preview = await _service.PreviewReconciliationAsync();
+
+        // Bystander should NOT appear in deltas — their rating was set by seed data, not battles
+        Assert.DoesNotContain(preview.PlayerDeltas, d => d.PlayerId == bystander.Id);
+        Assert.Equal(2, preview.TotalPlayersAffected); // Only the 2 fighters
+    }
+
+    [Fact]
     public async Task FullReplay_SameAsSinceBeforeAllBattles()
     {
         var p1 = TestDbContextFactory.CreatePlayer(_context, "player1");
