@@ -162,6 +162,7 @@ builder.Services.AddScoped<IEmailService, EmailService>();
 
 // Admin
 builder.Services.AddScoped<IAdminAnalyticsService, AdminAnalyticsService>();
+builder.Services.AddScoped<IAppLogService, AppLogService>();
 
 // Phase 4: Notifications & Logging
 builder.Services.AddScoped<INotificationService, NotificationService>();
@@ -298,14 +299,23 @@ builder.Services.AddSwaggerGen(c =>
     c.SchemaFilter<EnumSchemaFilter>();
 });
 
-// CORS (allow all for development)
+// CORS
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
     {
-        policy.AllowAnyOrigin()
-              .AllowAnyMethod()
-              .AllowAnyHeader();
+        if (builder.Environment.IsDevelopment())
+        {
+            policy.AllowAnyOrigin()
+                  .AllowAnyMethod()
+                  .AllowAnyHeader();
+        }
+        else
+        {
+            policy.WithOrigins("https://apicombat.com", "https://www.apicombat.com")
+                  .AllowAnyMethod()
+                  .AllowAnyHeader();
+        }
     });
 });
 
@@ -323,6 +333,13 @@ if (!string.IsNullOrEmpty(stripeSecretKey))
 var app = builder.Build();
 
 // Configure the HTTP request pipeline
+
+// Error handling (must be early in pipeline)
+app.UseStatusCodePagesWithReExecute("/Error", "?code={0}");
+app.UseMiddleware<GlobalExceptionMiddleware>();
+
+app.UseHttpsRedirection();
+
 app.UseSwagger(options =>
 {
     options.RouteTemplate = "openapi/{documentName}.json";

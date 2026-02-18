@@ -43,30 +43,35 @@ public class AdminAnalyticsService : IAdminAnalyticsService
         var prevMonthStart = today.AddDays(-60);
         var prevMonthEnd = today.AddDays(-30);
 
-        var totalPlayers = await _context.Players.CountAsync();
-        var dau = await _context.Players.CountAsync(p => p.LastLoginAt >= today);
-        var wau = await _context.Players.CountAsync(p => p.LastLoginAt >= weekAgo);
-        var mau = await _context.Players.CountAsync(p => p.LastLoginAt >= monthAgo);
+        // All player metrics exclude bots — bots aren't real users
+        var realPlayers = _context.Players.Where(p => !p.IsBot);
 
-        var prevDau = await _context.Players.CountAsync(p => p.LastLoginAt >= today.AddDays(-1) && p.LastLoginAt < today);
-        var prevWau = await _context.Players.CountAsync(p => p.LastLoginAt >= weekAgo.AddDays(-7) && p.LastLoginAt < weekAgo);
-        var prevMau = await _context.Players.CountAsync(p => p.LastLoginAt >= prevMonthStart && p.LastLoginAt < prevMonthEnd);
+        var totalPlayers = await realPlayers.CountAsync();
+        var dau = await realPlayers.CountAsync(p => p.LastLoginAt >= today);
+        var wau = await realPlayers.CountAsync(p => p.LastLoginAt >= weekAgo);
+        var mau = await realPlayers.CountAsync(p => p.LastLoginAt >= monthAgo);
 
-        // Revenue: count paying users
-        var premiumCount = await _context.Players.CountAsync(p => p.CurrentTier == SubscriptionTier.Premium);
-        var premiumPlusCount = await _context.Players.CountAsync(p => p.CurrentTier == SubscriptionTier.PremiumPlus);
-        var mrr = premiumCount * 5m + premiumPlusCount * 12m;
+        var prevDau = await realPlayers.CountAsync(p => p.LastLoginAt >= today.AddDays(-1) && p.LastLoginAt < today);
+        var prevWau = await realPlayers.CountAsync(p => p.LastLoginAt >= weekAgo.AddDays(-7) && p.LastLoginAt < weekAgo);
+        var prevMau = await realPlayers.CountAsync(p => p.LastLoginAt >= prevMonthStart && p.LastLoginAt < prevMonthEnd);
+
+        // Revenue: sum actual Stripe subscription amounts for active/past-due subscriptions
+        var mrr = await _context.Subscriptions
+            .Where(s => s.Status == SubscriptionStatus.Active || s.Status == SubscriptionStatus.PastDue)
+            .SumAsync(s => s.AmountUsd);
 
         // Battles today
         var battlesToday = await _context.Battles.CountAsync(b => b.QueuedAt >= today);
         var battlesThisWeek = await _context.Battles.CountAsync(b => b.QueuedAt >= weekAgo);
 
-        // New signups today
-        var signupsToday = await _context.Players.CountAsync(p => p.CreatedAt >= today);
-        var signupsThisWeek = await _context.Players.CountAsync(p => p.CreatedAt >= weekAgo);
+        // New signups today (real players only)
+        var signupsToday = await realPlayers.CountAsync(p => p.CreatedAt >= today);
+        var signupsThisWeek = await realPlayers.CountAsync(p => p.CreatedAt >= weekAgo);
 
-        // Tier breakdown
-        var freeCount = await _context.Players.CountAsync(p => p.CurrentTier == SubscriptionTier.Free);
+        // Tier breakdown (real players only)
+        var freeCount = await realPlayers.CountAsync(p => p.CurrentTier == SubscriptionTier.Free);
+        var premiumCount = await realPlayers.CountAsync(p => p.CurrentTier == SubscriptionTier.Premium);
+        var premiumPlusCount = await realPlayers.CountAsync(p => p.CurrentTier == SubscriptionTier.PremiumPlus);
         var conversionRate = totalPlayers > 0 ? Math.Round((double)(premiumCount + premiumPlusCount) / totalPlayers * 100, 1) : 0;
 
         // Guild stats
@@ -96,9 +101,14 @@ public class AdminAnalyticsService : IAdminAnalyticsService
         };
     }
 
-    public async Task<AdminPlayerAnalyticsData> GetPlayerAnalyticsAsync(string? search, string? tierFilter, int page, int pageSize)
+    public async Task<AdminPlayerAnalyticsData> GetPlayerAnalyticsAsync(string? search, string? tierFilter, int page, int pageSize, bool hideBots = false, string? sortBy = null, bool sortDesc = true)
     {
         var query = _context.Players.AsQueryable();
+
+        if (hideBots)
+        {
+            query = query.Where(p => !p.IsBot);
+        }
 
         if (!string.IsNullOrWhiteSpace(search))
         {
@@ -112,8 +122,19 @@ public class AdminAnalyticsService : IAdminAnalyticsService
 
         var totalCount = await query.CountAsync();
 
+        // Apply sorting
+        query = sortBy?.ToLowerInvariant() switch
+        {
+            "username" => sortDesc ? query.OrderByDescending(p => p.Username) : query.OrderBy(p => p.Username),
+            "rating" => sortDesc ? query.OrderByDescending(p => p.Rating) : query.OrderBy(p => p.Rating),
+            "tier" => sortDesc ? query.OrderByDescending(p => p.CurrentTier) : query.OrderBy(p => p.CurrentTier),
+            "joined" => sortDesc ? query.OrderByDescending(p => p.CreatedAt) : query.OrderBy(p => p.CreatedAt),
+            "lastactive" => sortDesc ? query.OrderByDescending(p => p.LastLoginAt) : query.OrderBy(p => p.LastLoginAt),
+            "level" => sortDesc ? query.OrderByDescending(p => p.Level) : query.OrderBy(p => p.Level),
+            _ => query.OrderByDescending(p => p.Rating) // default sort
+        };
+
         var players = await query
-            .OrderByDescending(p => p.Rating)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .Select(p => new AdminPlayerSummary
@@ -127,6 +148,7 @@ public class AdminAnalyticsService : IAdminAnalyticsService
                 CurrentTier = p.CurrentTier.ToString(),
                 WinStreak = p.WinStreak,
                 IsAdmin = p.IsAdmin,
+                IsBot = p.IsBot,
                 CreatedAt = p.CreatedAt,
                 LastLoginAt = p.LastLoginAt
             })

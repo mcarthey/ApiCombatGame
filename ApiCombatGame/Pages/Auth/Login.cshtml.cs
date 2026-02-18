@@ -1,22 +1,33 @@
 using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
 using ApiCombatGame.Data;
+using ApiCombatGame.Models;
+using ApiCombatGame.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 namespace ApiCombatGame.Pages.Auth;
 
 public class LoginModel : PageModel
 {
     private readonly GameDbContext _context;
+    private readonly IRecaptchaService _recaptchaService;
+    private readonly RecaptchaSettings _recaptchaSettings;
     private readonly ILogger<LoginModel> _logger;
 
-    public LoginModel(GameDbContext context, ILogger<LoginModel> logger)
+    public LoginModel(
+        GameDbContext context,
+        IRecaptchaService recaptchaService,
+        IOptions<RecaptchaSettings> recaptchaSettings,
+        ILogger<LoginModel> logger)
     {
         _context = context;
+        _recaptchaService = recaptchaService;
+        _recaptchaSettings = recaptchaSettings.Value;
         _logger = logger;
     }
 
@@ -25,11 +36,16 @@ public class LoginModel : PageModel
 
     public string? ErrorMessage { get; set; }
     public string? SuccessMessage { get; set; }
+    public string RecaptchaSiteKey => _recaptchaSettings.SiteKey;
 
     public void OnGet(string? message)
     {
         if (message == "registered")
             SuccessMessage = "Account created successfully! Please log in.";
+        else if (message == "password_reset")
+            SuccessMessage = "Password reset successfully! Please log in with your new password.";
+        else if (message == "deleted")
+            SuccessMessage = "Your account has been deleted. We're sorry to see you go.";
     }
 
     public async Task<IActionResult> OnPostAsync()
@@ -37,10 +53,26 @@ public class LoginModel : PageModel
         if (!ModelState.IsValid)
             return Page();
 
+        // Validate reCAPTCHA
+        var recaptchaResult = await _recaptchaService.ValidateAsync(Input.RecaptchaToken);
+        if (!recaptchaResult.Success)
+        {
+            _logger.LogWarning("reCAPTCHA validation failed during login for {Email}: score {Score}",
+                Input.Email, recaptchaResult.Score);
+            ErrorMessage = recaptchaResult.ErrorMessage ?? "Please try again.";
+            return Page();
+        }
+
         var player = await _context.Players
             .FirstOrDefaultAsync(p => p.Email == Input.Email);
 
         if (player == null || !BCrypt.Net.BCrypt.Verify(Input.Password, player.PasswordHash))
+        {
+            ErrorMessage = "Invalid email or password.";
+            return Page();
+        }
+
+        if (player.IsDeleted)
         {
             ErrorMessage = "Invalid email or password.";
             return Page();
@@ -92,5 +124,8 @@ public class LoginModel : PageModel
         public string Password { get; set; } = string.Empty;
 
         public bool RememberMe { get; set; }
+
+        /// <summary>reCAPTCHA v3 token populated by JavaScript.</summary>
+        public string RecaptchaToken { get; set; } = string.Empty;
     }
 }

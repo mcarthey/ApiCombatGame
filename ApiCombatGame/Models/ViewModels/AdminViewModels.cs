@@ -47,6 +47,7 @@ public class AdminPlayerSummary
     public int TotalBattles { get; set; }
     public double WinRate { get; set; }
     public bool IsAdmin { get; set; }
+    public bool IsBot { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime LastLoginAt { get; set; }
 }
@@ -149,6 +150,28 @@ public class AdminGuildSummary
     public int TreasuryBalance { get; set; }
     public int AvgMemberRating { get; set; }
     public double PremiumRate { get; set; }
+    public DateTime CreatedAt { get; set; }
+}
+
+// Logs
+public class AdminLogData
+{
+    public List<AdminLogSummary> Logs { get; set; } = new();
+    public int TotalCount { get; set; }
+    public int Page { get; set; }
+    public int PageSize { get; set; }
+    public int TotalPages { get; set; }
+}
+
+public class AdminLogSummary
+{
+    public Guid Id { get; set; }
+    public string Level { get; set; } = string.Empty;
+    public string Category { get; set; } = string.Empty;
+    public string Message { get; set; } = string.Empty;
+    public string? SupportId { get; set; }
+    public string? PlayerUsername { get; set; }
+    public Guid? PlayerId { get; set; }
     public DateTime CreatedAt { get; set; }
 }
 

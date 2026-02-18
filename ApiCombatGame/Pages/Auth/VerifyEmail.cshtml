@@ -1,0 +1,33 @@
+@page
+@model ApiCombatGame.Pages.Auth.VerifyEmailModel
+@{
+    ViewData["Title"] = "Verify Email";
+    ViewData["Description"] = "Verify your API Combat Game email address.";
+}
+
+<div class="auth-backdrop">
+    <div class="auth-card">
+        @if (Model.Verified)
+        {
+            <div class="text-center">
+                <div class="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style="background: color-mix(in srgb, var(--md-sys-color-primary) 12%, transparent);">
+                    <span class="material-symbols-outlined" style="color: var(--md-sys-color-primary); font-size: 32px;">check_circle</span>
+                </div>
+                <h1 class="text-2xl font-bold mb-2" style="color: var(--md-sys-color-on-surface);">Email Verified!</h1>
+                <p class="text-sm mb-6" style="color: var(--md-sys-color-on-surface-variant);">Your email has been confirmed. You're all set.</p>
+                <a asp-page="/Dashboard" class="md3-btn-filled" style="text-decoration: none;">Go to Dashboard</a>
+            </div>
+        }
+        else
+        {
+            <div class="text-center">
+                <div class="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style="background: color-mix(in srgb, var(--md-sys-color-error) 12%, transparent);">
+                    <span class="material-symbols-outlined" style="color: var(--md-sys-color-error); font-size: 32px;">error</span>
+                </div>
+                <h1 class="text-2xl font-bold mb-2" style="color: var(--md-sys-color-on-surface);">Verification Failed</h1>
+                <p class="text-sm mb-6" style="color: var(--md-sys-color-on-surface-variant);">@Model.ErrorMessage</p>
+                <a asp-page="/Dashboard" class="md3-btn-filled" style="text-decoration: none;">Go to Dashboard</a>
+            </div>
+        }
+    </div>
+</div>

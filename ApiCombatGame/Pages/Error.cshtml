@@ -1,0 +1,64 @@
+@page "{code:int?}"
+@model ApiCombatGame.Pages.ErrorModel
+@{
+    ViewData["Title"] = Model.StatusCode == 404 ? "Page Not Found" : "Something Went Wrong";
+}
+
+<div class="max-w-2xl mx-auto px-4 py-16 text-center">
+    <div class="mb-8">
+        <span class="material-symbols-outlined" style="font-size: 80px; color: @(Model.StatusCode == 404 ? "var(--md-sys-color-on-surface-variant)" : "var(--md-sys-color-error)");">
+            @(Model.StatusCode == 404 ? "explore_off" : "error")
+        </span>
+    </div>
+
+    <h1 class="text-5xl font-bold mb-4" style="color: var(--md-sys-color-on-surface);">@Model.StatusCode</h1>
+
+    @if (Model.StatusCode == 404)
+    {
+        <p class="text-lg mb-2" style="color: var(--md-sys-color-on-surface);">Page not found</p>
+        <p class="text-sm mb-8" style="color: var(--md-sys-color-on-surface-variant);">
+            The page you're looking for doesn't exist or has been moved. Maybe the API endpoint changed?
+        </p>
+        <div class="flex justify-center gap-4">
+            <a href="/" class="md3-btn-filled" style="text-decoration: none;">
+                <span class="material-symbols-outlined" style="font-size: 18px;">home</span>
+                Go Home
+            </a>
+            <a href="/api-docs/v1" class="md3-btn-outlined" style="text-decoration: none;">
+                <span class="material-symbols-outlined" style="font-size: 18px;">description</span>
+                API Docs
+            </a>
+        </div>
+    }
+    else
+    {
+        <p class="text-lg mb-2" style="color: var(--md-sys-color-on-surface);">Something went wrong</p>
+        <p class="text-sm mb-6" style="color: var(--md-sys-color-on-surface-variant);">
+            An unexpected error occurred. Our team has been notified.
+        </p>
+
+        @if (!string.IsNullOrEmpty(Model.SupportId))
+        {
+            <div class="md3-card p-6 mb-8 inline-block" style="background: var(--md-sys-color-error-container);">
+                <p class="text-sm mb-1" style="color: var(--md-sys-color-on-error-container);">Support Reference</p>
+                <p class="text-xl font-bold font-mono" style="color: var(--md-sys-color-on-error-container); letter-spacing: 0.05em;">
+                    @Model.SupportId
+                </p>
+                <p class="text-xs mt-2" style="color: var(--md-sys-color-on-error-container); opacity: 0.8;">
+                    Include this code when contacting support
+                </p>
+            </div>
+        }
+
+        <div class="flex justify-center gap-4">
+            <a href="/" class="md3-btn-filled" style="text-decoration: none;">
+                <span class="material-symbols-outlined" style="font-size: 18px;">home</span>
+                Go Home
+            </a>
+            <a href="/Contact" class="md3-btn-outlined" style="text-decoration: none;">
+                <span class="material-symbols-outlined" style="font-size: 18px;">mail</span>
+                Contact Support
+            </a>
+        </div>
+    }
+</div>

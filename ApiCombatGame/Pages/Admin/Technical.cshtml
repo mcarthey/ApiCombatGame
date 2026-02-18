@@ -73,49 +73,131 @@
 
 <!-- Background Jobs Status -->
 <div class="md3-card p-6">
-    <h3 class="text-lg font-semibold mb-4" style="color: var(--md-sys-color-on-surface);">Background Jobs</h3>
+    <h3 class="text-lg font-semibold mb-2" style="color: var(--md-sys-color-on-surface);">Background Jobs</h3>
+    <p class="text-sm mb-4" style="color: var(--md-sys-color-on-surface-variant);">10 hosted services running in the application pipeline. All jobs start automatically on app boot.</p>
+
+    <!-- Continuous -->
+    <div class="text-xs font-semibold uppercase tracking-wider mb-2 mt-4" style="color: var(--md-sys-color-primary);">Continuous</div>
+    <div class="space-y-3 mb-6">
+        <div class="p-4" style="background: var(--md-sys-color-surface-container-high); border-radius: var(--md-sys-shape-corner-medium);">
+            <div class="flex items-center justify-between mb-1">
+                <div class="flex items-center">
+                    <span class="material-symbols-outlined mr-3" style="color: var(--md-sys-color-primary);">swords</span>
+                    <span class="font-medium" style="color: var(--md-sys-color-on-surface);">BackgroundBattleProcessor</span>
+                </div>
+                <span class="text-xs font-medium px-2 py-1" style="background: var(--md-sys-color-primary-container); color: var(--md-sys-color-on-primary-container); border-radius: var(--md-sys-shape-corner-small);">Every 5s</span>
+            </div>
+            <div class="text-sm ml-10" style="color: var(--md-sys-color-on-surface-variant);">Processes queued battles through the combat engine, resolves matches, and updates ratings.</div>
+        </div>
+    </div>
+
+    <!-- Hourly -->
+    <div class="text-xs font-semibold uppercase tracking-wider mb-2" style="color: var(--md-sys-color-primary);">Hourly</div>
+    <div class="space-y-3 mb-6">
+        <div class="p-4" style="background: var(--md-sys-color-surface-container-high); border-radius: var(--md-sys-shape-corner-medium);">
+            <div class="flex items-center justify-between mb-1">
+                <div class="flex items-center">
+                    <span class="material-symbols-outlined mr-3" style="color: var(--md-sys-color-primary);">warning</span>
+                    <span class="font-medium" style="color: var(--md-sys-color-on-surface);">AdminAlertJob</span>
+                </div>
+                <span class="text-xs font-medium px-2 py-1" style="background: var(--md-sys-color-primary-container); color: var(--md-sys-color-on-primary-container); border-radius: var(--md-sys-shape-corner-small);">Every 1h</span>
+            </div>
+            <div class="text-sm ml-10" style="color: var(--md-sys-color-on-surface-variant);">Monitors queue health, player growth milestones, and expired guild bosses. Creates admin alerts.</div>
+        </div>
+        <div class="p-4" style="background: var(--md-sys-color-surface-container-high); border-radius: var(--md-sys-shape-corner-medium);">
+            <div class="flex items-center justify-between mb-1">
+                <div class="flex items-center">
+                    <span class="material-symbols-outlined mr-3" style="color: var(--md-sys-color-primary);">sports_esports</span>
+                    <span class="font-medium" style="color: var(--md-sys-color-on-surface);">TournamentProcessingJob</span>
+                </div>
+                <span class="text-xs font-medium px-2 py-1" style="background: var(--md-sys-color-primary-container); color: var(--md-sys-color-on-primary-container); border-radius: var(--md-sys-shape-corner-small);">Every 1h</span>
+            </div>
+            <div class="text-sm ml-10" style="color: var(--md-sys-color-on-surface-variant);">Creates weekly tournaments and processes ongoing tournament matches.</div>
+        </div>
+    </div>
+
+    <!-- Every 6 Hours -->
+    <div class="text-xs font-semibold uppercase tracking-wider mb-2" style="color: var(--md-sys-color-primary);">Every 6 Hours</div>
+    <div class="space-y-3 mb-6">
+        <div class="p-4" style="background: var(--md-sys-color-surface-container-high); border-radius: var(--md-sys-shape-corner-medium);">
+            <div class="flex items-center justify-between mb-1">
+                <div class="flex items-center">
+                    <span class="material-symbols-outlined mr-3" style="color: var(--md-sys-color-primary);">groups</span>
+                    <span class="font-medium" style="color: var(--md-sys-color-on-surface);">GuildWarMatchingJob</span>
+                </div>
+                <span class="text-xs font-medium px-2 py-1" style="background: var(--md-sys-color-primary-container); color: var(--md-sys-color-on-primary-container); border-radius: var(--md-sys-shape-corner-small);">Every 6h</span>
+            </div>
+            <div class="text-sm ml-10" style="color: var(--md-sys-color-on-surface-variant);">Finalizes expired guild wars and matches new guilds for upcoming wars.</div>
+        </div>
+        <div class="p-4" style="background: var(--md-sys-color-surface-container-high); border-radius: var(--md-sys-shape-corner-medium);">
+            <div class="flex items-center justify-between mb-1">
+                <div class="flex items-center">
+                    <span class="material-symbols-outlined mr-3" style="color: var(--md-sys-color-primary);">delete_sweep</span>
+                    <span class="font-medium" style="color: var(--md-sys-color-on-surface);">NotificationCleanupJob</span>
+                </div>
+                <span class="text-xs font-medium px-2 py-1" style="background: var(--md-sys-color-primary-container); color: var(--md-sys-color-on-primary-container); border-radius: var(--md-sys-shape-corner-small);">Every 6h</span>
+            </div>
+            <div class="text-sm ml-10" style="color: var(--md-sys-color-on-surface-variant);">Cleans up expired notifications from the database to keep things tidy.</div>
+        </div>
+    </div>
+
+    <!-- Daily -->
+    <div class="text-xs font-semibold uppercase tracking-wider mb-2" style="color: var(--md-sys-color-primary);">Daily</div>
+    <div class="space-y-3 mb-6">
+        <div class="p-4" style="background: var(--md-sys-color-surface-container-high); border-radius: var(--md-sys-shape-corner-medium);">
+            <div class="flex items-center justify-between mb-1">
+                <div class="flex items-center">
+                    <span class="material-symbols-outlined mr-3" style="color: var(--md-sys-color-primary);">task</span>
+                    <span class="font-medium" style="color: var(--md-sys-color-on-surface);">DailyChallengeGenerationJob</span>
+                </div>
+                <span class="text-xs font-medium px-2 py-1" style="background: var(--md-sys-color-primary-container); color: var(--md-sys-color-on-primary-container); border-radius: var(--md-sys-shape-corner-small);">Midnight UTC</span>
+            </div>
+            <div class="text-sm ml-10" style="color: var(--md-sys-color-on-surface-variant);">Generates new daily challenges for all active players (logged in within 7 days).</div>
+        </div>
+        <div class="p-4" style="background: var(--md-sys-color-surface-container-high); border-radius: var(--md-sys-shape-corner-medium);">
+            <div class="flex items-center justify-between mb-1">
+                <div class="flex items-center">
+                    <span class="material-symbols-outlined mr-3" style="color: var(--md-sys-color-primary);">trending_down</span>
+                    <span class="font-medium" style="color: var(--md-sys-color-on-surface);">StrategyDecayJob</span>
+                </div>
+                <span class="text-xs font-medium px-2 py-1" style="background: var(--md-sys-color-primary-container); color: var(--md-sys-color-on-primary-container); border-radius: var(--md-sys-shape-corner-small);">2 AM UTC</span>
+            </div>
+            <div class="text-sm ml-10" style="color: var(--md-sys-color-on-surface-variant);">Applies rating decay to marketplace strategies to prevent staleness and encourage fresh builds.</div>
+        </div>
+        <div class="p-4" style="background: var(--md-sys-color-surface-container-high); border-radius: var(--md-sys-shape-corner-medium);">
+            <div class="flex items-center justify-between mb-1">
+                <div class="flex items-center">
+                    <span class="material-symbols-outlined mr-3" style="color: var(--md-sys-color-primary);">mail</span>
+                    <span class="font-medium" style="color: var(--md-sys-color-on-surface);">GuildInviteExpiryJob</span>
+                </div>
+                <span class="text-xs font-medium px-2 py-1" style="background: var(--md-sys-color-primary-container); color: var(--md-sys-color-on-primary-container); border-radius: var(--md-sys-shape-corner-small);">Daily</span>
+            </div>
+            <div class="text-sm ml-10" style="color: var(--md-sys-color-on-surface-variant);">Marks pending guild invites as expired when their expiration window has passed.</div>
+        </div>
+    </div>
+
+    <!-- Weekly -->
+    <div class="text-xs font-semibold uppercase tracking-wider mb-2" style="color: var(--md-sys-color-primary);">Weekly</div>
     <div class="space-y-3">
-        <div class="flex items-center justify-between p-3" style="background: var(--md-sys-color-surface-container-high); border-radius: var(--md-sys-shape-corner-medium);">
-            <div class="flex items-center">
-                <span class="material-symbols-outlined mr-3" style="color: var(--md-sys-color-primary); font-size: 12px; width: 12px; height: 12px;">radio_button_checked</span>
-                <span class="font-medium" style="color: var(--md-sys-color-on-surface);">BackgroundBattleProcessor</span>
+        <div class="p-4" style="background: var(--md-sys-color-surface-container-high); border-radius: var(--md-sys-shape-corner-medium);">
+            <div class="flex items-center justify-between mb-1">
+                <div class="flex items-center">
+                    <span class="material-symbols-outlined mr-3" style="color: var(--md-sys-color-primary);">shuffle</span>
+                    <span class="font-medium" style="color: var(--md-sys-color-on-surface);">WeeklyModifierRotationJob</span>
+                </div>
+                <span class="text-xs font-medium px-2 py-1" style="background: var(--md-sys-color-primary-container); color: var(--md-sys-color-on-primary-container); border-radius: var(--md-sys-shape-corner-small);">Mondays 00:00 UTC</span>
             </div>
-            <span class="text-sm" style="color: var(--md-sys-color-on-surface-variant);">Continuous (every 5s)</span>
+            <div class="text-sm ml-10" style="color: var(--md-sys-color-on-surface-variant);">Rotates the active battle modifier to keep the meta fresh each week.</div>
         </div>
-        <div class="flex items-center justify-between p-3" style="background: var(--md-sys-color-surface-container-high); border-radius: var(--md-sys-shape-corner-medium);">
-            <div class="flex items-center">
-                <span class="material-symbols-outlined mr-3" style="color: var(--md-sys-color-primary); font-size: 12px; width: 12px; height: 12px;">radio_button_checked</span>
-                <span class="font-medium" style="color: var(--md-sys-color-on-surface);">WeeklyModifierRotationJob</span>
+        <div class="p-4" style="background: var(--md-sys-color-surface-container-high); border-radius: var(--md-sys-shape-corner-medium);">
+            <div class="flex items-center justify-between mb-1">
+                <div class="flex items-center">
+                    <span class="material-symbols-outlined mr-3" style="color: var(--md-sys-color-primary);">destruction</span>
+                    <span class="font-medium" style="color: var(--md-sys-color-on-surface);">GuildBossSpawnJob</span>
+                </div>
+                <span class="text-xs font-medium px-2 py-1" style="background: var(--md-sys-color-primary-container); color: var(--md-sys-color-on-primary-container); border-radius: var(--md-sys-shape-corner-small);">Mondays 00:00 UTC</span>
             </div>
-            <span class="text-sm" style="color: var(--md-sys-color-on-surface-variant);">Weekly (Mondays)</span>
-        </div>
-        <div class="flex items-center justify-between p-3" style="background: var(--md-sys-color-surface-container-high); border-radius: var(--md-sys-shape-corner-medium);">
-            <div class="flex items-center">
-                <span class="material-symbols-outlined mr-3" style="color: var(--md-sys-color-primary); font-size: 12px; width: 12px; height: 12px;">radio_button_checked</span>
-                <span class="font-medium" style="color: var(--md-sys-color-on-surface);">DailyChallengeGenerationJob</span>
-            </div>
-            <span class="text-sm" style="color: var(--md-sys-color-on-surface-variant);">Daily (midnight UTC)</span>
-        </div>
-        <div class="flex items-center justify-between p-3" style="background: var(--md-sys-color-surface-container-high); border-radius: var(--md-sys-shape-corner-medium);">
-            <div class="flex items-center">
-                <span class="material-symbols-outlined mr-3" style="color: var(--md-sys-color-primary); font-size: 12px; width: 12px; height: 12px;">radio_button_checked</span>
-                <span class="font-medium" style="color: var(--md-sys-color-on-surface);">StrategyDecayJob</span>
-            </div>
-            <span class="text-sm" style="color: var(--md-sys-color-on-surface-variant);">Daily</span>
-        </div>
-        <div class="flex items-center justify-between p-3" style="background: var(--md-sys-color-surface-container-high); border-radius: var(--md-sys-shape-corner-medium);">
-            <div class="flex items-center">
-                <span class="material-symbols-outlined mr-3" style="color: var(--md-sys-color-primary); font-size: 12px; width: 12px; height: 12px;">radio_button_checked</span>
-                <span class="font-medium" style="color: var(--md-sys-color-on-surface);">GuildBossSpawnJob</span>
-            </div>
-            <span class="text-sm" style="color: var(--md-sys-color-on-surface-variant);">Weekly (Mondays)</span>
-        </div>
-        <div class="flex items-center justify-between p-3" style="background: var(--md-sys-color-surface-container-high); border-radius: var(--md-sys-shape-corner-medium);">
-            <div class="flex items-center">
-                <span class="material-symbols-outlined mr-3" style="color: var(--md-sys-color-primary); font-size: 12px; width: 12px; height: 12px;">radio_button_checked</span>
-                <span class="font-medium" style="color: var(--md-sys-color-on-surface);">GuildInviteExpiryJob</span>
-            </div>
-            <span class="text-sm" style="color: var(--md-sys-color-on-surface-variant);">Daily</span>
+            <div class="text-sm ml-10" style="color: var(--md-sys-color-on-surface-variant);">Spawns a new boss encounter for each guild to tackle as a team.</div>
         </div>
     </div>
 </div>

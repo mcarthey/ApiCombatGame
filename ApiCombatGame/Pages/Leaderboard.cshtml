@@ -1,0 +1,95 @@
+@page
+@model ApiCombatGame.Pages.LeaderboardModel
+@using ApiCombatGame.Helpers
+@{
+    ViewData["Title"] = "Leaderboard";
+    ViewData["Description"] = "API Combat Game leaderboard. See who's climbing the Arena Power Index rankings and dominating the meta.";
+    ViewData["CanonicalPath"] = "/Leaderboard";
+}
+
+<div class="max-w-4xl mx-auto px-4">
+    <div class="text-center mb-8">
+        <h1 class="text-3xl font-bold" style="color: var(--md-sys-color-on-surface);">Leaderboard</h1>
+        <p class="text-sm mt-2" style="color: var(--md-sys-color-on-surface-variant);">Top 50 players by Arena Power Index (API) rating</p>
+    </div>
+
+    @if (Model.Players.Count == 0)
+    {
+        <div class="md3-card p-8 text-center">
+            <span class="material-symbols-outlined mb-4" style="font-size: 48px; color: var(--md-sys-color-outline);">emoji_events</span>
+            <p style="color: var(--md-sys-color-on-surface-variant);">No players ranked yet. Be the first to claim the throne!</p>
+            <a asp-page="/Auth/Register" class="md3-btn-filled mt-4" style="text-decoration: none; display: inline-block;">Create Account</a>
+        </div>
+    }
+    else
+    {
+        <div class="md3-card overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="md3-table min-w-full">
+                    <thead>
+                        <tr>
+                            <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider" style="width: 60px;">Rank</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider">Player</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider">Rating</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider">Tier</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider">Win Rate</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider">Battles</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (var i = 0; i < Model.Players.Count; i++)
+                        {
+                            var player = Model.Players[i];
+                            var rank = i + 1;
+                            var (tierName, tierFlavor, tierCss) = RatingTierHelper.GetTier(player.Rating);
+                            var rankColor = rank switch
+                            {
+                                1 => "color: #FFD700;",  // Gold
+                                2 => "color: #C0C0C0;",  // Silver
+                                3 => "color: #CD7F32;",  // Bronze
+                                _ => "color: var(--md-sys-color-on-surface-variant);"
+                            };
+                            var rankIcon = rank switch
+                            {
+                                1 => "emoji_events",
+                                2 => "military_tech",
+                                3 => "workspace_premium",
+                                _ => ""
+                            };
+                            <tr>
+                                <td class="px-4 py-3 whitespace-nowrap text-center">
+                                    @if (rank <= 3)
+                                    {
+                                        <span class="material-symbols-outlined" style="@rankColor font-size: 20px;" title="Rank @rank">@rankIcon</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-sm font-medium" style="@rankColor">@rank</span>
+                                    }
+                                </td>
+                                <td class="px-4 py-3 whitespace-nowrap">
+                                    <span class="text-sm font-medium" style="color: var(--md-sys-color-on-surface);">@player.Username</span>
+                                    <span class="text-xs ml-1" style="color: var(--md-sys-color-on-surface-variant);">Lv.@player.Level</span>
+                                </td>
+                                <td class="px-4 py-3 whitespace-nowrap">
+                                    <span class="text-sm font-bold" style="color: var(--md-sys-color-primary);">@player.Rating</span>
+                                </td>
+                                <td class="px-4 py-3 whitespace-nowrap">
+                                    <span class="text-xs font-medium px-2 py-0.5 rounded @tierCss">@tierName</span>
+                                </td>
+                                <td class="px-4 py-3 whitespace-nowrap text-sm">
+                                    <span style="color: @(player.WinRate >= 55 ? "var(--md-sys-color-primary)" : player.WinRate <= 45 ? "var(--md-sys-color-error)" : "var(--md-sys-color-on-surface)");">
+                                        @player.WinRate%
+                                    </span>
+                                </td>
+                                <td class="px-4 py-3 whitespace-nowrap text-sm" style="color: var(--md-sys-color-on-surface-variant);">
+                                    @player.TotalBattles
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+</div>

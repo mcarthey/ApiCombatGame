@@ -1,0 +1,57 @@
+@page
+@model ApiCombatGame.Pages.TermsModel
+@{
+    ViewData["Title"] = "Terms of Service";
+    ViewData["Description"] = "API Combat Game terms of service. Rules of engagement for the arena.";
+    ViewData["CanonicalPath"] = "/Terms";
+}
+
+<div class="max-w-3xl mx-auto px-4">
+    <h1 class="text-3xl font-bold mb-8" style="color: var(--md-sys-color-on-surface);">Terms of Service</h1>
+
+    <div class="max-w-none space-y-6" style="color: var(--md-sys-color-on-surface-variant);">
+        <p class="text-sm" style="color: var(--md-sys-color-outline);">Last updated: @DateTime.UtcNow.ToString("MMMM dd, yyyy")</p>
+
+        <h2 class="text-xl font-semibold mt-8" style="color: var(--md-sys-color-on-surface);">1. Acceptance of Terms</h2>
+        <p>By accessing or using API Combat Game ("the Service"), you agree to be bound by these Terms of Service. If you do not agree, do not use the Service.</p>
+
+        <h2 class="text-xl font-semibold mt-8" style="color: var(--md-sys-color-on-surface);">2. Account Registration</h2>
+        <p>You must be at least 13 years old to create an account. You are responsible for maintaining the confidentiality of your credentials and for all activity under your account. One account per person &mdash; multi-accounting is not permitted.</p>
+
+        <h2 class="text-xl font-semibold mt-8" style="color: var(--md-sys-color-on-surface);">3. Fair Play</h2>
+        <p>API Combat is a competitive game. You agree not to:</p>
+        <ul class="list-disc pl-6 space-y-1">
+            <li>Exploit bugs, glitches, or unintended mechanics instead of reporting them</li>
+            <li>Use automated tools, bots, or scripts to gain an unfair advantage (legitimate API usage for gameplay is encouraged &mdash; that's the point)</li>
+            <li>Intentionally manipulate ratings through collusion or win-trading</li>
+            <li>Harass, abuse, or impersonate other players</li>
+        </ul>
+
+        <h2 class="text-xl font-semibold mt-8" style="color: var(--md-sys-color-on-surface);">4. Subscriptions &amp; Payments</h2>
+        <p>Premium tiers are billed through Stripe on a recurring monthly basis. You may cancel at any time; access continues until the end of the current billing period. We do not store credit card information on our servers. Refunds are handled on a case-by-case basis &mdash; contact support for assistance.</p>
+
+        <h2 class="text-xl font-semibold mt-8" style="color: var(--md-sys-color-on-surface);">5. Intellectual Property</h2>
+        <p>All game content, artwork, code, and documentation are the property of API Combat Game and its creator. You retain ownership of any strategies or configurations you create, but grant us a license to use them within the Service (e.g., for battle processing and leaderboard display).</p>
+
+        <h2 class="text-xl font-semibold mt-8" style="color: var(--md-sys-color-on-surface);">6. Acceptable Use</h2>
+        <p>You agree not to use the Service to:</p>
+        <ul class="list-disc pl-6 space-y-1">
+            <li>Violate any applicable law or regulation</li>
+            <li>Transmit malicious code or attempt to compromise our infrastructure</li>
+            <li>Abuse API rate limits or intentionally degrade service for other players</li>
+            <li>Use offensive usernames or content</li>
+        </ul>
+
+        <h2 class="text-xl font-semibold mt-8" style="color: var(--md-sys-color-on-surface);">7. Termination</h2>
+        <p>We may suspend or terminate your account at our discretion for violations of these terms or for any behavior that harms the community. You may delete your account at any time through your account settings.</p>
+
+        <h2 class="text-xl font-semibold mt-8" style="color: var(--md-sys-color-on-surface);">8. Limitation of Liability</h2>
+        <p>The Service is provided "as is" without warranties of any kind. We are not liable for any damages arising from your use of the Service, including loss of data, virtual currency, or game progress. Our total liability shall not exceed the amount you have paid us in the preceding 12 months.</p>
+
+        <h2 class="text-xl font-semibold mt-8" style="color: var(--md-sys-color-on-surface);">9. Changes to Terms</h2>
+        <p>We may update these terms from time to time. Continued use of the Service after changes constitutes acceptance. We will notify registered users of material changes via email.</p>
+
+        <h2 class="text-xl font-semibold mt-8" style="color: var(--md-sys-color-on-surface);">10. Contact</h2>
+        <p>Questions about these terms? Reach out through our <a asp-page="/Contact" style="color: var(--md-sys-color-primary);">contact form</a> or email <a href="mailto:support@apicombat.com" style="color: var(--md-sys-color-primary);">support&commat;apicombat.com</a>.</p>
+    </div>
+</div>

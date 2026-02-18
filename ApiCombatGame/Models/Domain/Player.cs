@@ -74,6 +74,20 @@ public class Player
     /// <summary>When the player last claimed their monthly gem stipend (Premium Plus perk).</summary>
     public DateTime? LastGemStipendClaimedAt { get; set; }
 
+    // Password reset
+    [MaxLength(100)]
+    public string? PasswordResetToken { get; set; }
+    public DateTime? PasswordResetExpiresAt { get; set; }
+
+    // Email verification
+    public bool EmailConfirmed { get; set; } = false;
+    [MaxLength(100)]
+    public string? EmailConfirmationToken { get; set; }
+
+    // Account deletion (soft delete)
+    public bool IsDeleted { get; set; } = false;
+    public DateTime? DeletedAt { get; set; }
+
     // Lifetime stats (sunk cost tracking)
     public int TotalBattlesPlayed { get; set; } = 0;
     public int TotalBattlesWon { get; set; } = 0;

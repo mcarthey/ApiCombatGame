@@ -100,14 +100,11 @@
     <!-- Plan Comparison -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
         <!-- Free Tier -->
-        <div class="md3-card p-6" style="display: flex; flex-direction: column; @(Model.CurrentTier == "Free" ? "border: 2px solid var(--md-sys-color-primary);" : "")">
+        <div class="md3-card p-6" style="display: flex; flex-direction: column;">
             <div style="flex-grow: 1;">
-                @if (Model.CurrentTier == "Free")
-                {
-                    <span class="md3-badge-primary text-xs font-semibold inline-block mb-4">Current Plan</span>
-                }
+                <span class="text-xs font-semibold inline-block mb-4 px-3 py-1 rounded-full" style="background: var(--md-sys-color-surface-variant); color: var(--md-sys-color-on-surface-variant);">After Launch Week</span>
                 <h3 class="text-2xl font-bold mb-2" style="color: var(--md-sys-color-on-surface);">Free</h3>
-                <p class="text-4xl font-bold mb-6" style="color: var(--md-sys-color-on-surface);">$0<span class="text-lg" style="color: var(--md-sys-color-on-surface-variant);">/month</span></p>
+                <p class="text-4xl font-bold mb-6" style="color: var(--md-sys-color-on-surface);">$0<span class="text-lg" style="color: var(--md-sys-color-on-surface-variant);">/forever</span></p>
                 <ul class="space-y-3 mb-6">
                     <li class="flex items-start"><span class="material-symbols-outlined" style="color: var(--md-sys-color-primary); margin-right: 8px; font-size: 20px;">check</span><span style="color: var(--md-sys-color-on-surface);">10 battles per day</span></li>
                     <li class="flex items-start"><span class="material-symbols-outlined" style="color: var(--md-sys-color-primary); margin-right: 8px; font-size: 20px;">check</span><span style="color: var(--md-sys-color-on-surface);">Basic units</span></li>
@@ -116,45 +113,28 @@
                 </ul>
             </div>
             <div style="margin-top: auto;">
-                @if (Model.CurrentTier == "Free")
-                {
-                    <button class="md3-btn-tonal w-full" disabled>
-                        Current Plan
-                    </button>
-                }
-                else if (Model.IsCancellationPending)
-                {
-                    <button class="md3-btn-tonal w-full" disabled>
-                        Cancellation Pending
-                    </button>
-                }
-                else
-                {
-                    <form method="post" asp-page-handler="Downgrade">
-                        <button type="submit" class="md3-btn-outlined w-full"
-                                data-tier-from="@Model.CurrentTier" data-tier-to="Free">
-                            Downgrade to Free</button>
-                    </form>
-                }
+                <button class="md3-btn-tonal w-full" disabled>
+                    Always Free
+                </button>
             </div>
         </div>
 
         <!-- Premium Tier -->
-        <div class="md3-card-elevated p-6 relative" style="display: flex; flex-direction: column; @(Model.CurrentTier == "Premium" ? "border: 2px solid var(--md-sys-color-primary);" : "")">
-            @if (Model.CurrentTier != "Premium")
-            {
-                <div class="absolute top-0 right-0 px-3 py-1 text-xs font-semibold"
-                     style="background: var(--md-sys-color-tertiary-container); color: var(--md-sys-color-on-tertiary-container); border-radius: 0 var(--md-sys-shape-corner-large) 0 var(--md-sys-shape-corner-small);">
-                    POPULAR
-                </div>
-            }
-            <div style="flex-grow: 1;">
-                @if (Model.CurrentTier == "Premium")
-                {
-                    <span class="md3-badge-primary text-xs font-semibold inline-block mb-4">Current Plan</span>
-                }
+        <div class="md3-card-elevated p-6 relative" style="display: flex; flex-direction: column; border: 2px solid var(--md-sys-color-primary);">
+            <!-- Launch Week Banner -->
+            <div class="absolute top-0 left-0 right-0 px-3 py-2 text-center text-xs font-bold tracking-wide"
+                 style="background: linear-gradient(135deg, var(--md-sys-color-primary), var(--md-sys-color-tertiary)); color: var(--md-sys-color-on-primary); border-radius: var(--md-sys-shape-corner-large) var(--md-sys-shape-corner-large) 0 0;">
+                <span class="material-symbols-outlined" style="font-size: 14px; vertical-align: middle; margin-right: 4px;">celebration</span>
+                FREE FOR LAUNCH WEEK
+                <span class="material-symbols-outlined" style="font-size: 14px; vertical-align: middle; margin-left: 4px;">celebration</span>
+            </div>
+            <div style="flex-grow: 1; margin-top: 24px;">
+                <span class="md3-badge-primary text-xs font-semibold inline-block mb-4">Everyone Gets This</span>
                 <h3 class="text-2xl font-bold mb-2" style="color: var(--md-sys-color-on-surface);">Premium</h3>
-                <p class="text-4xl font-bold mb-6" style="color: var(--md-sys-color-on-surface);">$5<span class="text-lg" style="color: var(--md-sys-color-on-surface-variant);">/month</span></p>
+                <p class="mb-6">
+                    <span class="text-4xl font-bold" style="color: var(--md-sys-color-primary);">FREE</span>
+                    <span class="text-lg" style="color: var(--md-sys-color-on-surface-variant); text-decoration: line-through; margin-left: 8px;">$5/month</span>
+                </p>
                 <ul class="space-y-3 mb-6">
                     <li class="flex items-start"><span class="material-symbols-outlined" style="color: var(--md-sys-color-primary); margin-right: 8px; font-size: 20px;">check</span><span class="font-semibold" style="color: var(--md-sys-color-on-surface);">Unlimited battles</span></li>
                     <li class="flex items-start"><span class="material-symbols-outlined" style="color: var(--md-sys-color-primary); margin-right: 8px; font-size: 20px;">check</span><span style="color: var(--md-sys-color-on-surface);">50+ units (all rarities)</span></li>
@@ -164,22 +144,10 @@
                 </ul>
             </div>
             <div style="margin-top: auto;">
-                @if (Model.CurrentTier == "Premium")
-                {
-                    <button class="md3-btn-tonal w-full" disabled>
-                        Current Plan
-                    </button>
-                }
-                else
-                {
-                    <form method="post" asp-page-handler="Upgrade">
-                        <input type="hidden" name="tier" value="premium" />
-                        <button type="submit" class="md3-btn-filled w-full"
-                                data-tier-from="@Model.CurrentTier" data-tier-to="Premium">
-                            @(Model.CurrentTier == "PremiumPlus" ? "Switch to Premium" : "Upgrade to Premium")
-                        </button>
-                    </form>
-                }
+                <div class="text-center text-sm p-3 rounded-xl" style="background: var(--md-sys-color-primary-container); color: var(--md-sys-color-on-primary-container);">
+                    <span class="material-symbols-outlined" style="font-size: 16px; vertical-align: middle; margin-right: 4px;">rocket_launch</span>
+                    All players get Premium free during launch week
+                </div>
             </div>
         </div>
 

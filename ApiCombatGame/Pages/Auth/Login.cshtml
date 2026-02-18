@@ -29,7 +29,7 @@
             </div>
         }
 
-        <form method="post">
+        <form method="post" id="loginForm">
             <div class="mb-5">
                 <div class="md3-input-wrapper">
                     <label for="Input_Email">Email</label>
@@ -46,13 +46,16 @@
                 <span asp-validation-for="Input.Password" class="field-validation-error"></span>
             </div>
 
-            <div class="mb-6">
+            <div class="mb-6 flex items-center justify-between">
                 <label class="flex items-center gap-3">
                     <input type="checkbox" class="md3-checkbox" name="Input.RememberMe" value="true"
                                  @(Model.Input?.RememberMe == true ? "checked" : "") />
                     <span class="text-sm" style="color: var(--md-sys-color-on-surface-variant);">Remember me</span>
                 </label>
+                <a asp-page="/Auth/ForgotPassword" class="text-sm link-underline" style="color: var(--md-sys-color-primary);">Forgot password?</a>
             </div>
+
+            <input type="hidden" id="recaptchaToken" name="Input.RecaptchaToken" />
 
             <button type="submit" class="btn-glow w-full">
                 Sign In
@@ -65,3 +68,19 @@
         </p>
     </div>
 </div>
+
+@if (!string.IsNullOrEmpty(Model.RecaptchaSiteKey))
+{
+    <script src="https://www.google.com/recaptcha/api.js?render=@Model.RecaptchaSiteKey"></script>
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            grecaptcha.ready(function() {
+                grecaptcha.execute('@Model.RecaptchaSiteKey', {action: 'login'}).then(function(token) {
+                    document.getElementById('recaptchaToken').value = token;
+                    document.getElementById('loginForm').submit();
+                });
+            });
+        });
+    </script>
+}

@@ -34,6 +34,9 @@
     <meta name="twitter:description" content="@seoDescription" />
     <meta name="twitter:image" content="@(baseUrl)@(seoImage)" />
 
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
     <!-- DNS Prefetch -->
     <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
     <link rel="dns-prefetch" href="https://cdn.tailwindcss.com" />
@@ -202,6 +205,9 @@
                         <a asp-page="/Contact" class="@NavClass(currentPath == "/Contact")" style="text-decoration: none;">
                             Contact
                         </a>
+                        <a asp-page="/Leaderboard" class="@NavClass(currentPath == "/Leaderboard")" style="text-decoration: none;">
+                            Leaderboard
+                        </a>
                         @if (User.Identity?.IsAuthenticated == true)
                         {
                             <a asp-page="/Dashboard" class="@NavClass(currentPath == "/Dashboard")" style="text-decoration: none;">
@@ -233,11 +239,87 @@
                         <span class="material-symbols-outlined icon-light">dark_mode</span>
                         <span class="material-symbols-outlined icon-dark" style="display: none;">light_mode</span>
                     </button>
-                    <partial name="_LoginPartial" />
+                    <div class="hidden sm:block">
+                        <partial name="_LoginPartial" />
+                    </div>
+                    <!-- Mobile menu button -->
+                    <button class="sm:hidden md3-btn-icon" id="mobile-menu-btn" aria-label="Open menu" aria-expanded="false">
+                        <span class="material-symbols-outlined" id="mobile-menu-icon">menu</span>
+                    </button>
                 </div>
             </div>
         </div>
     </nav>
+
+    <!-- Mobile navigation drawer -->
+    <div id="mobile-menu" class="sm:hidden fixed inset-0 z-40" style="display: none;">
+        <div id="mobile-menu-backdrop" class="absolute inset-0" style="background: rgba(0,0,0,0.5);"></div>
+        <div class="absolute top-0 right-0 h-full w-72 shadow-xl" style="background: var(--md-sys-color-surface-container); transform: translateX(100%); transition: transform 0.25s ease;" id="mobile-menu-panel">
+            <div class="flex items-center justify-between p-4" style="border-bottom: 1px solid var(--md-sys-color-outline-variant);">
+                <span class="text-base font-bold" style="color: var(--md-sys-color-on-surface);">Menu</span>
+                <button class="md3-btn-icon" id="mobile-menu-close" aria-label="Close menu">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            <div class="flex flex-col py-2">
+                @{
+                    string MobileNavClass(bool isActive) => isActive
+                        ? "flex items-center gap-3 px-5 py-3 text-sm font-medium"
+                        : "flex items-center gap-3 px-5 py-3 text-sm font-medium";
+                    string MobileNavStyle(bool isActive) => isActive
+                        ? "color: var(--md-sys-color-primary); background: var(--md-sys-color-primary-container); text-decoration: none;"
+                        : "color: var(--md-sys-color-on-surface-variant); text-decoration: none;";
+                }
+                <a asp-page="/Index" class="@MobileNavClass(currentPath == "/")" style="@MobileNavStyle(currentPath == "/")">
+                    <span class="material-symbols-outlined" style="font-size: 20px;">home</span> Home
+                </a>
+                <a href="/api-docs/v1" class="@MobileNavClass(currentPath.StartsWith("/api-docs"))" style="@MobileNavStyle(currentPath.StartsWith("/api-docs"))">
+                    <span class="material-symbols-outlined" style="font-size: 20px;">description</span> API Docs
+                </a>
+                <a asp-page="/Leaderboard" class="@MobileNavClass(currentPath == "/Leaderboard")" style="@MobileNavStyle(currentPath == "/Leaderboard")">
+                    <span class="material-symbols-outlined" style="font-size: 20px;">leaderboard</span> Leaderboard
+                </a>
+                <a asp-page="/Contact" class="@MobileNavClass(currentPath == "/Contact")" style="@MobileNavStyle(currentPath == "/Contact")">
+                    <span class="material-symbols-outlined" style="font-size: 20px;">mail</span> Contact
+                </a>
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                    <div class="mx-4 my-2" style="border-top: 1px solid var(--md-sys-color-outline-variant);"></div>
+                    <a asp-page="/Dashboard" class="@MobileNavClass(currentPath == "/Dashboard")" style="@MobileNavStyle(currentPath == "/Dashboard")">
+                        <span class="material-symbols-outlined" style="font-size: 20px;">dashboard</span> Dashboard
+                    </a>
+                    <a asp-page="/Account/Index" class="@MobileNavClass(currentPath.StartsWith("/Account"))" style="@MobileNavStyle(currentPath.StartsWith("/Account"))">
+                        <span class="material-symbols-outlined" style="font-size: 20px;">person</span> Account
+                    </a>
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <a href="/Admin" class="@MobileNavClass(currentPath.StartsWith("/Admin"))" style="@MobileNavStyle(currentPath.StartsWith("/Admin"))">
+                            <span class="material-symbols-outlined" style="font-size: 20px;">admin_panel_settings</span> Admin
+                        </a>
+                    }
+                    <div class="mx-4 my-2" style="border-top: 1px solid var(--md-sys-color-outline-variant);"></div>
+                    <div class="px-5 py-2 text-xs" style="color: var(--md-sys-color-outline);">
+                        Signed in as @User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value
+                    </div>
+                    <form method="post" asp-page="/Auth/Logout" class="px-5 py-1">
+                        <button type="submit" class="md3-btn-text" style="padding-left: 0;">
+                            <span class="material-symbols-outlined" style="font-size: 20px; margin-right: 8px;">logout</span> Logout
+                        </button>
+                    </form>
+                }
+                else
+                {
+                    <div class="mx-4 my-2" style="border-top: 1px solid var(--md-sys-color-outline-variant);"></div>
+                    <a href="/Auth/Login" class="@MobileNavClass(false)" style="@MobileNavStyle(false)">
+                        <span class="material-symbols-outlined" style="font-size: 20px;">login</span> Login
+                    </a>
+                    <a href="/Auth/Register" class="@MobileNavClass(false)" style="@MobileNavStyle(false)">
+                        <span class="material-symbols-outlined" style="font-size: 20px;">person_add</span> Sign Up
+                    </a>
+                }
+            </div>
+        </div>
+    </div>
 
     <main class="flex-grow">
         @RenderBody()
@@ -264,11 +346,15 @@
                     <div class="space-y-2">
                         <a href="/api-docs/v1" class="block text-sm link-underline" style="color: var(--md-sys-color-on-surface-variant);">API Documentation</a>
                         <a href="/openapi/v1.json" class="block text-sm link-underline" style="color: var(--md-sys-color-on-surface-variant);">OpenAPI Spec</a>
+                        <a asp-page="/About" class="block text-sm link-underline" style="color: var(--md-sys-color-on-surface-variant);">About</a>
+                        <a href="https://discord.gg/jfSCSfAN49" target="_blank" rel="noopener noreferrer" class="block text-sm link-underline" style="color: var(--md-sys-color-on-surface-variant);">Discord</a>
+                        <a href="https://github.com/api-combat-game" target="_blank" rel="noopener noreferrer" class="block text-sm link-underline" style="color: var(--md-sys-color-on-surface-variant);">GitHub</a>
                     </div>
                 </div>
                 <div>
                     <h4 class="text-sm font-semibold mb-3" style="color: var(--md-sys-color-on-surface);">Legal</h4>
                     <div class="space-y-2">
+                        <a asp-page="/Terms" class="block text-sm link-underline" style="color: var(--md-sys-color-on-surface-variant);">Terms of Service</a>
                         <a asp-page="/Privacy" class="block text-sm link-underline" style="color: var(--md-sys-color-on-surface-variant);">Privacy Policy</a>
                         <a asp-page="/Contact" class="block text-sm link-underline" style="color: var(--md-sys-color-on-surface-variant);">Contact</a>
                     </div>
@@ -323,5 +409,25 @@
     }
     <script src="https://unpkg.com/@@dotlottie/player-component@@2/dist/dotlottie-player.mjs" type="module"></script>
     @await RenderSectionAsync("Scripts", required: false)
+
+    <!-- Cookie Consent Banner -->
+    <div id="cookieConsent" style="display:none; position:fixed; bottom:0; left:0; right:0; z-index:9999; padding:16px 24px; background:var(--md-sys-color-surface-container-high); border-top:1px solid var(--md-sys-color-outline-variant); box-shadow:0 -2px 8px rgba(0,0,0,0.15);">
+        <div class="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
+            <p class="text-sm" style="color:var(--md-sys-color-on-surface-variant); margin:0;">
+                We use essential cookies only &mdash; for authentication and site functionality. No tracking, no analytics.
+                <a asp-page="/Privacy" style="color:var(--md-sys-color-primary);">Learn more</a>
+            </p>
+            <button onclick="acceptCookies()" class="md3-btn-filled" style="white-space:nowrap;">Got it</button>
+        </div>
+    </div>
+    <script>
+        function acceptCookies() {
+            localStorage.setItem('cookie_consent', 'acknowledged');
+            document.getElementById('cookieConsent').style.display = 'none';
+        }
+        if (!localStorage.getItem('cookie_consent')) {
+            document.getElementById('cookieConsent').style.display = 'block';
+        }
+    </script>
 </body>
 </html>

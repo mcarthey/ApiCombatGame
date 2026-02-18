@@ -2,6 +2,8 @@ using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
 using ApiCombatGame.Data;
 using ApiCombatGame.Services.Interfaces;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -14,17 +16,22 @@ public class SettingsModel : PageModel
 {
     private readonly GameDbContext _context;
     private readonly INotificationService _notifications;
+    private readonly IAuthService _authService;
     private readonly ILogger<SettingsModel> _logger;
 
-    public SettingsModel(GameDbContext context, INotificationService notifications, ILogger<SettingsModel> logger)
+    public SettingsModel(GameDbContext context, INotificationService notifications, IAuthService authService, ILogger<SettingsModel> logger)
     {
         _context = context;
         _notifications = notifications;
+        _authService = authService;
         _logger = logger;
     }
 
     [BindProperty]
     public SettingsInputModel Input { get; set; } = new();
+
+    [BindProperty]
+    public string? DeletePassword { get; set; }
 
     public string? SuccessMessage { get; set; }
     public string? ErrorMessage { get; set; }
@@ -127,6 +134,32 @@ public class SettingsModel : PageModel
         var player = await _context.Players.FindAsync(playerId);
         if (player != null) await LoadPlayerInfo(player);
         return Page();
+    }
+
+    public async Task<IActionResult> OnPostDeleteAccountAsync()
+    {
+        var playerId = GetPlayerId();
+
+        if (string.IsNullOrWhiteSpace(DeletePassword))
+        {
+            ErrorMessage = "Password is required to delete your account.";
+            var player = await _context.Players.FindAsync(playerId);
+            if (player != null) await LoadPlayerInfo(player);
+            return Page();
+        }
+
+        var success = await _authService.DeleteAccountAsync(playerId, DeletePassword);
+
+        if (!success)
+        {
+            ErrorMessage = "Incorrect password. Account was not deleted.";
+            var player = await _context.Players.FindAsync(playerId);
+            if (player != null) await LoadPlayerInfo(player);
+            return Page();
+        }
+
+        await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+        return RedirectToPage("/Auth/Login", new { message = "deleted" });
     }
 
     private async Task LoadPlayerInfo(Models.Domain.Player player)

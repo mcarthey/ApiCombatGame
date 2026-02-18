@@ -1,0 +1,65 @@
+@page
+@model ApiCombatGame.Pages.AboutModel
+@{
+    ViewData["Title"] = "About";
+    ViewData["Description"] = "API Combat Game is a turn-based combat game played entirely through REST API endpoints. Build your own client, design battle strategies in JSON, and compete.";
+    ViewData["CanonicalPath"] = "/About";
+}
+
+<div class="max-w-3xl mx-auto px-4">
+    <h1 class="text-3xl font-bold mb-8" style="color: var(--md-sys-color-on-surface);">About API Combat</h1>
+
+    <div class="max-w-none space-y-6" style="color: var(--md-sys-color-on-surface-variant);">
+
+        <h2 class="text-xl font-semibold mt-8" style="color: var(--md-sys-color-on-surface);">The API IS the Game</h2>
+        <p>API Combat isn't a game with an API tacked on. The API <em>is</em> the entire game. There's no Unity client, no downloadable app, no point-and-click interface for battles. Every action &mdash; building your roster, setting strategies, queuing fights &mdash; happens through REST endpoints that you call yourself.</p>
+        <p>Write a script in Python, build a CLI in Go, automate from a GitHub Action, or just curl it from your terminal. If it can send HTTP requests, it can play API Combat.</p>
+
+        <h2 class="text-xl font-semibold mt-8" style="color: var(--md-sys-color-on-surface);">Built for Developers</h2>
+        <p>This project was born from a simple idea: what if a game was designed API-first? Not as a gimmick, but as a genuine competitive experience where your programming skills give you the edge.</p>
+        <ul class="list-disc pl-6 space-y-1">
+            <li>Full OpenAPI 3.0 spec &mdash; generate typed clients in any language</li>
+            <li>JWT authentication &mdash; standard, stateless, no proprietary SDKs</li>
+            <li>100+ documented endpoints covering every game mechanic</li>
+            <li>Webhook-friendly design for automation and monitoring</li>
+        </ul>
+
+        <h2 class="text-xl font-semibold mt-8" style="color: var(--md-sys-color-on-surface);">How It Works</h2>
+        <p>Register, get a token, and start playing:</p>
+        <ol class="list-decimal pl-6 space-y-1">
+            <li><strong>Build a Roster</strong> &mdash; unlock units with different classes, stats, and abilities</li>
+            <li><strong>Form a Team</strong> &mdash; assemble up to 5 units into a battle squad</li>
+            <li><strong>Set a Strategy</strong> &mdash; define target priorities, formations, and ability rotations in JSON</li>
+            <li><strong>Queue a Battle</strong> &mdash; get matched against opponents and watch the turn-by-turn replay</li>
+            <li><strong>Climb the Ranks</strong> &mdash; earn rating, unlock achievements, and join guilds</li>
+        </ol>
+
+        <h2 class="text-xl font-semibold mt-8" style="color: var(--md-sys-color-on-surface);">Fair Play &amp; Rating</h2>
+        <p>Rating uses an Elo-based system with active battle modifiers that rotate weekly. This keeps the meta fresh and prevents any single strategy from dominating forever. Your Arena Power Index (API) rating determines your rank tier &mdash; from <strong>Rubber Duck</strong> all the way to <strong>I Use Arch btw</strong>.</p>
+
+        <h2 class="text-xl font-semibold mt-8" style="color: var(--md-sys-color-on-surface);">Open to All</h2>
+        <p>The free tier gives you everything you need to compete: 10 battles per day, full API access, and a roster to build. Premium tiers remove limits, add guild features, and boost rewards &mdash; but they don't give gameplay advantages.</p>
+
+        <h2 class="text-xl font-semibold mt-8" style="color: var(--md-sys-color-on-surface);">Join the Community</h2>
+        <p>Got questions? Want to share your client build or talk strategy? Join us on Discord.</p>
+
+        <div class="mt-8 flex flex-col sm:flex-row gap-4">
+            <a href="/api-docs/v1" class="md3-btn-filled" style="text-decoration: none; text-align: center;">
+                <span class="material-symbols-outlined" style="font-size: 18px; margin-right: 4px;">description</span>
+                Read the API Docs
+            </a>
+            <a asp-page="/Auth/Register" class="md3-btn-outlined" style="text-decoration: none; text-align: center;">
+                <span class="material-symbols-outlined" style="font-size: 18px; margin-right: 4px;">person_add</span>
+                Create an Account
+            </a>
+            <a href="https://discord.gg/jfSCSfAN49" target="_blank" rel="noopener noreferrer" class="md3-btn-outlined" style="text-decoration: none; text-align: center;">
+                <span class="material-symbols-outlined" style="font-size: 18px; margin-right: 4px;">forum</span>
+                Join the Discord
+            </a>
+            <a href="https://github.com/api-combat-game" target="_blank" rel="noopener noreferrer" class="md3-btn-outlined" style="text-decoration: none; text-align: center;">
+                <span class="material-symbols-outlined" style="font-size: 18px; margin-right: 4px;">code</span>
+                GitHub
+            </a>
+        </div>
+    </div>
+</div>

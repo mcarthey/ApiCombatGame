@@ -1,0 +1,84 @@
+@page
+@model ApiCombatGame.Pages.LandingModel
+@{
+    ViewData["Title"] = "Play API Combat";
+    ViewData["Description"] = "A turn-based combat game played entirely through REST API endpoints. Build your client, design strategies in JSON, and compete.";
+    Layout = "_LandingLayout";
+}
+
+<div class="max-w-4xl mx-auto px-4 py-12 sm:py-20">
+    <!-- Hero -->
+    <div class="text-center mb-16">
+        <div class="w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6" style="background: var(--md-sys-color-primary);">
+            <span class="material-symbols-outlined" style="color: var(--md-sys-color-on-primary); font-size: 40px;">swords</span>
+        </div>
+        <h1 class="text-4xl sm:text-5xl font-bold mb-4" style="color: var(--md-sys-color-on-surface); letter-spacing: -0.03em;">
+            The API <em>is</em> the game.
+        </h1>
+        <p class="text-lg max-w-2xl mx-auto mb-8" style="color: var(--md-sys-color-on-surface-variant);">
+            A competitive combat game played entirely through REST endpoints.
+            No UI required &mdash; just your code, your strategy, and your HTTP client of choice.
+        </p>
+        <a href="@Model.RegisterUrl" class="btn-glow" style="text-decoration: none; display: inline-block; font-size: 18px; padding: 14px 40px;">
+            Start Playing &mdash; Free
+        </a>
+    </div>
+
+    <!-- Social Proof -->
+    @if (Model.PlayerCount > 0 || Model.TotalBattles > 0)
+    {
+        <div class="flex justify-center gap-8 sm:gap-16 mb-16">
+            @if (Model.PlayerCount > 0)
+            {
+                <div class="text-center">
+                    <div class="text-3xl font-bold" style="color: var(--md-sys-color-primary);">@Model.PlayerCount</div>
+                    <div class="text-sm" style="color: var(--md-sys-color-on-surface-variant);">Players</div>
+                </div>
+            }
+            @if (Model.TotalBattles > 0)
+            {
+                <div class="text-center">
+                    <div class="text-3xl font-bold" style="color: var(--md-sys-color-primary);">@Model.TotalBattles.ToString("N0")</div>
+                    <div class="text-sm" style="color: var(--md-sys-color-on-surface-variant);">Battles Fought</div>
+                </div>
+            }
+            <div class="text-center">
+                <div class="text-3xl font-bold" style="color: var(--md-sys-color-primary);">100+</div>
+                <div class="text-sm" style="color: var(--md-sys-color-on-surface-variant);">API Endpoints</div>
+            </div>
+        </div>
+    }
+
+    <!-- Selling Points -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-16">
+        <div class="md3-card p-6">
+            <span class="material-symbols-outlined mb-3" style="color: var(--md-sys-color-primary); font-size: 32px;">code</span>
+            <h3 class="text-lg font-semibold mb-2" style="color: var(--md-sys-color-on-surface);">Any Language, Any Client</h3>
+            <p class="text-sm" style="color: var(--md-sys-color-on-surface-variant);">Python, Go, Rust, JavaScript, curl &mdash; if it sends HTTP requests, it plays API Combat. Full OpenAPI 3.0 spec included.</p>
+        </div>
+        <div class="md3-card p-6">
+            <span class="material-symbols-outlined mb-3" style="color: var(--md-sys-color-primary); font-size: 32px;">strategy</span>
+            <h3 class="text-lg font-semibold mb-2" style="color: var(--md-sys-color-on-surface);">Strategy in JSON</h3>
+            <p class="text-sm" style="color: var(--md-sys-color-on-surface-variant);">Define target priorities, formations, and ability rotations as data. No mouse clicks &mdash; your strategy is code.</p>
+        </div>
+        <div class="md3-card p-6">
+            <span class="material-symbols-outlined mb-3" style="color: var(--md-sys-color-primary); font-size: 32px;">leaderboard</span>
+            <h3 class="text-lg font-semibold mb-2" style="color: var(--md-sys-color-on-surface);">Competitive Ranking</h3>
+            <p class="text-sm" style="color: var(--md-sys-color-on-surface-variant);">Elo-based rating with weekly modifiers. Climb from Rubber Duck to "I Use Arch btw" on the public leaderboard.</p>
+        </div>
+        <div class="md3-card p-6">
+            <span class="material-symbols-outlined mb-3" style="color: var(--md-sys-color-primary); font-size: 32px;">group</span>
+            <h3 class="text-lg font-semibold mb-2" style="color: var(--md-sys-color-on-surface);">Guilds &amp; Boss Raids</h3>
+            <p class="text-sm" style="color: var(--md-sys-color-on-surface-variant);">Form guilds, tackle boss raids together, share strategies, and compete for guild rankings.</p>
+        </div>
+    </div>
+
+    <!-- CTA -->
+    <div class="text-center">
+        <h2 class="text-2xl font-bold mb-4" style="color: var(--md-sys-color-on-surface);">Ready to compete?</h2>
+        <p class="text-sm mb-6" style="color: var(--md-sys-color-on-surface-variant);">Free tier includes 10 battles/day, full API access, and 3 starter units.</p>
+        <a href="@Model.RegisterUrl" class="btn-glow" style="text-decoration: none; display: inline-block; font-size: 16px; padding: 12px 32px;">
+            Create Your Account
+        </a>
+    </div>
+</div>

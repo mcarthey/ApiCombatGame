@@ -103,5 +103,77 @@ public class EmailTemplateService : IEmailTemplateService
         return Render("We got your message!", body, "Thanks for contacting API Combat Game");
     }
 
+    public string WelcomeEmail(string username)
+    {
+        var body = $"""
+<h2>Welcome to the arena, {Encode(username)}!</h2>
+<p>Your API Combat account is ready. You've been granted <strong>3 starter units</strong> and <strong>1,000 currency</strong> to get started.</p>
+<p>Here's your battle plan:</p>
+<table class="meta-table">
+  <tr><td>1.</td><td><strong>Build a team</strong> &mdash; assemble your units into a squad via the API</td></tr>
+  <tr><td>2.</td><td><strong>Set a strategy</strong> &mdash; define formations and target priorities</td></tr>
+  <tr><td>3.</td><td><strong>Queue a battle</strong> &mdash; throw down and climb the leaderboard</td></tr>
+</table>
+<p>Everything happens through the API. Check out the docs to get started:</p>
+<p style="text-align:center;">
+  <a href="https://apicombat.com/api-docs/v1" class="cta" style="color:#ffffff !important; text-decoration:none !important;">Read the API Docs &rarr;</a>
+</p>
+<p>See you on the leaderboard. <span style="font-size:18px;">&#9876;</span></p>
+<p style="font-size:13px; color:#6b7280;">You&rsquo;re receiving this because you created an account on apicombat.com.</p>
+""";
+
+        return Render("Welcome to API Combat!", body, $"Welcome to the arena, {username}! Your account is ready.");
+    }
+
+    public string PasswordResetEmail(string username, string resetLink)
+    {
+        var body = $"""
+<h2>Password Reset Request</h2>
+<p>Hey {Encode(username)}, we received a request to reset your password.</p>
+<p>Click the button below to choose a new password. This link expires in <strong>1 hour</strong>.</p>
+<p style="text-align:center; margin:24px 0;">
+  <a href="{Encode(resetLink)}" class="cta" style="color:#ffffff !important; text-decoration:none !important;">Reset Password &rarr;</a>
+</p>
+<p style="font-size:13px; color:#6b7280;">If you didn&rsquo;t request this, you can safely ignore this email &mdash; your password won&rsquo;t change.</p>
+<p style="font-size:12px; color:#9ca3af;">If the button doesn&rsquo;t work, copy and paste this link into your browser:<br/><span style="word-break:break-all;">{Encode(resetLink)}</span></p>
+""";
+
+        return Render("Reset Your Password", body, "Reset your API Combat password");
+    }
+
+    public string AccountDeletionEmail(string username)
+    {
+        var body = $"""
+<h2>Account Deleted</h2>
+<p>Hey {Encode(username)}, your API Combat account has been permanently deleted as requested.</p>
+<p>Here&rsquo;s what happened:</p>
+<ul style="padding-left:20px; margin:12px 0;">
+  <li>Your personal data has been anonymized</li>
+  <li>Your login credentials have been removed</li>
+  <li>Your game data will be retained in anonymized form for service integrity</li>
+</ul>
+<p>If you change your mind, you&rsquo;re always welcome to create a new account and start fresh.</p>
+<p style="font-size:13px; color:#6b7280;">If you didn&rsquo;t request this deletion, please contact us immediately at <a href="mailto:support@apicombat.com" style="color:#2563eb;">support&commat;apicombat.com</a>.</p>
+""";
+
+        return Render("Account Deleted", body, "Your API Combat account has been deleted");
+    }
+
+    public string VerificationEmail(string username, string verifyLink)
+    {
+        var body = $"""
+<h2>Verify Your Email</h2>
+<p>Hey {Encode(username)}, one quick step to complete your account setup.</p>
+<p>Click the button below to verify your email address:</p>
+<p style="text-align:center; margin:24px 0;">
+  <a href="{Encode(verifyLink)}" class="cta" style="color:#ffffff !important; text-decoration:none !important;">Verify Email &rarr;</a>
+</p>
+<p style="font-size:13px; color:#6b7280;">If you didn&rsquo;t create an API Combat account, you can safely ignore this email.</p>
+<p style="font-size:12px; color:#9ca3af;">If the button doesn&rsquo;t work, copy and paste this link into your browser:<br/><span style="word-break:break-all;">{Encode(verifyLink)}</span></p>
+""";
+
+        return Render("Verify Your Email", body, $"Verify your email for API Combat, {username}");
+    }
+
     private static string Encode(string value) => WebUtility.HtmlEncode(value);
 }

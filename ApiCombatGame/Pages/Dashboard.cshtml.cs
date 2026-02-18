@@ -16,6 +16,7 @@ public class DashboardPageModel : PageModel
     private readonly GameDbContext _context;
     private readonly IConfiguration _config;
     private readonly IPlayerProgressionService _progression;
+    private readonly IAuthService _authService;
     private readonly ILogger<DashboardPageModel> _logger;
 
     private static readonly int[] StreakRewards = [25, 25, 50, 50, 75, 75, 200];
@@ -24,21 +25,26 @@ public class DashboardPageModel : PageModel
         GameDbContext context,
         IConfiguration config,
         IPlayerProgressionService progression,
+        IAuthService authService,
         ILogger<DashboardPageModel> logger)
     {
         _context = context;
         _config = config;
         _progression = progression;
+        _authService = authService;
         _logger = logger;
     }
 
     public PlayerDashboardViewModel Dashboard { get; set; } = new();
+    public bool EmailVerified { get; set; }
 
     public async Task<IActionResult> OnGetAsync()
     {
         var playerId = GetPlayerId();
         var player = await _context.Players.FirstOrDefaultAsync(p => p.Id == playerId);
         if (player == null) return RedirectToPage("/Auth/Login");
+
+        EmailVerified = player.EmailConfirmed;
 
         // Reset daily battles if new day
         if (player.LastBattleResetDate.Date < DateTime.UtcNow.Date)
@@ -422,6 +428,13 @@ public class DashboardPageModel : PageModel
         }
 
         return actions.Take(6).ToList();
+    }
+
+    public async Task<IActionResult> OnPostResendVerificationAsync()
+    {
+        var playerId = GetPlayerId();
+        await _authService.SendVerificationEmailAsync(playerId);
+        return RedirectToPage();
     }
 
     private Guid GetPlayerId()

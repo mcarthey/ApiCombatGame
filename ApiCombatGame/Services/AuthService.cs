@@ -14,12 +14,14 @@ public class AuthService : IAuthService
 {
     private readonly GameDbContext _context;
     private readonly IConfiguration _config;
+    private readonly IEmailService _emailService;
     private readonly ILogger<AuthService> _logger;
 
-    public AuthService(GameDbContext context, IConfiguration config, ILogger<AuthService> logger)
+    public AuthService(GameDbContext context, IConfiguration config, IEmailService emailService, ILogger<AuthService> logger)
     {
         _context = context;
         _config = config;
+        _emailService = emailService;
         _logger = logger;
     }
 
@@ -92,6 +94,14 @@ public class AuthService : IAuthService
 
         _logger.LogInformation("New player registered: {Username} ({PlayerId})", player.Username, player.Id);
 
+        // Fire-and-forget: don't let email failure block registration
+        try { await _emailService.SendWelcomeEmailAsync(player.Email, player.Username); }
+        catch (Exception ex) { _logger.LogWarning(ex, "Failed to send welcome email to {Email}", player.Email); }
+
+        // Send verification email (fire-and-forget)
+        try { await SendVerificationEmailAsync(player.Id); }
+        catch (Exception ex) { _logger.LogWarning(ex, "Failed to send verification email to {Email}", player.Email); }
+
         return new AuthResponse
         {
             PlayerId = player.Id,
@@ -106,6 +116,9 @@ public class AuthService : IAuthService
             .FirstOrDefaultAsync(p => p.Email == request.Email);
 
         if (player == null || !BCrypt.Net.BCrypt.Verify(request.Password, player.PasswordHash))
+            throw new UnauthorizedAccessException("Invalid email or password.");
+
+        if (player.IsDeleted)
             throw new UnauthorizedAccessException("Invalid email or password.");
 
         player.LastLoginAt = DateTime.UtcNow;
@@ -133,6 +146,127 @@ public class AuthService : IAuthService
             Token = GenerateJwtToken(player),
             ExpiresAt = DateTime.UtcNow.AddMinutes(_config.GetValue<int>("JWT:ExpirationMinutes", 60))
         };
+    }
+
+    public async Task RequestPasswordResetAsync(string email)
+    {
+        var player = await _context.Players
+            .FirstOrDefaultAsync(p => p.Email == email && !p.IsDeleted);
+
+        if (player == null)
+        {
+            // Don't reveal whether email exists
+            _logger.LogInformation("Password reset requested for unknown email {Email}", email);
+            return;
+        }
+
+        // Generate URL-safe token
+        var tokenBytes = Guid.NewGuid().ToByteArray();
+        var token = Convert.ToBase64String(tokenBytes)
+            .Replace("+", "-").Replace("/", "_").TrimEnd('=');
+
+        player.PasswordResetToken = token;
+        player.PasswordResetExpiresAt = DateTime.UtcNow.AddHours(1);
+        await _context.SaveChangesAsync();
+
+        var baseUrl = _config["AppSettings:BaseUrl"]?.TrimEnd('/') ?? "https://apicombat.com";
+        var resetLink = $"{baseUrl}/Auth/ResetPassword?token={token}";
+
+        try { await _emailService.SendPasswordResetEmailAsync(player.Email, player.Username, resetLink); }
+        catch (Exception ex) { _logger.LogWarning(ex, "Failed to send password reset email to {Email}", email); }
+
+        _logger.LogInformation("Password reset token generated for {Username} ({PlayerId})", player.Username, player.Id);
+    }
+
+    public async Task<bool> ResetPasswordAsync(string token, string newPassword)
+    {
+        var player = await _context.Players
+            .FirstOrDefaultAsync(p => p.PasswordResetToken == token && !p.IsDeleted);
+
+        if (player == null || player.PasswordResetExpiresAt == null || player.PasswordResetExpiresAt < DateTime.UtcNow)
+        {
+            _logger.LogWarning("Invalid or expired password reset token attempted");
+            return false;
+        }
+
+        player.PasswordHash = BCrypt.Net.BCrypt.HashPassword(newPassword);
+        player.PasswordResetToken = null;
+        player.PasswordResetExpiresAt = null;
+        await _context.SaveChangesAsync();
+
+        _logger.LogInformation("Password reset completed for {Username} ({PlayerId})", player.Username, player.Id);
+        return true;
+    }
+
+    public async Task<bool> DeleteAccountAsync(Guid playerId, string password)
+    {
+        var player = await _context.Players.FindAsync(playerId);
+        if (player == null || player.IsDeleted)
+            return false;
+
+        if (!BCrypt.Net.BCrypt.Verify(password, player.PasswordHash))
+            return false;
+
+        // Capture original info for confirmation email before anonymizing
+        var originalEmail = player.Email;
+        var originalUsername = player.Username;
+
+        // Soft delete: anonymize PII
+        var anonId = Guid.NewGuid().ToString("N");
+        player.IsDeleted = true;
+        player.DeletedAt = DateTime.UtcNow;
+        player.Username = $"deleted-{anonId}";
+        player.Email = $"deleted-{anonId}@removed";
+        player.PasswordHash = string.Empty;
+        player.PasswordResetToken = null;
+        player.PasswordResetExpiresAt = null;
+        player.EmailConfirmationToken = null;
+
+        await _context.SaveChangesAsync();
+
+        _logger.LogInformation("Account deleted (soft) for {Username} ({PlayerId})", originalUsername, playerId);
+
+        // Fire-and-forget confirmation email
+        try { await _emailService.SendAccountDeletionEmailAsync(originalEmail, originalUsername); }
+        catch (Exception ex) { _logger.LogWarning(ex, "Failed to send account deletion email to {Email}", originalEmail); }
+
+        return true;
+    }
+
+    public async Task SendVerificationEmailAsync(Guid playerId)
+    {
+        var player = await _context.Players.FindAsync(playerId);
+        if (player == null || player.IsDeleted || player.EmailConfirmed)
+            return;
+
+        var tokenBytes = Guid.NewGuid().ToByteArray();
+        var token = Convert.ToBase64String(tokenBytes)
+            .Replace("+", "-").Replace("/", "_").TrimEnd('=');
+
+        player.EmailConfirmationToken = token;
+        await _context.SaveChangesAsync();
+
+        var baseUrl = _config["AppSettings:BaseUrl"]?.TrimEnd('/') ?? "https://apicombat.com";
+        var verifyLink = $"{baseUrl}/Auth/VerifyEmail?token={token}";
+
+        try { await _emailService.SendVerificationEmailAsync(player.Email, player.Username, verifyLink); }
+        catch (Exception ex) { _logger.LogWarning(ex, "Failed to send verification email to {Email}", player.Email); }
+    }
+
+    public async Task<bool> VerifyEmailAsync(string token)
+    {
+        var player = await _context.Players
+            .FirstOrDefaultAsync(p => p.EmailConfirmationToken == token && !p.IsDeleted);
+
+        if (player == null)
+            return false;
+
+        player.EmailConfirmed = true;
+        player.EmailConfirmationToken = null;
+        await _context.SaveChangesAsync();
+
+        _logger.LogInformation("Email verified for {Username} ({PlayerId})", player.Username, player.Id);
+        return true;
     }
 
     private string GenerateJwtToken(Player player)

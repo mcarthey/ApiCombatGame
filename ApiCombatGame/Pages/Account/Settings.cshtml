@@ -137,4 +137,29 @@
             <button type="submit" class="md3-btn-filled" style="margin-top: 16px;">Save Preferences</button>
         </form>
     </div>
+
+    <!-- Danger Zone -->
+    <div class="md3-card p-6 mt-6" style="border: 1px solid var(--md-sys-color-error);">
+        <div class="flex items-center gap-3 mb-4">
+            <span class="material-symbols-outlined" style="color: var(--md-sys-color-error);">warning</span>
+            <h2 class="text-lg font-semibold" style="color: var(--md-sys-color-error);">Danger Zone</h2>
+        </div>
+        <p class="text-sm mb-4" style="color: var(--md-sys-color-on-surface-variant);">
+            Permanently delete your account and all associated data. This action cannot be undone.
+            Your username and email will be anonymized, and you will be logged out immediately.
+        </p>
+        <form method="post" asp-page-handler="DeleteAccount" id="deleteAccountForm">
+            <div class="mb-4">
+                <div class="md3-input-wrapper">
+                    <label for="deletePassword">Confirm Password</label>
+                    <input class="md3-input" id="deletePassword" name="DeletePassword" type="password" required placeholder="Enter your password to confirm" />
+                </div>
+            </div>
+            <button type="submit" class="md3-btn-filled" style="background: var(--md-sys-color-error); color: var(--md-sys-color-on-error);"
+                    onclick="return confirm('Are you sure you want to delete your account? This cannot be undone.');">
+                <span class="material-symbols-outlined" style="font-size: 18px; margin-right: 4px;">delete_forever</span>
+                Delete My Account
+            </button>
+        </form>
+    </div>
 </div>

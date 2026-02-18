@@ -92,6 +92,7 @@ public class GameDbContext : DbContext
     public DbSet<ApiKeyUsageLog> ApiKeyUsageLogs => Set<ApiKeyUsageLog>();
     public DbSet<AdminAuditLog> AdminAuditLogs => Set<AdminAuditLog>();
     public DbSet<AdminAlert> AdminAlerts => Set<AdminAlert>();
+    public DbSet<AppLog> AppLogs => Set<AppLog>();
     public DbSet<SubscriptionEvent> SubscriptionEvents => Set<SubscriptionEvent>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -418,6 +419,20 @@ public class GameDbContext : DbContext
         {
             entity.HasIndex(a => new { a.IsAcknowledged, a.CreatedAt });
             entity.HasIndex(a => a.Severity);
+        });
+
+        // ── AppLog ──
+        modelBuilder.Entity<AppLog>(entity =>
+        {
+            entity.HasIndex(l => l.CreatedAt);
+            entity.HasIndex(l => l.SupportId);
+            entity.HasIndex(l => l.Level);
+            entity.HasIndex(l => new { l.PlayerId, l.CreatedAt });
+
+            entity.HasOne(l => l.Player)
+                .WithMany()
+                .HasForeignKey(l => l.PlayerId)
+                .OnDelete(DeleteBehavior.SetNull);
         });
 
         // ── SubscriptionEvent ──

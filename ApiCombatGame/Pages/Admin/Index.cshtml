@@ -5,36 +5,110 @@
     Layout = "_AdminLayout";
 }
 
+<!-- KPI Tooltip Styles -->
+<style>
+    .kpi-label {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+    .kpi-info {
+        position: relative;
+        display: inline-flex;
+        cursor: help;
+    }
+    .kpi-info .material-symbols-outlined {
+        font-size: 16px;
+        color: var(--md-sys-color-on-surface-variant);
+        opacity: 0.6;
+        transition: opacity 0.2s;
+    }
+    .kpi-info:hover .material-symbols-outlined {
+        opacity: 1;
+        color: var(--md-sys-color-primary);
+    }
+    .kpi-tooltip {
+        display: none;
+        position: absolute;
+        top: calc(100% + 8px);
+        left: 50%;
+        transform: translateX(-50%);
+        background: var(--md-sys-color-inverse-surface);
+        color: var(--md-sys-color-inverse-on-surface);
+        padding: 8px 12px;
+        border-radius: 8px;
+        font-size: 12px;
+        font-weight: 400;
+        white-space: nowrap;
+        z-index: 10;
+        pointer-events: none;
+        box-shadow: var(--md-sys-elevation-2);
+    }
+    .kpi-info:hover .kpi-tooltip {
+        display: block;
+    }
+</style>
+
 <!-- KPI Cards -->
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
     <div class="md3-card stat-card p-6">
-        <div class="text-sm font-medium" style="color: var(--md-sys-color-on-surface-variant);">DAU</div>
+        <div class="text-sm font-medium kpi-label" style="color: var(--md-sys-color-on-surface-variant);">
+            DAU
+            <span class="kpi-info">
+                <span class="material-symbols-outlined">info</span>
+                <span class="kpi-tooltip">Daily Active Users — unique players active today</span>
+            </span>
+        </div>
         <div class="text-3xl font-bold mt-1" style="color: var(--md-sys-color-on-surface);">@Model.Data.Dau.ToString("N0")</div>
         <div class="text-sm mt-1" style="color: @(Model.Data.DauChange >= 0 ? "var(--md-sys-color-primary)" : "var(--md-sys-color-error)");">
             @(Model.Data.DauChange >= 0 ? "+" : "")@Model.Data.DauChange% vs yesterday
         </div>
     </div>
     <div class="md3-card stat-card p-6">
-        <div class="text-sm font-medium" style="color: var(--md-sys-color-on-surface-variant);">WAU</div>
+        <div class="text-sm font-medium kpi-label" style="color: var(--md-sys-color-on-surface-variant);">
+            WAU
+            <span class="kpi-info">
+                <span class="material-symbols-outlined">info</span>
+                <span class="kpi-tooltip">Weekly Active Users — unique players active in the last 7 days</span>
+            </span>
+        </div>
         <div class="text-3xl font-bold mt-1" style="color: var(--md-sys-color-on-surface);">@Model.Data.Wau.ToString("N0")</div>
         <div class="text-sm mt-1" style="color: @(Model.Data.WauChange >= 0 ? "var(--md-sys-color-primary)" : "var(--md-sys-color-error)");">
             @(Model.Data.WauChange >= 0 ? "+" : "")@Model.Data.WauChange% vs last week
         </div>
     </div>
     <div class="md3-card stat-card p-6">
-        <div class="text-sm font-medium" style="color: var(--md-sys-color-on-surface-variant);">MAU</div>
+        <div class="text-sm font-medium kpi-label" style="color: var(--md-sys-color-on-surface-variant);">
+            MAU
+            <span class="kpi-info">
+                <span class="material-symbols-outlined">info</span>
+                <span class="kpi-tooltip">Monthly Active Users — unique players active in the last 30 days</span>
+            </span>
+        </div>
         <div class="text-3xl font-bold mt-1" style="color: var(--md-sys-color-on-surface);">@Model.Data.Mau.ToString("N0")</div>
         <div class="text-sm mt-1" style="color: @(Model.Data.MauChange >= 0 ? "var(--md-sys-color-primary)" : "var(--md-sys-color-error)");">
             @(Model.Data.MauChange >= 0 ? "+" : "")@Model.Data.MauChange% vs last month
         </div>
     </div>
     <div class="md3-card stat-card p-6">
-        <div class="text-sm font-medium" style="color: var(--md-sys-color-on-surface-variant);">MRR</div>
+        <div class="text-sm font-medium kpi-label" style="color: var(--md-sys-color-on-surface-variant);">
+            MRR
+            <span class="kpi-info">
+                <span class="material-symbols-outlined">info</span>
+                <span class="kpi-tooltip">Monthly Recurring Revenue — total subscription income per month</span>
+            </span>
+        </div>
         <div class="text-3xl font-bold mt-1" style="color: var(--md-sys-color-on-surface);">$@Model.Data.Mrr.ToString("N0")</div>
         <div class="text-sm mt-1" style="color: var(--md-sys-color-on-surface-variant);">ARR: $@Model.Data.Arr.ToString("N0")</div>
     </div>
     <div class="md3-card stat-card p-6">
-        <div class="text-sm font-medium" style="color: var(--md-sys-color-on-surface-variant);">Conversion</div>
+        <div class="text-sm font-medium kpi-label" style="color: var(--md-sys-color-on-surface-variant);">
+            Conversion
+            <span class="kpi-info">
+                <span class="material-symbols-outlined">info</span>
+                <span class="kpi-tooltip">Conversion Rate — percentage of free players who upgraded to paid</span>
+            </span>
+        </div>
         <div class="text-3xl font-bold mt-1" style="color: var(--md-sys-color-on-surface);">@Model.Data.ConversionRate%</div>
         <div class="text-sm mt-1" style="color: var(--md-sys-color-on-surface-variant);">Free to Paid</div>
     </div>
@@ -107,7 +181,13 @@
         <div class="space-y-4">
             <div>
                 <div class="flex justify-between text-sm mb-1">
-                    <span style="color: var(--md-sys-color-on-surface-variant);">DAU/MAU Ratio</span>
+                    <span class="kpi-label" style="color: var(--md-sys-color-on-surface-variant);">
+                        DAU/MAU Ratio
+                        <span class="kpi-info">
+                            <span class="material-symbols-outlined">info</span>
+                            <span class="kpi-tooltip">Stickiness — how often monthly users return daily. 0.2+ is good, 0.3+ is excellent.</span>
+                        </span>
+                    </span>
                     <span class="font-medium" style="color: @(Model.Data.DauMauRatio >= 0.2 ? "var(--md-sys-color-primary)" : "var(--md-sys-color-error)");">
                         @Model.Data.DauMauRatio
                     </span>
@@ -133,41 +213,45 @@
 </div>
 
 <!-- Quick Links -->
-<div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-    <a href="/Admin/Players" class="md3-card stat-card p-4 flex items-center">
-        <div class="p-3 mr-4" style="background: var(--md-sys-color-primary-container); border-radius: var(--md-sys-shape-corner-medium);">
-            <span class="material-symbols-outlined" style="color: var(--md-sys-color-on-primary-container);">group</span>
-        </div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <a href="/Admin/Players" class="acct-nav-card">
         <div>
-            <div class="font-medium" style="color: var(--md-sys-color-on-surface);">Player Management</div>
-            <div class="text-sm" style="color: var(--md-sys-color-on-surface-variant);">Search and manage players</div>
+            <div class="text-lg font-semibold mb-2" style="color: var(--md-sys-color-on-surface);">
+                <span class="material-symbols-outlined" style="vertical-align: middle; margin-right: 8px; color: var(--md-sys-color-primary);">group</span>
+                Player Management
+            </div>
+            <p class="text-sm" style="color: var(--md-sys-color-on-surface-variant);">Search and manage players</p>
         </div>
+        <span class="material-symbols-outlined acct-nav-arrow">arrow_forward</span>
     </a>
-    <a href="/Admin/Meta" class="md3-card stat-card p-4 flex items-center">
-        <div class="p-3 mr-4" style="background: var(--md-sys-color-secondary-container); border-radius: var(--md-sys-shape-corner-medium);">
-            <span class="material-symbols-outlined" style="color: var(--md-sys-color-on-secondary-container);">bar_chart</span>
-        </div>
+    <a href="/Admin/Meta" class="acct-nav-card">
         <div>
-            <div class="font-medium" style="color: var(--md-sys-color-on-surface);">Meta & Balance</div>
-            <div class="text-sm" style="color: var(--md-sys-color-on-surface-variant);">Unit stats and balance</div>
+            <div class="text-lg font-semibold mb-2" style="color: var(--md-sys-color-on-surface);">
+                <span class="material-symbols-outlined" style="vertical-align: middle; margin-right: 8px; color: var(--md-sys-color-primary);">bar_chart</span>
+                Meta & Balance
+            </div>
+            <p class="text-sm" style="color: var(--md-sys-color-on-surface-variant);">Unit stats and balance</p>
         </div>
+        <span class="material-symbols-outlined acct-nav-arrow">arrow_forward</span>
     </a>
-    <a href="/Admin/Guilds" class="md3-card stat-card p-4 flex items-center">
-        <div class="p-3 mr-4" style="background: var(--md-sys-color-tertiary-container); border-radius: var(--md-sys-shape-corner-medium);">
-            <span class="material-symbols-outlined" style="color: var(--md-sys-color-on-tertiary-container);">shield</span>
-        </div>
+    <a href="/Admin/Guilds" class="acct-nav-card">
         <div>
-            <div class="font-medium" style="color: var(--md-sys-color-on-surface);">Guild Analytics</div>
-            <div class="text-sm" style="color: var(--md-sys-color-on-surface-variant);">Social features overview</div>
+            <div class="text-lg font-semibold mb-2" style="color: var(--md-sys-color-on-surface);">
+                <span class="material-symbols-outlined" style="vertical-align: middle; margin-right: 8px; color: var(--md-sys-color-primary);">shield</span>
+                Guild Analytics
+            </div>
+            <p class="text-sm" style="color: var(--md-sys-color-on-surface-variant);">Social features overview</p>
         </div>
+        <span class="material-symbols-outlined acct-nav-arrow">arrow_forward</span>
     </a>
-    <a href="/Admin/Technical" class="md3-card stat-card p-4 flex items-center">
-        <div class="p-3 mr-4" style="background: var(--md-sys-color-error-container); border-radius: var(--md-sys-shape-corner-medium);">
-            <span class="material-symbols-outlined" style="color: var(--md-sys-color-on-error-container);">settings</span>
-        </div>
+    <a href="/Admin/Technical" class="acct-nav-card">
         <div>
-            <div class="font-medium" style="color: var(--md-sys-color-on-surface);">Technical Health</div>
-            <div class="text-sm" style="color: var(--md-sys-color-on-surface-variant);">System status and queues</div>
+            <div class="text-lg font-semibold mb-2" style="color: var(--md-sys-color-on-surface);">
+                <span class="material-symbols-outlined" style="vertical-align: middle; margin-right: 8px; color: var(--md-sys-color-primary);">settings</span>
+                Technical Health
+            </div>
+            <p class="text-sm" style="color: var(--md-sys-color-on-surface-variant);">System status and queues</p>
         </div>
+        <span class="material-symbols-outlined acct-nav-arrow">arrow_forward</span>
     </a>
 </div>
