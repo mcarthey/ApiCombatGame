@@ -8,11 +8,13 @@ namespace ApiCombatGame.Services;
 public class StrategyMarketplaceService : IStrategyMarketplaceService
 {
     private readonly GameDbContext _context;
+    private readonly IActivityLedger _ledger;
     private readonly ILogger<StrategyMarketplaceService> _logger;
 
-    public StrategyMarketplaceService(GameDbContext context, ILogger<StrategyMarketplaceService> logger)
+    public StrategyMarketplaceService(GameDbContext context, IActivityLedger ledger, ILogger<StrategyMarketplaceService> logger)
     {
         _context = context;
+        _ledger = ledger;
         _logger = logger;
     }
 
@@ -86,13 +88,17 @@ public class StrategyMarketplaceService : IStrategyMarketplaceService
             if (player.Currency < strategy.Price)
                 throw new InvalidOperationException("Not enough currency to download this strategy");
 
+            var oldBuyerCurrency = player.Currency;
             player.Currency -= strategy.Price;
+            _ledger.LogPlayer(playerId, "Currency", oldBuyerCurrency, player.Currency, "Strategy", "StrategyPurchased", strategyId);
 
             // Creator earns 80% of the price
             var creator = await _context.Players.FindAsync(strategy.CreatorId);
             if (creator != null)
             {
+                var oldCreatorCurrency = creator.Currency;
                 creator.Currency += (int)(strategy.Price * 0.8);
+                _ledger.LogPlayer(strategy.CreatorId, "Currency", oldCreatorCurrency, creator.Currency, "Strategy", "StrategySale", strategyId);
             }
         }
 

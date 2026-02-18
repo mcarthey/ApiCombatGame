@@ -11,16 +11,18 @@ public class GuildWarService : IGuildWarService
 {
     private readonly GameDbContext _context;
     private readonly INotificationService _notifications;
+    private readonly IActivityLedger _ledger;
     private readonly ILogger<GuildWarService> _logger;
 
     private const int WarDurationDays = 7;
     private const int PointsPerWin = 10;
     private const int BaseTreasuryReward = 500;
 
-    public GuildWarService(GameDbContext context, INotificationService notifications, ILogger<GuildWarService> logger)
+    public GuildWarService(GameDbContext context, INotificationService notifications, IActivityLedger ledger, ILogger<GuildWarService> logger)
     {
         _context = context;
         _notifications = notifications;
+        _ledger = ledger;
         _logger = logger;
     }
 
@@ -237,19 +239,27 @@ public class GuildWarService : IGuildWarService
             if (war.Guild1Score > war.Guild2Score)
             {
                 war.WinnerGuildId = war.Guild1Id;
+                var oldTreasury = war.Guild1.TreasuryBalance;
                 war.Guild1.TreasuryBalance += war.TreasuryReward;
+                _ledger.LogGuild(war.Guild1Id, "TreasuryBalance", oldTreasury, war.Guild1.TreasuryBalance, "GuildWar", "WarReward", war.Id);
             }
             else if (war.Guild2Score > war.Guild1Score)
             {
                 war.WinnerGuildId = war.Guild2Id;
+                var oldTreasury = war.Guild2.TreasuryBalance;
                 war.Guild2.TreasuryBalance += war.TreasuryReward;
+                _ledger.LogGuild(war.Guild2Id, "TreasuryBalance", oldTreasury, war.Guild2.TreasuryBalance, "GuildWar", "WarReward", war.Id);
             }
             else
             {
                 // Draw — split reward
                 int halfReward = war.TreasuryReward / 2;
+                var oldTreasury1 = war.Guild1.TreasuryBalance;
                 war.Guild1.TreasuryBalance += halfReward;
+                _ledger.LogGuild(war.Guild1Id, "TreasuryBalance", oldTreasury1, war.Guild1.TreasuryBalance, "GuildWar", "WarReward", war.Id);
+                var oldTreasury2 = war.Guild2.TreasuryBalance;
                 war.Guild2.TreasuryBalance += halfReward;
+                _ledger.LogGuild(war.Guild2Id, "TreasuryBalance", oldTreasury2, war.Guild2.TreasuryBalance, "GuildWar", "WarReward", war.Id);
             }
 
             _logger.LogInformation("Guild war finalized: {Guild1} ({Score1}) vs {Guild2} ({Score2}). Winner: {Winner}",

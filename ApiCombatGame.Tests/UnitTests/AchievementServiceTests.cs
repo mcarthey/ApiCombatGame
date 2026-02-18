@@ -14,18 +14,20 @@ public class AchievementServiceTests
 {
     private readonly Mock<IPlayerProgressionService> _progressionMock;
     private readonly Mock<INotificationService> _notificationsMock;
+    private readonly Mock<IActivityLedger> _ledgerMock;
     private readonly NullLogger<AchievementService> _logger;
 
     public AchievementServiceTests()
     {
         _progressionMock = new Mock<IPlayerProgressionService>();
         _notificationsMock = new Mock<INotificationService>();
+        _ledgerMock = new Mock<IActivityLedger>();
         _logger = NullLogger<AchievementService>.Instance;
     }
 
     private AchievementService CreateService(GameDbContext context)
     {
-        return new AchievementService(context, _progressionMock.Object, _logger, _notificationsMock.Object);
+        return new AchievementService(context, _progressionMock.Object, _logger, _notificationsMock.Object, _ledgerMock.Object);
     }
 
     /// <summary>Seeds an achievement into the database and returns it.</summary>

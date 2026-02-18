@@ -11,15 +11,17 @@ public class RivalService : IRivalService
 {
     private readonly GameDbContext _context;
     private readonly INotificationService _notifications;
+    private readonly IActivityLedger _ledger;
     private readonly ILogger<RivalService> _logger;
 
     private const int RivalBonusGold = 100;
     private const int RivalDurationDays = 7;
 
-    public RivalService(GameDbContext context, INotificationService notifications, ILogger<RivalService> logger)
+    public RivalService(GameDbContext context, INotificationService notifications, IActivityLedger ledger, ILogger<RivalService> logger)
     {
         _context = context;
         _notifications = notifications;
+        _ledger = ledger;
         _logger = logger;
     }
 
@@ -70,7 +72,9 @@ public class RivalService : IRivalService
             var player = await _context.Players.FindAsync(winnerId);
             if (player != null)
             {
+                var oldCurrency = player.Currency;
                 player.Currency += RivalBonusGold;
+                _ledger.LogPlayer(winnerId, "Currency", oldCurrency, player.Currency, "Rival", "RivalDefeated", battleId);
                 await _notifications.SendAsync(winnerId, NotificationType.BattleCompleted,
                     "Rival Defeated!",
                     $"You beat your rival! +{RivalBonusGold}g bonus. Total rival wins: {winnerRival.WinsAgainstRival}",

@@ -11,18 +11,25 @@ public class PlayerProgressionService : IPlayerProgressionService
     private readonly GameDbContext _context;
     private readonly ILogger<PlayerProgressionService> _logger;
     private readonly INotificationService _notifications;
+    private readonly IActivityLedger _ledger;
 
-    public PlayerProgressionService(GameDbContext context, ILogger<PlayerProgressionService> logger, INotificationService notifications)
+    public PlayerProgressionService(GameDbContext context, ILogger<PlayerProgressionService> logger, INotificationService notifications, IActivityLedger ledger)
     {
         _context = context;
         _logger = logger;
         _notifications = notifications;
+        _ledger = ledger;
     }
 
     public async Task<BattleRewardsSummary> ProcessBattleRewardsAsync(Guid playerId, bool won, int ratingChange)
     {
         var player = await _context.Players.FindAsync(playerId);
         if (player == null) throw new KeyNotFoundException("Player not found");
+
+        var oldCurrency = player.Currency;
+        var oldXp = player.ExperiencePoints;
+        var oldLevel = player.Level;
+        var oldWinStreak = player.WinStreak;
 
         var summary = new BattleRewardsSummary();
 
@@ -89,6 +96,12 @@ public class PlayerProgressionService : IPlayerProgressionService
             _logger.LogInformation("Player {PlayerId} leveled up to {Level}", playerId, player.Level);
         }
 
+        var action = won ? "BattleWon" : "BattleLost";
+        _ledger.LogPlayer(playerId, "Currency", oldCurrency, player.Currency, "Battle", action);
+        _ledger.LogPlayer(playerId, "ExperiencePoints", oldXp, player.ExperiencePoints, "Battle", action);
+        _ledger.LogPlayer(playerId, "Level", oldLevel, player.Level, "LevelUp", "LevelUp");
+        _ledger.LogPlayer(playerId, "WinStreak", oldWinStreak, player.WinStreak, "Battle", action);
+
         await _context.SaveChangesAsync();
         return summary;
     }
@@ -98,9 +111,11 @@ public class PlayerProgressionService : IPlayerProgressionService
         var player = await _context.Players.FindAsync(playerId);
         if (player == null) throw new KeyNotFoundException("Player not found");
 
+        var oldCurrency = player.Currency;
         var multiplier = GetGoldMultiplier(player.CurrentTier);
         int actual = (int)(baseGold * multiplier);
         player.Currency += actual;
+        _ledger.LogPlayer(playerId, "Currency", oldCurrency, player.Currency, "Battle", "CurrencyAwarded");
         await _context.SaveChangesAsync();
         return actual;
     }
@@ -109,6 +124,10 @@ public class PlayerProgressionService : IPlayerProgressionService
     {
         var player = await _context.Players.FindAsync(playerId);
         if (player == null) throw new KeyNotFoundException("Player not found");
+
+        var oldXp = player.ExperiencePoints;
+        var oldLevel = player.Level;
+        var oldCurrency = player.Currency;
 
         player.ExperiencePoints += baseXp;
 
@@ -126,6 +145,10 @@ public class PlayerProgressionService : IPlayerProgressionService
 
             _logger.LogInformation("Player {PlayerId} leveled up to {Level}", playerId, player.Level);
         }
+
+        _ledger.LogPlayer(playerId, "ExperiencePoints", oldXp, player.ExperiencePoints, "Battle", "XpAwarded");
+        _ledger.LogPlayer(playerId, "Level", oldLevel, player.Level, "LevelUp", "LevelUp");
+        _ledger.LogPlayer(playerId, "Currency", oldCurrency, player.Currency, "LevelUp", "LevelUpBonus");
 
         await _context.SaveChangesAsync();
         return newLevel;

@@ -14,17 +14,21 @@ public class GuildBossService : IGuildBossService
     private readonly INotificationService _notifications;
     private readonly ILogger<GuildBossService> _logger;
 
+    private readonly IActivityLedger _ledger;
+
     public GuildBossService(
         GameDbContext context,
         IPlayerProgressionService progressionService,
         IAchievementService achievementService,
         INotificationService notifications,
+        IActivityLedger ledger,
         ILogger<GuildBossService> logger)
     {
         _context = context;
         _progressionService = progressionService;
         _achievementService = achievementService;
         _notifications = notifications;
+        _ledger = ledger;
         _logger = logger;
     }
 
@@ -107,7 +111,9 @@ public class GuildBossService : IGuildBossService
             boss.DefeatedAt = DateTime.UtcNow;
 
             // Deposit reward to guild treasury
+            var oldTreasury = membership.Guild.TreasuryBalance;
             membership.Guild.TreasuryBalance += boss.RewardCurrency;
+            _ledger.LogGuild(boss.GuildId, "TreasuryBalance", oldTreasury, membership.Guild.TreasuryBalance, "GuildBoss", "BossDefeated", boss.Id);
 
             // Award XP and gold to all contributors
             var contributors = boss.Attempts

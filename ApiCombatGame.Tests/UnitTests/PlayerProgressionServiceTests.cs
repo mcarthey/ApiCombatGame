@@ -24,7 +24,7 @@ public class PlayerProgressionServiceTests
 
     private PlayerProgressionService CreateService(GameDbContext context)
     {
-        return new PlayerProgressionService(context, _logger, _notificationsMock.Object);
+        return new PlayerProgressionService(context, _logger, _notificationsMock.Object, new ActivityLedger(context));
     }
 
     // ---------------------------------------------------------------

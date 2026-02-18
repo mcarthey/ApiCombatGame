@@ -10,6 +10,7 @@ namespace ApiCombatGame.Services;
 public class LootService : ILootService
 {
     private readonly GameDbContext _context;
+    private readonly IActivityLedger _ledger;
     private readonly ILogger<LootService> _logger;
     private static readonly Random Rng = new();
 
@@ -21,9 +22,10 @@ public class LootService : ILootService
     private const int PremiumPlusGuaranteedEveryN = 3; // Premium Plus gets guaranteed drop every 3 battles
     private const double PremiumPlusRarityBoost = 0.15; // 15% better rarity distribution for PP
 
-    public LootService(GameDbContext context, ILogger<LootService> logger)
+    public LootService(GameDbContext context, IActivityLedger ledger, ILogger<LootService> logger)
     {
         _context = context;
+        _ledger = ledger;
         _logger = logger;
     }
 
@@ -148,8 +150,12 @@ public class LootService : ILootService
             }
         }
 
+        var oldCurrency = player.Currency;
+        var oldXp = player.ExperiencePoints;
         player.Currency += totalGold;
         player.ExperiencePoints += totalXp;
+        _ledger.LogPlayer(playerId, "Currency", oldCurrency, player.Currency, "Loot", "LootClaimed");
+        _ledger.LogPlayer(playerId, "ExperiencePoints", oldXp, player.ExperiencePoints, "Loot", "LootClaimed");
         await _context.SaveChangesAsync();
 
         return new ClaimLootResponse

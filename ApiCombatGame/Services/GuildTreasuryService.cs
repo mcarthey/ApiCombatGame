@@ -9,6 +9,7 @@ namespace ApiCombatGame.Services;
 public class GuildTreasuryService : IGuildTreasuryService
 {
     private readonly GameDbContext _context;
+    private readonly IActivityLedger _ledger;
     private readonly ILogger<GuildTreasuryService> _logger;
 
     private static readonly List<UpgradeDefinition> Upgrades = new()
@@ -21,9 +22,10 @@ public class GuildTreasuryService : IGuildTreasuryService
         new("raid_attempts_5", "Raid Stamina II", "Increase daily raid attempts from 4 to 5", 80_000, g => g.MaxRaidAttempts >= 4 && g.MaxRaidAttempts < 5, g => g.MaxRaidAttempts = 5),
     };
 
-    public GuildTreasuryService(GameDbContext context, ILogger<GuildTreasuryService> logger)
+    public GuildTreasuryService(GameDbContext context, IActivityLedger ledger, ILogger<GuildTreasuryService> logger)
     {
         _context = context;
+        _ledger = ledger;
         _logger = logger;
     }
 
@@ -59,7 +61,9 @@ public class GuildTreasuryService : IGuildTreasuryService
         if (guild.TreasuryBalance < upgrade.Cost)
             throw new InvalidOperationException($"Insufficient treasury balance. Need {upgrade.Cost:N0}, have {guild.TreasuryBalance:N0}.");
 
+        var oldBalance = guild.TreasuryBalance;
         guild.TreasuryBalance -= upgrade.Cost;
+        _ledger.LogGuild(guildId, "TreasuryBalance", oldBalance, guild.TreasuryBalance, "GuildTreasury", "UpgradePurchased");
         upgrade.Apply(guild);
         guild.UpdatedAt = DateTime.UtcNow;
 
@@ -89,8 +93,12 @@ public class GuildTreasuryService : IGuildTreasuryService
         if (player.Currency < amount)
             throw new InvalidOperationException($"Insufficient currency. You have {player.Currency:N0}, tried to deposit {amount:N0}.");
 
+        var oldCurrency = player.Currency;
+        var oldTreasury = guild.TreasuryBalance;
         player.Currency -= amount;
         guild.TreasuryBalance += amount;
+        _ledger.LogPlayer(playerId, "Currency", oldCurrency, player.Currency, "GuildTreasury", "TreasuryDeposit", guildId);
+        _ledger.LogGuild(guildId, "TreasuryBalance", oldTreasury, guild.TreasuryBalance, "GuildTreasury", "TreasuryDeposit");
         membership.ContributionPoints += amount;
         guild.UpdatedAt = DateTime.UtcNow;
 

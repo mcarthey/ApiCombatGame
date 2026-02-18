@@ -12,13 +12,15 @@ public class TournamentService : ITournamentService
 {
     private readonly GameDbContext _context;
     private readonly INotificationService _notifications;
+    private readonly IActivityLedger _ledger;
     private readonly ILogger<TournamentService> _logger;
     private static readonly JsonSerializerOptions JsonOptions = new() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
 
-    public TournamentService(GameDbContext context, INotificationService notifications, ILogger<TournamentService> logger)
+    public TournamentService(GameDbContext context, INotificationService notifications, IActivityLedger ledger, ILogger<TournamentService> logger)
     {
         _context = context;
         _notifications = notifications;
+        _ledger = ledger;
         _logger = logger;
     }
 
@@ -90,7 +92,9 @@ public class TournamentService : ITournamentService
         if (player.Currency < tournament.EntryFee)
             throw new InvalidOperationException($"Insufficient currency. Need {tournament.EntryFee}g, have {player.Currency}g.");
 
+        var oldCurrency = player.Currency;
         player.Currency -= tournament.EntryFee;
+        _ledger.LogPlayer(playerId, "Currency", oldCurrency, player.Currency, "Tournament", "TournamentEntry", tournament.Id);
 
         var entry = new TournamentEntry
         {
@@ -218,7 +222,12 @@ public class TournamentService : ITournamentService
                 foreach (var entry in tournament.Entries)
                 {
                     var player = await _context.Players.FindAsync(entry.PlayerId);
-                    if (player != null) player.Currency += tournament.EntryFee;
+                    if (player != null)
+                    {
+                        var oldCurrency = player.Currency;
+                        player.Currency += tournament.EntryFee;
+                        _ledger.LogPlayer(entry.PlayerId, "Currency", oldCurrency, player.Currency, "Tournament", "TournamentRefund", tournament.Id);
+                    }
                 }
                 continue;
             }
@@ -419,8 +428,12 @@ public class TournamentService : ITournamentService
             var player = await _context.Players.FindAsync(entry.PlayerId);
             if (player == null) continue;
 
+            var oldCurrency = player.Currency;
+            var oldXp = player.ExperiencePoints;
             player.Currency += prize.Currency;
             player.ExperiencePoints += prize.Xp;
+            _ledger.LogPlayer(entry.PlayerId, "Currency", oldCurrency, player.Currency, "Tournament", "TournamentPrize", tournament.Id);
+            _ledger.LogPlayer(entry.PlayerId, "ExperiencePoints", oldXp, player.ExperiencePoints, "Tournament", "TournamentPrize", tournament.Id);
 
             if (!string.IsNullOrEmpty(prize.Title))
             {

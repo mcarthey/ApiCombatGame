@@ -26,6 +26,7 @@ public class PlayerController : ControllerBase
     private readonly IPlayerProgressionService _progressionService;
     private readonly IAchievementService _achievementService;
     private readonly INotificationService _notifications;
+    private readonly IActivityLedger _ledger;
     private readonly ILogger<PlayerController> _logger;
 
     public PlayerController(
@@ -33,12 +34,14 @@ public class PlayerController : ControllerBase
         IPlayerProgressionService progressionService,
         IAchievementService achievementService,
         INotificationService notifications,
+        IActivityLedger ledger,
         ILogger<PlayerController> logger)
     {
         _context = context;
         _progressionService = progressionService;
         _achievementService = achievementService;
         _notifications = notifications;
+        _ledger = ledger;
         _logger = logger;
     }
 
@@ -192,7 +195,9 @@ public class PlayerController : ControllerBase
             return BadRequest(new { error = $"Insufficient currency. Need {template.UnlockCost}, have {player.Currency}." });
 
         // Deduct currency and create unit copy
+        var oldCurrency = player.Currency;
         player.Currency -= template.UnlockCost;
+        _ledger.LogPlayer(playerId, "Currency", oldCurrency, player.Currency, "UnitUnlock", "UnitUnlocked", template.Id);
 
         var newUnit = new Unit
         {

@@ -11,15 +11,17 @@ public class ReferralService : IReferralService
 {
     private readonly GameDbContext _context;
     private readonly INotificationService _notifications;
+    private readonly IActivityLedger _ledger;
     private readonly ILogger<ReferralService> _logger;
 
     private const int ReferrerReward = 500;
     private const int ReferredBonus = 300;
 
-    public ReferralService(GameDbContext context, INotificationService notifications, ILogger<ReferralService> logger)
+    public ReferralService(GameDbContext context, INotificationService notifications, IActivityLedger ledger, ILogger<ReferralService> logger)
     {
         _context = context;
         _notifications = notifications;
+        _ledger = ledger;
         _logger = logger;
     }
 
@@ -76,11 +78,15 @@ public class ReferralService : IReferralService
         referral.ReferredRewardClaimed = true;
 
         // Award bonus to new player
+        var oldNewPlayerCurrency = newPlayer.Currency;
         newPlayer.Currency += ReferredBonus;
+        _ledger.LogPlayer(newPlayer.Id, "Currency", oldNewPlayerCurrency, newPlayer.Currency, "Referral", "ReferralBonus", referral.Id);
 
         // Award reward to referrer
         var referrer = referral.Referrer;
+        var oldReferrerCurrency = referrer.Currency;
         referrer.Currency += ReferrerReward;
+        _ledger.LogPlayer(referrer.Id, "Currency", oldReferrerCurrency, referrer.Currency, "Referral", "ReferrerReward", referral.Id);
         referral.ReferrerRewardClaimed = true;
 
         // Create a fresh unused code for the referrer (so they can refer more people)

@@ -2,8 +2,10 @@ using ApiCombatGame.Data;
 using ApiCombatGame.Models.Domain;
 using ApiCombatGame.Models.Enums;
 using ApiCombatGame.Services;
+using ApiCombatGame.Services.Interfaces;
 using ApiCombatGame.Tests.Helpers;
 using Microsoft.Extensions.Logging.Abstractions;
+using Moq;
 using Xunit;
 
 namespace ApiCombatGame.Tests.UnitTests;
@@ -13,7 +15,7 @@ public class GuildTreasuryServiceTests
     private static (GameDbContext context, GuildTreasuryService service) CreateService()
     {
         var context = TestDbContextFactory.Create();
-        var service = new GuildTreasuryService(context, NullLogger<GuildTreasuryService>.Instance);
+        var service = new GuildTreasuryService(context, new Mock<IActivityLedger>().Object, NullLogger<GuildTreasuryService>.Instance);
         return (context, service);
     }
 

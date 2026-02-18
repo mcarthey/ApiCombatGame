@@ -12,13 +12,15 @@ public class BattlePassService : IBattlePassService
 {
     private readonly GameDbContext _context;
     private readonly INotificationService _notifications;
+    private readonly IActivityLedger _ledger;
     private readonly ILogger<BattlePassService> _logger;
     private static readonly JsonSerializerOptions JsonOptions = new() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
 
-    public BattlePassService(GameDbContext context, INotificationService notifications, ILogger<BattlePassService> logger)
+    public BattlePassService(GameDbContext context, INotificationService notifications, IActivityLedger ledger, ILogger<BattlePassService> logger)
     {
         _context = context;
         _notifications = notifications;
+        _ledger = ledger;
         _logger = logger;
     }
 
@@ -106,6 +108,9 @@ public class BattlePassService : IBattlePassService
         if (player == null)
             throw new InvalidOperationException("Player not found.");
 
+        var oldCurrency = player.Currency;
+        var oldXp = player.ExperiencePoints;
+
         switch (rewardToClaim.RewardType)
         {
             case "currency":
@@ -131,6 +136,9 @@ public class BattlePassService : IBattlePassService
                 player.ActiveTitleId = existingTitle.Id;
                 break;
         }
+
+        _ledger.LogPlayer(playerId, "Currency", oldCurrency, player.Currency, "BattlePass", "RewardClaimed");
+        _ledger.LogPlayer(playerId, "ExperiencePoints", oldXp, player.ExperiencePoints, "BattlePass", "RewardClaimed");
 
         claimed.Add(claimKey);
         progress.ClaimedLevelsJson = JsonSerializer.Serialize(claimed, JsonOptions);

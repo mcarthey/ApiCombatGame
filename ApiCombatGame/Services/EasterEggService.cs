@@ -8,6 +8,7 @@ namespace ApiCombatGame.Services;
 public class EasterEggService : IEasterEggService
 {
     private readonly GameDbContext _context;
+    private readonly IActivityLedger _ledger;
     private readonly ILogger<EasterEggService> _logger;
 
     // Pages where eggs can be hidden
@@ -52,9 +53,10 @@ public class EasterEggService : IEasterEggService
         ("XpBoost", "XP Boost", 1000, 2000),
     };
 
-    public EasterEggService(GameDbContext context, ILogger<EasterEggService> logger)
+    public EasterEggService(GameDbContext context, IActivityLedger ledger, ILogger<EasterEggService> logger)
     {
         _context = context;
+        _ledger = ledger;
         _logger = logger;
     }
 
@@ -122,6 +124,10 @@ public class EasterEggService : IEasterEggService
         var player = await _context.Players.FindAsync(playerId);
         if (player != null)
         {
+            var oldCurrency = player.Currency;
+            var oldGems = player.Gems;
+            var oldXp = player.ExperiencePoints;
+
             switch (lootType)
             {
                 case "Currency":
@@ -137,6 +143,10 @@ public class EasterEggService : IEasterEggService
                     player.TotalXpEarned += lootAmount;
                     break;
             }
+
+            _ledger.LogPlayer(playerId, "Currency", oldCurrency, player.Currency, "EasterEgg", "EggRedeemed", egg.Id);
+            _ledger.LogPlayer(playerId, "Gems", oldGems, player.Gems, "EasterEgg", "EggRedeemed", egg.Id);
+            _ledger.LogPlayer(playerId, "ExperiencePoints", oldXp, player.ExperiencePoints, "EasterEgg", "EggRedeemed", egg.Id);
         }
 
         await _context.SaveChangesAsync();

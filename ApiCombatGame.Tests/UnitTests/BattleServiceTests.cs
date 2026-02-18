@@ -75,6 +75,7 @@ public class BattleServiceTests : IDisposable
             _battlePass.Object,
             _guildWar.Object,
             _activityFeed.Object,
+            new ActivityLedger(_context),
             _notifications.Object,
             _config,
             _logger.Object);

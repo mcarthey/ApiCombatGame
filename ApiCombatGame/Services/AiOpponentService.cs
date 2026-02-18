@@ -17,6 +17,7 @@ public class AiOpponentService : IAiOpponentService
     private readonly IPlayerProgressionService _progressionService;
     private readonly IAchievementService _achievementService;
     private readonly INotificationService _notifications;
+    private readonly IActivityLedger _ledger;
     private readonly IConfiguration _config;
     private readonly ILogger<AiOpponentService> _logger;
     private static readonly JsonSerializerOptions JsonOptions = new() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
@@ -30,6 +31,7 @@ public class AiOpponentService : IAiOpponentService
         IPlayerProgressionService progressionService,
         IAchievementService achievementService,
         INotificationService notifications,
+        IActivityLedger ledger,
         IConfiguration config,
         ILogger<AiOpponentService> logger)
     {
@@ -38,6 +40,7 @@ public class AiOpponentService : IAiOpponentService
         _progressionService = progressionService;
         _achievementService = achievementService;
         _notifications = notifications;
+        _ledger = ledger;
         _config = config;
         _logger = logger;
     }
@@ -136,6 +139,10 @@ public class AiOpponentService : IAiOpponentService
         if (player == null)
             throw new KeyNotFoundException("Player not found.");
 
+        var oldCurrency = player.Currency;
+        var oldXp = player.ExperiencePoints;
+        var oldLevel = player.Level;
+
         // Apply tier multiplier to gold
         decimal tierMultiplier = _progressionService.GetGoldMultiplier(player.CurrentTier);
         int gold = (int)(baseGold * tierMultiplier);
@@ -158,6 +165,11 @@ public class AiOpponentService : IAiOpponentService
                 $"You reached level {player.Level}! +250g bonus.");
             xpNeeded = _progressionService.GetXpForLevel(player.Level);
         }
+
+        var practiceAction = playerWon ? "PracticeWon" : "PracticeLost";
+        _ledger.LogPlayer(playerId, "Currency", oldCurrency, player.Currency, "AiOpponent", practiceAction, battle.Id);
+        _ledger.LogPlayer(playerId, "ExperiencePoints", oldXp, player.ExperiencePoints, "AiOpponent", practiceAction, battle.Id);
+        _ledger.LogPlayer(playerId, "Level", oldLevel, player.Level, "LevelUp", "LevelUp", battle.Id);
 
         // Practice battles don't affect win streak or rating, but track achievement
         try

@@ -13,16 +13,20 @@ public class AchievementService : IAchievementService
     private readonly ILogger<AchievementService> _logger;
     private readonly INotificationService _notifications;
 
+    private readonly IActivityLedger _ledger;
+
     public AchievementService(
         GameDbContext context,
         IPlayerProgressionService progressionService,
         ILogger<AchievementService> logger,
-        INotificationService notifications)
+        INotificationService notifications,
+        IActivityLedger ledger)
     {
         _context = context;
         _progressionService = progressionService;
         _logger = logger;
         _notifications = notifications;
+        _ledger = ledger;
     }
 
     public async Task<List<PlayerAchievement>> GetPlayerAchievementsAsync(Guid playerId)
@@ -43,6 +47,8 @@ public class AchievementService : IAchievementService
 
         var player = await _context.Players.FindAsync(playerId);
         if (player == null) return;
+
+        var oldAchievementPoints = player.AchievementPoints;
 
         foreach (var achievement in achievements)
         {
@@ -101,6 +107,8 @@ public class AchievementService : IAchievementService
                     $"You unlocked '{achievement.Name}'! +{achievement.Points} achievement points.");
             }
         }
+
+        _ledger.LogPlayer(playerId, "AchievementPoints", oldAchievementPoints, player.AchievementPoints, "Achievement", "AchievementUnlocked");
 
         await _context.SaveChangesAsync();
     }

@@ -22,6 +22,7 @@ public class BattleService : IBattleService
     private readonly IBattlePassService _battlePassService;
     private readonly IGuildWarService _guildWarService;
     private readonly IActivityFeedService _activityFeedService;
+    private readonly IActivityLedger _ledger;
     private readonly IConfiguration _config;
     private readonly INotificationService _notifications;
     private readonly ILogger<BattleService> _logger;
@@ -39,6 +40,7 @@ public class BattleService : IBattleService
         IBattlePassService battlePassService,
         IGuildWarService guildWarService,
         IActivityFeedService activityFeedService,
+        IActivityLedger ledger,
         INotificationService notifications,
         IConfiguration config,
         ILogger<BattleService> logger)
@@ -50,6 +52,7 @@ public class BattleService : IBattleService
         _battlePassService = battlePassService;
         _guildWarService = guildWarService;
         _activityFeedService = activityFeedService;
+        _ledger = ledger;
         _notifications = notifications;
         _context = context;
         _strategyEngine = strategyEngine;
@@ -367,6 +370,8 @@ public class BattleService : IBattleService
         // API (Arena Power Index) rating calculation — ranked only
         int winnerChange = 0;
         int loserChange = 0;
+        var winnerOldRating = winner.Rating;
+        var loserOldRating = loser.Rating;
 
         if (battle.Mode == "ranked")
         {
@@ -380,6 +385,9 @@ public class BattleService : IBattleService
 
             // Ensure rating doesn't go below 100
             if (loser.Rating < 100) loser.Rating = 100;
+
+            _ledger.LogPlayer(winnerId, "Rating", winnerOldRating, winner.Rating, "Battle", "BattleWon", battle.Id);
+            _ledger.LogPlayer(loserId, "Rating", loserOldRating, loser.Rating, "Battle", "BattleLost", battle.Id);
         }
 
         battle.Player1RatingChange = winnerId == battle.Player1Id ? winnerChange : loserChange;
@@ -482,8 +490,6 @@ public class BattleService : IBattleService
         try
         {
             await _notifications.SendRevengeAlertAsync(loserId, winnerId, battle.Id);
-            int winnerOldRating = winner.Rating - winnerChange;
-            int loserOldRating = loser.Rating - loserChange;
             await _notifications.SendRankChangeAlertAsync(winnerId, winnerOldRating, winner.Rating);
             await _notifications.SendRankChangeAlertAsync(loserId, loserOldRating, loser.Rating);
         }

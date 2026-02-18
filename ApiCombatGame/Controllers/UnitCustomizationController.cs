@@ -2,6 +2,7 @@ using System.Security.Claims;
 using ApiCombatGame.Data;
 using ApiCombatGame.Filters.Attributes;
 using ApiCombatGame.Models.DTOs.UnitCustomization;
+using ApiCombatGame.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -19,13 +20,15 @@ namespace ApiCombatGame.Controllers;
 public class UnitCustomizationController : ControllerBase
 {
     private readonly GameDbContext _context;
+    private readonly IActivityLedger _ledger;
     private const int RenameCost = 200;
     private const int RerollCost = 500;
     private const int GoldenUpgradeCost = 2000;
 
-    public UnitCustomizationController(GameDbContext context)
+    public UnitCustomizationController(GameDbContext context, IActivityLedger ledger)
     {
         _context = context;
+        _ledger = ledger;
     }
 
     /// <summary>Rename a unit you own.</summary>
@@ -57,7 +60,9 @@ public class UnitCustomizationController : ControllerBase
         if (player.Currency < RenameCost)
             return BadRequest(new { error = $"Insufficient gold. Rename costs {RenameCost}g, you have {player.Currency}g." });
 
+        var oldCurrency = player.Currency;
         player.Currency -= RenameCost;
+        _ledger.LogPlayer(playerId, "Currency", oldCurrency, player.Currency, "UnitCustomize", "UnitRenamed", request.UnitId);
         unit.CustomName = request.NewName;
         await _context.SaveChangesAsync();
 
@@ -107,7 +112,9 @@ public class UnitCustomizationController : ControllerBase
             case 3: unit.Speed = rng.Next(spdRange.Min, spdRange.Max + 1); break;
         }
 
+        var oldCurrency = player.Currency;
         player.Currency -= RerollCost;
+        _ledger.LogPlayer(playerId, "Currency", oldCurrency, player.Currency, "UnitCustomize", "UnitRerolled", request.UnitId);
         unit.RerollCount++;
         await _context.SaveChangesAsync();
 
@@ -147,7 +154,9 @@ public class UnitCustomizationController : ControllerBase
         if (player.Currency < GoldenUpgradeCost)
             return BadRequest(new { error = $"Insufficient gold. Golden upgrade costs {GoldenUpgradeCost}g, you have {player.Currency}g." });
 
+        var oldCurrency = player.Currency;
         player.Currency -= GoldenUpgradeCost;
+        _ledger.LogPlayer(playerId, "Currency", oldCurrency, player.Currency, "UnitCustomize", "GoldenUpgrade", request.UnitId);
         unit.IsGolden = true;
 
         // Apply +5% to all stats

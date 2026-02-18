@@ -10,11 +10,13 @@ namespace ApiCombatGame.Services;
 public class CosmeticService : ICosmeticService
 {
     private readonly GameDbContext _context;
+    private readonly IActivityLedger _ledger;
     private readonly ILogger<CosmeticService> _logger;
 
-    public CosmeticService(GameDbContext context, ILogger<CosmeticService> logger)
+    public CosmeticService(GameDbContext context, IActivityLedger ledger, ILogger<CosmeticService> logger)
     {
         _context = context;
+        _ledger = ledger;
         _logger = logger;
     }
 
@@ -101,8 +103,10 @@ public class CosmeticService : ICosmeticService
             if (player.Gems < item.GemPrice)
                 throw new InvalidOperationException($"Insufficient gems. Need {item.GemPrice}, have {player.Gems}.");
 
+            var oldGems = player.Gems;
             player.Gems -= item.GemPrice;
             player.GemsSpentTotal += item.GemPrice;
+            _ledger.LogPlayer(playerId, "Gems", oldGems, player.Gems, "Cosmetic", "CosmeticPurchased", cosmeticId);
         }
         else if (paymentMethod == "gold")
         {
@@ -111,7 +115,9 @@ public class CosmeticService : ICosmeticService
             if (player.Currency < item.GoldPrice)
                 throw new InvalidOperationException($"Insufficient gold. Need {item.GoldPrice}, have {player.Currency}.");
 
+            var oldCurrency = player.Currency;
             player.Currency -= item.GoldPrice;
+            _ledger.LogPlayer(playerId, "Currency", oldCurrency, player.Currency, "Cosmetic", "CosmeticPurchased", cosmeticId);
         }
         else
         {
