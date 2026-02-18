@@ -364,17 +364,23 @@ public class BattleService : IBattleService
 
         if (winner == null || loser == null) return;
 
-        // API (Arena Power Index) rating calculation
-        double expectedWinner = 1.0 / (1.0 + Math.Pow(10, (loser.Rating - winner.Rating) / 400.0));
-        int kFactor = 32;
-        int winnerChange = (int)(kFactor * (1 - expectedWinner));
-        int loserChange = -(int)(kFactor * expectedWinner);
+        // API (Arena Power Index) rating calculation — ranked only
+        int winnerChange = 0;
+        int loserChange = 0;
 
-        winner.Rating += winnerChange;
-        loser.Rating += loserChange;
+        if (battle.Mode == "ranked")
+        {
+            double expectedWinner = 1.0 / (1.0 + Math.Pow(10, (loser.Rating - winner.Rating) / 400.0));
+            int kFactor = 32;
+            winnerChange = (int)(kFactor * (1 - expectedWinner));
+            loserChange = -(int)(kFactor * expectedWinner);
 
-        // Ensure rating doesn't go below 100
-        if (loser.Rating < 100) loser.Rating = 100;
+            winner.Rating += winnerChange;
+            loser.Rating += loserChange;
+
+            // Ensure rating doesn't go below 100
+            if (loser.Rating < 100) loser.Rating = 100;
+        }
 
         battle.Player1RatingChange = winnerId == battle.Player1Id ? winnerChange : loserChange;
         battle.Player2RatingChange = winnerId == battle.Player2Id ? winnerChange : loserChange;
