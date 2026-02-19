@@ -476,7 +476,7 @@ curl /api/v1/player/profile \
                             @* Enums *@
                             @foreach (var (name, schema) in Model.Schemas.Where(s => s.Value.EnumValues?.Any() == true))
                             {
-                                <details class="group md3-card overflow-hidden">
+                                <details id="schema-@name" class="group md3-card overflow-hidden scroll-mt-24">
                                     <summary class="flex items-center gap-3 px-5 py-3 cursor-pointer select-none list-none [&::-webkit-details-marker]:hidden">
                                         <span class="text-xs px-2 py-0.5 font-mono" style="background: var(--md-sys-color-tertiary-container); color: var(--md-sys-color-on-tertiary-container); border-radius: var(--md-sys-shape-corner-small);">enum</span>
                                         <span class="font-mono text-sm font-semibold" style="color: var(--md-sys-color-on-surface);">@name</span>
@@ -552,6 +552,7 @@ curl /api/v1/player/profile \
             const el = document.getElementById(anchorId);
             if (el && el.tagName === 'DETAILS') {
                 el.open = true;
+                el.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
         }
 
