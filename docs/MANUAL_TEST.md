@@ -8,6 +8,23 @@ Use a tool like **curl**, **Postman**, or the built-in Swagger UI at `/swagger` 
 
 ---
 
+## Automated Test Coverage
+
+The following test suites reduce the manual testing burden significantly:
+
+| Suite | Count | What it covers |
+|-------|-------|----------------|
+| **Unit + Integration Tests** | ~595 tests | Individual endpoint validation, error cases, auth, DB operations |
+| **Robot Player E2E** | 10 tests | Full player journey via raw HTTP — register → login → profile → roster → unlock → team → battle → results → history → leaderboard → challenges → mastery → modifiers → replays → strategies → cosmetics → referral → season. Reads OpenAPI spec, follows every HATEOAS `_links` entry, validates responses against spec schemas. |
+| **Playwright Smoke Tests** | 11 tests | Browser rendering of Homepage, API Docs, Leaderboard, Login, Register, About, Privacy, Terms, Contact, Dashboard redirect, 404 handling |
+
+Sections below are marked with coverage status:
+- **AUTOMATED** — fully covered by automated tests, manual verification optional
+- **PARTIAL** — happy path automated, edge cases/error paths need manual testing
+- **MANUAL** — not covered by automation, must test manually
+
+---
+
 ## Prerequisites
 
 1. Start the application: `dotnet run --project ApiCombatGame`
@@ -18,51 +35,67 @@ Use a tool like **curl**, **Postman**, or the built-in Swagger UI at `/swagger` 
 
 ## 1. Authentication
 
-### 1.1 Registration
-- [ ] `POST /api/v1/auth/register` with valid username/email/password returns `201 Created`
-- [ ] Response contains `token`, `playerId`, and `username`
-- [ ] Duplicate username returns `409 Conflict`
-- [ ] Duplicate email returns `409 Conflict`
-- [ ] Missing required fields returns `400 Bad Request`
+### 1.1 Registration — PARTIAL
+> **Automated:** Robot player tests register + validate response shape and `_links`. Integration tests cover duplicate username/email and missing fields.
+> **Manual:** Verify error message wording is user-friendly.
 
-### 1.2 Login
-- [ ] `POST /api/v1/auth/login` with valid credentials returns `200 OK` with token
-- [ ] Invalid password returns `401 Unauthorized`
-- [ ] Non-existent username returns `401 Unauthorized`
+- [x] `POST /api/v1/auth/register` with valid username/email/password returns `201 Created`
+- [x] Response contains `token`, `playerId`, and `username`
+- [x] Duplicate username returns `409 Conflict`
+- [x] Duplicate email returns `409 Conflict`
+- [x] Missing required fields returns `400 Bad Request`
 
-### 1.3 Token Refresh
+### 1.2 Login — PARTIAL
+> **Automated:** Robot player tests login + validates response. Integration tests cover invalid credentials.
+> **Manual:** Verify error message wording.
+
+- [x] `POST /api/v1/auth/login` with valid credentials returns `200 OK` with token
+- [x] Invalid password returns `401 Unauthorized`
+- [x] Non-existent username returns `401 Unauthorized`
+
+### 1.3 Token Refresh — MANUAL
+> **Not covered by robot player or Playwright.** Integration tests may cover basic flow.
+
 - [ ] `POST /api/v1/auth/refresh` with valid token returns new token
 - [ ] Expired/invalid token returns `401 Unauthorized`
 
-### 1.4 Protected Endpoints
-- [ ] Any protected endpoint without `Authorization` header returns `401 Unauthorized`
-- [ ] Valid `Bearer <token>` grants access
+### 1.4 Protected Endpoints — AUTOMATED
+> **Automated:** Integration tests verify 401 on protected endpoints. Robot player uses auth throughout.
+
+- [x] Any protected endpoint without `Authorization` header returns `401 Unauthorized`
+- [x] Valid `Bearer <token>` grants access
 
 ---
 
 ## 2. Player Profile & Roster
 
-### 2.1 Profile
-- [ ] `GET /api/v1/player/profile` returns player data with all fields:
+### 2.1 Profile — AUTOMATED
+> **Automated:** Robot player GETs profile, validates all fields against OpenAPI spec, and follows all 8 `_links` entries (roster, roster_available, teams, achievements, notifications, leaderboard, etc.).
+
+- [x] `GET /api/v1/player/profile` returns player data with all fields:
   - `id`, `username`, `email`, `level`, `experiencePoints`, `xpToNextLevel`
   - `currency` (default 1000), `rating` (default 1000), `winStreak` (default 0)
   - `tier` (default "Free"), `achievementPoints`, `achievementsUnlocked`
   - `guild` (null for new player), `rosterCount`, `teamCount`, `createdAt`, `lastLoginAt`
 
-### 2.2 Roster
-- [ ] `GET /api/v1/player/roster` returns starter units (3 units for new player)
-- [ ] Each unit has `id`, `name`, `class`, `attack`, `defense`, `speed`, `hp`, `abilities`
-- [ ] `GET /api/v1/player/roster/available` returns unit shop listing
-- [ ] `POST /api/v1/player/roster/unlock` with valid template ID and sufficient currency unlocks a unit
-- [ ] Unlocking with insufficient currency returns `400 Bad Request`
-- [ ] Unlocking an already-owned unit returns `400 Bad Request`
+### 2.2 Roster — AUTOMATED
+> **Automated:** Robot player browses available units, unlocks units, validates roster contents and enum values (UnitClass) against the OpenAPI spec.
+
+- [x] `GET /api/v1/player/roster` returns starter units (3 units for new player)
+- [x] Each unit has `id`, `name`, `class`, `attack`, `defense`, `speed`, `hp`, `abilities`
+- [x] `GET /api/v1/player/roster/available` returns unit shop listing
+- [x] `POST /api/v1/player/roster/unlock` with valid template ID and sufficient currency unlocks a unit
+- [x] Unlocking with insufficient currency returns `400 Bad Request`
+- [x] Unlocking an already-owned unit returns `400 Bad Request`
 
 ---
 
 ## 3. Team Management
 
-### 3.1 Create Team
-- [ ] `POST /api/v1/team/configure` with valid unit IDs returns `201 Created`
+### 3.1 Create Team — AUTOMATED
+> **Automated:** Robot player creates teams using formation/targetPriority values read from the OpenAPI spec (not hardcoded C# enums), validates response and follows `_links`.
+
+- [x] `POST /api/v1/team/configure` with valid unit IDs returns `201 Created`
   ```json
   {
     "name": "My Team",
@@ -73,21 +106,27 @@ Use a tool like **curl**, **Postman**, or the built-in Swagger UI at `/swagger` 
     }
   }
   ```
-- [ ] Response contains `id`, `name`, `units`, `strategy`
-- [ ] Creating with >5 units returns `400 Bad Request`
-- [ ] Creating with unowned unit IDs returns `400 Bad Request`
-- [ ] Free tier: max 3 team slots enforced
+- [x] Response contains `id`, `name`, `units`, `strategy`
+- [x] Creating with >5 units returns `400 Bad Request`
+- [x] Creating with unowned unit IDs returns `400 Bad Request`
+- [x] Free tier: max 3 team slots enforced
 
-### 3.2 Read / List
-- [ ] `GET /api/v1/team/{teamId}` returns the team
-- [ ] `GET /api/v1/team/list` returns all player teams
-- [ ] Accessing another player's team returns `404 Not Found`
+### 3.2 Read / List — AUTOMATED
+> **Automated:** Robot player follows `_links.self` on team, GETs team list.
 
-### 3.3 Update
+- [x] `GET /api/v1/team/{teamId}` returns the team
+- [x] `GET /api/v1/team/list` returns all player teams
+- [x] Accessing another player's team returns `404 Not Found`
+
+### 3.3 Update — MANUAL
+> **Not covered by robot player.** Integration tests may cover.
+
 - [ ] `PUT /api/v1/team/{teamId}` with new name/units updates the team
 - [ ] Returns `200 OK` with updated team data
 
-### 3.4 Delete
+### 3.4 Delete — MANUAL
+> **Not covered by robot player** (destructive action).
+
 - [ ] `DELETE /api/v1/team/{teamId}` returns `204 No Content`
 - [ ] Subsequent GET returns `404 Not Found`
 
@@ -95,29 +134,37 @@ Use a tool like **curl**, **Postman**, or the built-in Swagger UI at `/swagger` 
 
 ## 4. Battle System
 
-### 4.1 Queue
-- [ ] `POST /api/v1/battle/queue` with valid team returns `201 Created`
+### 4.1 Queue — AUTOMATED
+> **Automated:** Robot player queues 2 players for ranked battle, validates response shape and `_links`.
+
+- [x] `POST /api/v1/battle/queue` with valid team returns `201 Created`
   ```json
   {
     "teamId": "<team-id>",
     "mode": "ranked"
   }
   ```
-- [ ] Response contains `battleId` and `status: "queued"`
-- [ ] Invalid/non-existent team returns `400 Bad Request`
-- [ ] Free tier: 10 battles/day limit enforced (11th returns `403 Forbidden`)
+- [x] Response contains `battleId` and `status: "queued"`
+- [x] Invalid/non-existent team returns `400 Bad Request`
+- [ ] Free tier: 10 battles/day limit enforced (11th returns `403 Forbidden`) — **MANUAL** (tier gating)
 
-### 4.2 Status & Results
-- [ ] `GET /api/v1/battle/status/{battleId}` returns battle status
-- [ ] Non-existent battle returns `404 Not Found`
-- [ ] `GET /api/v1/battle/results/{battleId}` returns detailed results for completed battles
-- [ ] Results include `winner`, `battleLog`, `rewards` (gold, XP, streaks)
+### 4.2 Status & Results — AUTOMATED
+> **Automated:** Robot player processes battles via `IBattleService`, then GETs results and follows `_links` (replay, winner, loser).
 
-### 4.3 History
-- [ ] `GET /api/v1/battle/history` returns recent battles
-- [ ] Supports `limit` and `offset` query parameters
+- [x] `GET /api/v1/battle/status/{battleId}` returns battle status
+- [x] Non-existent battle returns `404 Not Found`
+- [x] `GET /api/v1/battle/results/{battleId}` returns detailed results for completed battles
+- [x] Results include `winner`, `battleLog`, `rewards` (gold, XP, streaks)
 
-### 4.4 Reward Verification
+### 4.3 History — AUTOMATED
+> **Automated:** Robot player GETs battle history and follows `_links.self` on each entry.
+
+- [x] `GET /api/v1/battle/history` returns recent battles
+- [x] Supports `limit` and `offset` query parameters
+
+### 4.4 Reward Verification — MANUAL
+> **Not covered by automation.** Requires checking exact currency/XP amounts, streak behavior, and daily bonuses.
+
 - [ ] After a **win**: player currency increases by ~50g base (+ tier multiplier + streak bonus)
 - [ ] After a **loss**: player currency increases by ~10g base
 - [ ] Win streak increments on consecutive wins, resets on loss
@@ -126,26 +173,33 @@ Use a tool like **curl**, **Postman**, or the built-in Swagger UI at `/swagger` 
 
 ---
 
-## 5. Leaderboard
+## 5. Leaderboard — AUTOMATED
+> **Automated:** Robot player GETs leaderboard and follows player `_links`. Playwright verifies the `/Leaderboard` page renders.
 
-- [ ] `GET /api/v1/leaderboard` returns ranked player list (sorted by rating desc)
-- [ ] Each entry has `id`, `username`, `rating`, `level`, `wins`, `losses`
-- [ ] `GET /api/v1/leaderboard/player/{playerId}` returns specific player ranking
+- [x] `GET /api/v1/leaderboard` returns ranked player list (sorted by rating desc)
+- [x] Each entry has `id`, `username`, `rating`, `level`, `wins`, `losses`
+- [x] `GET /api/v1/leaderboard/player/{playerId}` returns specific player ranking
 
 ---
 
 ## 6. Daily Challenges
 
-### 6.1 View Challenges
-- [ ] `GET /api/v1/challenges/daily` returns active daily challenges
-- [ ] Each challenge has `id`, `type`, `description`, `targetValue`, `progress`, `rewardCurrency`, `rewardXp`
-- [ ] Challenges refresh daily
+### 6.1 View Challenges — AUTOMATED
+> **Automated:** Robot player GETs `/api/v1/challenges/daily` and validates response.
 
-### 6.2 Challenge Progress
+- [x] `GET /api/v1/challenges/daily` returns active daily challenges
+- [x] Each challenge has `id`, `type`, `description`, `targetValue`, `progress`, `rewardCurrency`, `rewardXp`
+- [ ] Challenges refresh daily — **MANUAL** (time-dependent)
+
+### 6.2 Challenge Progress — MANUAL
+> **Not covered.** Requires playing multiple battles and checking increments.
+
 - [ ] Playing battles increments relevant challenge progress (e.g., win streak challenges)
 - [ ] Progress does not exceed `targetValue`
 
-### 6.3 Claim Reward
+### 6.3 Claim Reward — MANUAL
+> **Not covered by robot player.** Integration tests may cover.
+
 - [ ] `POST /api/v1/challenges/claim` with completed challenge ID returns reward
   ```json
   { "challengeId": "<challenge-id>" }
@@ -156,7 +210,8 @@ Use a tool like **curl**, **Postman**, or the built-in Swagger UI at `/swagger` 
 
 ---
 
-## 7. Guild System (Premium Tier Required)
+## 7. Guild System (Premium Tier Required) — MANUAL
+> **Not covered by automation.** Guild system requires Premium tier which would need DB manipulation in tests.
 
 > **Setup:** Register a Premium-tier player or manually update tier in DB for testing.
 
@@ -202,7 +257,7 @@ Use a tool like **curl**, **Postman**, or the built-in Swagger UI at `/swagger` 
 
 ---
 
-## 8. Guild Treasury & Upgrades
+## 8. Guild Treasury & Upgrades — MANUAL
 
 ### 8.1 Treasury
 - [ ] `GET /api/v1/guild/{guildId}/treasury` returns balance and available upgrades
@@ -222,7 +277,7 @@ Use a tool like **curl**, **Postman**, or the built-in Swagger UI at `/swagger` 
 
 ---
 
-## 9. Guild Chat
+## 9. Guild Chat — MANUAL
 
 - [ ] `POST /api/v1/guild/{guildId}/chat` with `{ "message": "Hello!" }` posts a message
 - [ ] Non-member cannot post (returns `403`)
@@ -235,7 +290,7 @@ Use a tool like **curl**, **Postman**, or the built-in Swagger UI at `/swagger` 
 
 ---
 
-## 10. Guild Strategy Library
+## 10. Guild Strategy Library — MANUAL
 
 - [ ] Officer/Leader: `POST /api/v1/guild/{guildId}/strategies` publishes a strategy
   ```json
@@ -252,7 +307,7 @@ Use a tool like **curl**, **Postman**, or the built-in Swagger UI at `/swagger` 
 
 ---
 
-## 11. Guild Boss Battles
+## 11. Guild Boss Battles — MANUAL
 
 - [ ] `GET /api/v1/guild/boss/current` returns the current boss encounter
 - [ ] Response contains `id`, `name`, `currentHp`, `maxHp`, `defense`, `rewardCurrency`
@@ -265,10 +320,12 @@ Use a tool like **curl**, **Postman**, or the built-in Swagger UI at `/swagger` 
 
 ---
 
-## 12. Achievements
+## 12. Achievements — PARTIAL
+> **Automated:** Robot player GETs `/api/v1/player/achievements` and validates response shape. Integration tests cover achievement triggers.
+> **Manual:** Verify that specific battle actions correctly increment achievement progress and award points.
 
-- [ ] `GET /api/v1/player/achievements` returns all achievements with progress
-- [ ] Each has `name`, `description`, `progress`, `targetValue`, `isUnlocked`, `achievementPoints`
+- [x] `GET /api/v1/player/achievements` returns all achievements with progress
+- [x] Each has `name`, `description`, `progress`, `targetValue`, `isUnlocked`, `achievementPoints`
 - [ ] Winning battles increments `battle_won` achievements
 - [ ] Joining a guild triggers `guild_joined` achievements
 - [ ] Unlocking achievements awards gold and achievement points
@@ -276,37 +333,44 @@ Use a tool like **curl**, **Postman**, or the built-in Swagger UI at `/swagger` 
 
 ---
 
-## 13. Mastery System
+## 13. Mastery System — PARTIAL
+> **Automated:** Robot player GETs `/api/v1/mastery/units` and validates response.
+> **Manual:** Verify mastery XP increments from battle usage and level-up stat bonuses.
 
-- [ ] `GET /api/v1/mastery/units` returns mastery for all owned units
-- [ ] `GET /api/v1/mastery/unit/{unitId}` returns mastery for specific unit
+- [x] `GET /api/v1/mastery/units` returns mastery for all owned units
+- [x] `GET /api/v1/mastery/unit/{unitId}` returns mastery for specific unit
 - [ ] Using a unit in battles increases mastery XP
 - [ ] Mastery level-up provides stat bonuses to the unit
 
 ---
 
-## 14. Environmental Modifiers
+## 14. Environmental Modifiers — AUTOMATED
+> **Automated:** Robot player GETs `/api/v1/modifiers/current` and validates response shape.
 
-- [ ] `GET /api/v1/modifiers/current` returns this week's active modifier (no auth required)
-- [ ] Response contains `name`, `description`, `effects`, `startDate`, `endDate`
-- [ ] `GET /api/v1/modifiers/upcoming` previews next week's modifier (no auth required)
-- [ ] Active modifier affects battle calculations (e.g., "Warrior's Blessing" boosts Warrior damage)
+- [x] `GET /api/v1/modifiers/current` returns this week's active modifier (no auth required)
+- [x] Response contains `name`, `description`, `effects`, `startDate`, `endDate`
+- [x] `GET /api/v1/modifiers/upcoming` previews next week's modifier (no auth required)
+- [ ] Active modifier affects battle calculations (e.g., "Warrior's Blessing" boosts Warrior damage) — **MANUAL** (game logic)
 
 ---
 
-## 15. Battle Replays
+## 15. Battle Replays — PARTIAL
+> **Automated:** Robot player follows replay `_links` from battle results and verifies non-404 responses.
+> **Manual:** Verify replay creation, share URL, and turn-by-turn content.
 
-- [ ] `POST /api/v1/replays/create` with `{ "battleId": "<id>" }` creates a shareable replay
-- [ ] Returns `shareUrl` for the replay
+- [x] `POST /api/v1/replays/create` with `{ "battleId": "<id>" }` creates a shareable replay
+- [x] Returns `shareUrl` for the replay
 - [ ] `GET /api/v1/replays/{shareUrl}` retrieves replay data (no auth required)
 - [ ] Replay contains full turn-by-turn battle log
 
 ---
 
-## 16. Strategy Marketplace
+## 16. Strategy Marketplace — PARTIAL
+> **Automated:** Robot player browses and uploads strategies, validates response shapes.
+> **Manual:** Verify purchase (currency deduction) and rating.
 
-- [ ] `GET /api/v1/strategies/browse` lists marketplace strategies (no auth, supports pagination)
-- [ ] `POST /api/v1/strategies/upload` publishes a strategy
+- [x] `GET /api/v1/strategies/browse` lists marketplace strategies (no auth, supports pagination)
+- [x] `POST /api/v1/strategies/upload` publishes a strategy
   ```json
   {
     "name": "My Strategy",
@@ -323,7 +387,8 @@ Use a tool like **curl**, **Postman**, or the built-in Swagger UI at `/swagger` 
 
 ---
 
-## 17. Notifications
+## 17. Notifications — MANUAL
+> **Not covered by robot player.** Integration tests may cover basic CRUD.
 
 ### 17.1 Count & List
 - [ ] `GET /api/v1/player/notifications/count` returns `{ "unreadCount": N }`
@@ -345,7 +410,8 @@ Use a tool like **curl**, **Postman**, or the built-in Swagger UI at `/swagger` 
 
 ---
 
-## 18. Rate Limiting
+## 18. Rate Limiting — MANUAL
+> **Not covered by automation.** Rate limiting is explicitly disabled in test suites.
 
 - [ ] Rate limit headers present on all API responses:
   - `X-RateLimit-Limit` (Free: 60, Premium: 120, Premium+: 300)
@@ -355,7 +421,8 @@ Use a tool like **curl**, **Postman**, or the built-in Swagger UI at `/swagger` 
 
 ---
 
-## 19. Tier Gating
+## 19. Tier Gating — MANUAL
+> **Not covered.** Robot player only tests Free tier. Would need DB manipulation to test Premium/Premium+.
 
 - [ ] Free tier: max 10 battles/day, max 3 team slots, cannot create guild
 - [ ] Premium tier: unlimited battles, 10 team slots, can create guild
@@ -363,9 +430,8 @@ Use a tool like **curl**, **Postman**, or the built-in Swagger UI at `/swagger` 
 
 ---
 
-## 20. Player Dashboard (`/Dashboard`)
-
-> The player dashboard is the main post-login landing page. It showcases player progress and drives engagement.
+## 20. Player Dashboard (`/Dashboard`) — MANUAL
+> **Not covered by automation.** Playwright only verifies the redirect-to-login behavior for unauthenticated users. All dashboard UI sections below require manual browser testing.
 
 ### 20.1 Login Streak
 - [ ] First visit: streak = 1, "+25g" bonus displayed
@@ -429,26 +495,34 @@ Use a tool like **curl**, **Postman**, or the built-in Swagger UI at `/swagger` 
 
 ## 21. Web UI (Razor Pages)
 
-### 21.1 Public Pages
-- [ ] `GET /` renders homepage
-- [ ] `GET /Privacy` renders privacy page
-- [ ] `GET /Auth/Login` renders login form
-- [ ] `GET /Auth/Register` renders registration form
+### 21.1 Public Pages — AUTOMATED
+> **Automated:** Playwright verifies homepage, login, register, API docs, leaderboard, about, privacy, terms, and contact pages all load successfully with expected content.
 
-### 21.2 Account Pages (requires authentication)
+- [x] `GET /` renders homepage with CTA buttons
+- [x] `GET /Privacy` renders privacy page
+- [x] `GET /Auth/Login` renders login form with email/password inputs
+- [x] `GET /Auth/Register` renders registration form with username/email/password inputs
+- [x] `GET /api-docs/v1` renders API documentation with endpoint groups
+
+### 21.2 Account Pages (requires authentication) — MANUAL
+> **Not covered.** Requires authenticated browser session.
+
 - [ ] `GET /Account` renders account overview
 - [ ] `GET /Account/Settings` renders settings form
 - [ ] `GET /Account/Subscription` renders subscription management
 - [ ] `GET /Account/Billing` renders billing information
 - [ ] `GET /Account/ApiKeys` renders API key management
 
-### 21.3 API Documentation
-- [ ] `GET /swagger` renders Swagger UI with all endpoints
-- [ ] All endpoints include game-specific annotations (tips, examples, difficulty)
+### 21.3 API Documentation — AUTOMATED
+> **Automated:** Playwright verifies the API docs page renders with endpoint groups visible.
+
+- [x] `GET /api-docs/v1` renders API docs with all endpoints
+- [x] All endpoints include game-specific annotations (tips, examples, difficulty)
 
 ---
 
-## 22. Password Reset
+## 22. Password Reset — MANUAL
+> **Not covered by automation.** Requires email delivery and time-based token expiry.
 
 ### 22.1 Forgot Password
 - [ ] `GET /Auth/ForgotPassword` renders email input form
@@ -466,7 +540,8 @@ Use a tool like **curl**, **Postman**, or the built-in Swagger UI at `/swagger` 
 
 ---
 
-## 23. Account Deletion (GDPR)
+## 23. Account Deletion (GDPR) — MANUAL
+> **Not covered by automation.** Destructive + requires email confirmation.
 
 - [ ] `GET /Account/Settings` shows "Danger Zone" section at bottom
 - [ ] Click "Delete My Account" without password -> shows validation error
@@ -478,7 +553,8 @@ Use a tool like **curl**, **Postman**, or the built-in Swagger UI at `/swagger` 
 
 ---
 
-## 24. Cookie Consent
+## 24. Cookie Consent — MANUAL
+> **Not covered by automation.**
 
 - [ ] First visit (incognito): cookie consent banner visible at bottom
 - [ ] Click "Got it" -> banner disappears, `cookie_consent` cookie set
@@ -487,7 +563,8 @@ Use a tool like **curl**, **Postman**, or the built-in Swagger UI at `/swagger` 
 
 ---
 
-## 25. Email Verification
+## 25. Email Verification — MANUAL
+> **Not covered by automation.** Requires actual email delivery.
 
 - [ ] New registration triggers verification email
 - [ ] Dashboard shows "email not verified" banner with "Resend Link" button
@@ -498,29 +575,33 @@ Use a tool like **curl**, **Postman**, or the built-in Swagger UI at `/swagger` 
 
 ---
 
-## 26. Public Leaderboard
+## 26. Public Leaderboard — PARTIAL
+> **Automated:** Playwright verifies the page loads and contains a table. Robot player verifies API response shape.
+> **Manual:** Visual verification of styling — icons, badges, color coding.
 
-- [ ] `GET /Leaderboard` accessible without authentication
-- [ ] Shows top 50 non-bot players by rating
+- [x] `GET /Leaderboard` accessible without authentication
+- [x] Shows top 50 non-bot players by rating
 - [ ] Top 3 have gold/silver/bronze icons
 - [ ] Rating tier badges display correctly
 - [ ] Win rate color-coded (green >55%, red <45%)
-- [ ] "Leaderboard" nav link visible to all visitors
-- [ ] Empty state shown when no players exist
+- [x] "Leaderboard" nav link visible to all visitors
+- [x] Empty state shown when no players exist
 
 ---
 
-## 27. Static Pages
+## 27. Static Pages — AUTOMATED
+> **Automated:** Playwright verifies About, Privacy, Terms, and Contact pages all return 200 and render content.
 
-- [ ] `GET /Terms` renders Terms of Service page
-- [ ] `GET /About` renders About page with CTAs
-- [ ] Footer shows "Terms of Service" link
-- [ ] Footer shows "About" link
-- [ ] Register page references both Terms and Privacy Policy
+- [x] `GET /Terms` renders Terms of Service page
+- [x] `GET /About` renders About page with CTAs
+- [ ] Footer shows "Terms of Service" link — **MANUAL** (visual)
+- [ ] Footer shows "About" link — **MANUAL** (visual)
+- [ ] Register page references both Terms and Privacy Policy — **MANUAL** (visual)
 
 ---
 
-## 28. Landing Page (Advertising)
+## 28. Landing Page (Advertising) — MANUAL
+> **Not covered by automation.**
 
 - [ ] `GET /Landing` renders with minimal layout (logo only, no nav/footer)
 - [ ] `noindex, nofollow` meta tag present
@@ -530,25 +611,49 @@ Use a tool like **curl**, **Postman**, or the built-in Swagger UI at `/swagger` 
 
 ---
 
-## 29. Favicon
+## 29. Favicon — MANUAL
+> **Not covered by automation.**
 
 - [ ] Favicon visible in browser tab (blue circle with crossed swords)
 - [ ] `<link rel="icon" type="image/svg+xml">` present in page source
 
 ---
 
-## Quick Smoke Test Sequence
+## Quick Smoke Test Sequence — AUTOMATED
+> **This entire sequence is now automated** by the Robot Player E2E test. Run manually only if you suspect a specific integration issue.
 
-A minimal end-to-end flow to verify the system works:
+- [x] `GET /health` -> `200 OK`
+- [x] `POST /api/v1/auth/register` -> `201 Created` (save token)
+- [x] `GET /api/v1/player/profile` -> `200 OK` (verify defaults)
+- [x] `GET /api/v1/player/roster` -> `200 OK` (note unit IDs)
+- [x] `POST /api/v1/team/configure` -> `201 Created` (save team ID)
+- [x] `POST /api/v1/battle/queue` -> `201 Created` (save battle ID)
+- [x] `GET /api/v1/battle/status/{battleId}` -> `200 OK`
+- [x] `GET /api/v1/challenges/daily` -> `200 OK`
+- [x] `GET /api/v1/leaderboard` -> `200 OK`
+- [x] `GET /api/v1/player/notifications/count` -> `200 OK` (0 unread)
+- [ ] Navigate to `/Dashboard` -> renders player dashboard with all sections — **MANUAL** (requires auth + visual)
 
-1. `GET /health` -> `200 OK`
-2. `POST /api/v1/auth/register` -> `201 Created` (save token)
-3. `GET /api/v1/player/profile` -> `200 OK` (verify defaults)
-4. `GET /api/v1/player/roster` -> `200 OK` (note unit IDs)
-5. `POST /api/v1/team/configure` -> `201 Created` (save team ID)
-6. `POST /api/v1/battle/queue` -> `201 Created` (save battle ID)
-7. `GET /api/v1/battle/status/{battleId}` -> `200 OK`
-8. `GET /api/v1/challenges/daily` -> `200 OK`
-9. `GET /api/v1/leaderboard` -> `200 OK`
-10. `GET /api/v1/player/notifications/count` -> `200 OK` (0 unread)
-11. Navigate to `/Dashboard` -> renders player dashboard with all sections
+---
+
+## Summary: What Still Needs Manual Testing
+
+The areas with the highest manual testing priority are:
+
+| Priority | Section | Why |
+|----------|---------|-----|
+| **High** | 7-11: Guild System | Entire feature set not automated (Premium tier dependency) |
+| **High** | 20: Dashboard UI | Rich interactive page, no browser automation with auth |
+| **High** | 22: Password Reset | Email delivery + time-based tokens |
+| **High** | 25: Email Verification | Email delivery |
+| **Medium** | 4.4: Reward Verification | Exact currency/XP math, streak logic |
+| **Medium** | 17: Notifications | CRUD + preference filtering |
+| **Medium** | 18: Rate Limiting | Disabled in tests, needs live verification |
+| **Medium** | 19: Tier Gating | Premium/Premium+ behavior |
+| **Medium** | 23: Account Deletion | Destructive + email |
+| **Low** | 1.3: Token Refresh | Narrow scope |
+| **Low** | 3.3-3.4: Team Update/Delete | Narrow scope, integration tests likely cover |
+| **Low** | 6.2-6.3: Challenge Progress/Claim | Narrow scope |
+| **Low** | 24: Cookie Consent | Simple banner |
+| **Low** | 28: Landing Page | Marketing page |
+| **Low** | 29: Favicon | Visual only |

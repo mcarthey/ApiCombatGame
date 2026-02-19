@@ -104,7 +104,7 @@ public class PlayerController : ControllerBase
                 ["self"] = Links.Get("/api/v1/player/profile"),
                 ["roster"] = Links.Get("/api/v1/player/roster", "Your owned units"),
                 ["roster_available"] = Links.Get("/api/v1/player/roster/available", "Units available to unlock"),
-                ["teams"] = Links.Get("/api/v1/player/teams", "Your configured teams"),
+                ["teams"] = Links.Get("/api/v1/team/list", "Your configured teams"),
                 ["achievements"] = Links.Get("/api/v1/player/achievements", "Your achievements"),
                 ["notifications"] = Links.Get("/api/v1/player/notifications", "Your notifications"),
                 ["leaderboard"] = Links.Get($"/api/v1/leaderboard/player/{playerId}", "Your leaderboard rank"),
