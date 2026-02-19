@@ -1,3 +1,6 @@
+using System.ComponentModel;
+using System.Reflection;
+using ApiCombatGame.Models.DTOs.Strategy;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Interfaces;
@@ -18,6 +21,12 @@ public class ApiDocsModel : PageModel
     public List<TagGroup> TagGroups { get; private set; } = new();
     public Dictionary<string, SchemaInfo> Schemas { get; private set; } = new();
 
+    // Strategy guide — auto-generated from enum [Description] attributes
+    public List<(string Value, string Description)> FormationValues { get; private set; } = new();
+    public List<(string Value, string Description)> TargetPriorityValues { get; private set; } = new();
+    public List<(string Value, string Description)> WhenConditionValues { get; private set; } = new();
+    public List<(string Value, string Description)> TargetModeValues { get; private set; } = new();
+
     private OpenApiDocument _spec = null!;
 
     public void OnGet()
@@ -25,6 +34,23 @@ public class ApiDocsModel : PageModel
         _spec = _swaggerProvider.GetSwagger("v1");
         TagGroups = BuildTagGroups(_spec);
         Schemas = BuildSchemas(_spec);
+
+        FormationValues = GetEnumInfo<Formation>();
+        TargetPriorityValues = GetEnumInfo<TargetPriority>();
+        WhenConditionValues = GetEnumInfo<AbilityWhen>();
+        TargetModeValues = GetEnumInfo<AbilityTarget>();
+    }
+
+    private static List<(string Value, string Description)> GetEnumInfo<T>() where T : struct, Enum
+    {
+        return Enum.GetValues<T>().Select(v =>
+        {
+            var member = typeof(T).GetMember(v.ToString());
+            var desc = member.Length > 0
+                ? member[0].GetCustomAttribute<DescriptionAttribute>()?.Description ?? ""
+                : "";
+            return (v.ToString(), desc);
+        }).ToList();
     }
 
     private List<TagGroup> BuildTagGroups(OpenApiDocument spec)
@@ -192,6 +218,21 @@ public class ApiDocsModel : PageModel
                 {
                     prop.Type = propSchema.Reference.Id;
                 }
+                else if (propSchema.AdditionalPropertiesAllowed && propSchema.AdditionalProperties != null)
+                {
+                    // Dictionary<string, T> — rendered as map<string, T>
+                    prop.IsMap = true;
+                    if (propSchema.AdditionalProperties.Reference != null)
+                    {
+                        prop.MapValueType = propSchema.AdditionalProperties.Reference.Id;
+                        prop.Type = $"map<string, {prop.MapValueType}>";
+                    }
+                    else
+                    {
+                        prop.MapValueType = propSchema.AdditionalProperties.Type ?? "object";
+                        prop.Type = $"map<string, {prop.MapValueType}>";
+                    }
+                }
 
                 if (propSchema.Enum?.Any() == true)
                 {
@@ -216,7 +257,8 @@ public class ApiDocsModel : PageModel
         foreach (var (name, schema) in spec.Components.Schemas)
         {
             // Skip internal/complex schemas, focus on DTOs
-            if (schema.Properties?.Any() != true && schema.Enum?.Any() != true)
+            if (schema.Properties?.Any() != true && schema.Enum?.Any() != true
+                && schema.AdditionalProperties == null)
                 continue;
 
             schemas[name] = BuildSchemaInfo(schema);
@@ -316,6 +358,8 @@ public class SchemaInfo
     public List<PropertyInfo> Properties { get; set; } = new();
     public List<string>? EnumValues { get; set; }
     public SchemaInfo? ItemSchema { get; set; }
+    public bool IsMap { get; set; }
+    public string? MapValueType { get; set; }
 }
 
 public class PropertyInfo
@@ -330,6 +374,8 @@ public class PropertyInfo
     public decimal? Minimum { get; set; }
     public decimal? Maximum { get; set; }
     public List<string>? EnumValues { get; set; }
+    public bool IsMap { get; set; }
+    public string? MapValueType { get; set; }
 }
 
 public class ResponseInfo

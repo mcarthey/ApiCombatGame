@@ -238,9 +238,10 @@ curl /api/v1/player/profile \
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr><td class="px-4 py-2.5 font-mono text-xs">aggressive</td><td class="px-4 py-2.5 text-xs" style="color: var(--md-sys-color-on-surface-variant);">+Attack bonus, less survivability</td></tr>
-                                <tr><td class="px-4 py-2.5 font-mono text-xs">defensive</td><td class="px-4 py-2.5 text-xs" style="color: var(--md-sys-color-on-surface-variant);">+Defense bonus, tankier but slower damage</td></tr>
-                                <tr><td class="px-4 py-2.5 font-mono text-xs">balanced</td><td class="px-4 py-2.5 text-xs" style="color: var(--md-sys-color-on-surface-variant);">No bonus &mdash; the safe default</td></tr>
+                                @foreach (var (val, desc) in Model.FormationValues)
+                                {
+                                    <tr><td class="px-4 py-2.5 font-mono text-xs">@val</td><td class="px-4 py-2.5 text-xs" style="color: var(--md-sys-color-on-surface-variant);">@desc</td></tr>
+                                }
                             </tbody>
                         </table>
                     </div>
@@ -262,11 +263,10 @@ curl /api/v1/player/profile \
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr><td class="px-4 py-2.5 font-mono text-xs">lowest_hp</td><td class="px-4 py-2.5 text-xs" style="color: var(--md-sys-color-on-surface-variant);">Enemy with lowest current HP</td></tr>
-                                <tr><td class="px-4 py-2.5 font-mono text-xs">highest_hp</td><td class="px-4 py-2.5 text-xs" style="color: var(--md-sys-color-on-surface-variant);">Enemy with highest current HP</td></tr>
-                                <tr><td class="px-4 py-2.5 font-mono text-xs">healers</td><td class="px-4 py-2.5 text-xs" style="color: var(--md-sys-color-on-surface-variant);">Enemy Healers first</td></tr>
-                                <tr><td class="px-4 py-2.5 font-mono text-xs">highest_threat</td><td class="px-4 py-2.5 text-xs" style="color: var(--md-sys-color-on-surface-variant);">Enemy with highest Attack stat</td></tr>
-                                <tr><td class="px-4 py-2.5 font-mono text-xs">random</td><td class="px-4 py-2.5 text-xs" style="color: var(--md-sys-color-on-surface-variant);">Random enemy each turn</td></tr>
+                                @foreach (var (val, desc) in Model.TargetPriorityValues)
+                                {
+                                    <tr><td class="px-4 py-2.5 font-mono text-xs">@val</td><td class="px-4 py-2.5 text-xs" style="color: var(--md-sys-color-on-surface-variant);">@desc</td></tr>
+                                }
                             </tbody>
                         </table>
                     </div>
@@ -283,12 +283,10 @@ curl /api/v1/player/profile \
                         <table class="md3-table w-full text-sm">
                             <thead><tr><th class="px-4 py-2 text-left text-xs font-medium uppercase">when</th><th class="px-4 py-2 text-left text-xs font-medium uppercase">Fires if...</th></tr></thead>
                             <tbody>
-                                <tr><td class="px-4 py-2.5 font-mono text-xs">always</td><td class="px-4 py-2.5 text-xs" style="color: var(--md-sys-color-on-surface-variant);">Always use when off cooldown</td></tr>
-                                <tr><td class="px-4 py-2.5 font-mono text-xs">ally_hp_below_50</td><td class="px-4 py-2.5 text-xs" style="color: var(--md-sys-color-on-surface-variant);">Any ally below 50% HP</td></tr>
-                                <tr><td class="px-4 py-2.5 font-mono text-xs">ally_hp_below_25</td><td class="px-4 py-2.5 text-xs" style="color: var(--md-sys-color-on-surface-variant);">Any ally below 25% HP</td></tr>
-                                <tr><td class="px-4 py-2.5 font-mono text-xs">enemy_count_gte_2</td><td class="px-4 py-2.5 text-xs" style="color: var(--md-sys-color-on-surface-variant);">2+ enemies alive (good for AoE)</td></tr>
-                                <tr><td class="px-4 py-2.5 font-mono text-xs">enemy_count_gte_3</td><td class="px-4 py-2.5 text-xs" style="color: var(--md-sys-color-on-surface-variant);">3+ enemies alive</td></tr>
-                                <tr><td class="px-4 py-2.5 font-mono text-xs">cooldown_ready</td><td class="px-4 py-2.5 text-xs" style="color: var(--md-sys-color-on-surface-variant);">Ability is off cooldown</td></tr>
+                                @foreach (var (val, desc) in Model.WhenConditionValues)
+                                {
+                                    <tr><td class="px-4 py-2.5 font-mono text-xs">@val</td><td class="px-4 py-2.5 text-xs" style="color: var(--md-sys-color-on-surface-variant);">@desc</td></tr>
+                                }
                             </tbody>
                         </table>
                     </div>
@@ -296,11 +294,10 @@ curl /api/v1/player/profile \
                         <table class="md3-table w-full text-sm">
                             <thead><tr><th class="px-4 py-2 text-left text-xs font-medium uppercase">target</th><th class="px-4 py-2 text-left text-xs font-medium uppercase">Hits...</th></tr></thead>
                             <tbody>
-                                <tr><td class="px-4 py-2.5 font-mono text-xs">priority</td><td class="px-4 py-2.5 text-xs" style="color: var(--md-sys-color-on-surface-variant);">Uses your targetPriority list</td></tr>
-                                <tr><td class="px-4 py-2.5 font-mono text-xs">lowest_ally_hp</td><td class="px-4 py-2.5 text-xs" style="color: var(--md-sys-color-on-surface-variant);">Ally with lowest HP (for heals)</td></tr>
-                                <tr><td class="px-4 py-2.5 font-mono text-xs">self</td><td class="px-4 py-2.5 text-xs" style="color: var(--md-sys-color-on-surface-variant);">The casting unit itself</td></tr>
-                                <tr><td class="px-4 py-2.5 font-mono text-xs">all_enemies</td><td class="px-4 py-2.5 text-xs" style="color: var(--md-sys-color-on-surface-variant);">All enemies (AoE abilities)</td></tr>
-                                <tr><td class="px-4 py-2.5 font-mono text-xs">all_allies</td><td class="px-4 py-2.5 text-xs" style="color: var(--md-sys-color-on-surface-variant);">All allies (AoE heals/buffs)</td></tr>
+                                @foreach (var (val, desc) in Model.TargetModeValues)
+                                {
+                                    <tr><td class="px-4 py-2.5 font-mono text-xs">@val</td><td class="px-4 py-2.5 text-xs" style="color: var(--md-sys-color-on-surface-variant);">@desc</td></tr>
+                                }
                             </tbody>
                         </table>
                     </div>

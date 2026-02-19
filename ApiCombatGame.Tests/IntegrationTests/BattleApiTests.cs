@@ -39,7 +39,7 @@ public class BattleApiTests : IntegrationTestBase
         {
             Name = "Battle Team",
             UnitIds = unitIds,
-            Strategy = new StrategyConfig { Formation = "balanced", TargetPriority = new List<string> { "lowest_hp" } }
+            Strategy = new StrategyConfig { Formation = Formation.balanced, TargetPriority = new List<TargetPriority> { TargetPriority.lowest_hp } }
         };
         var teamResponse = await client.PostAsJsonAsync("/api/v1/team/configure", teamRequest);
         var teamJson = await teamResponse.Content.ReadAsStringAsync();

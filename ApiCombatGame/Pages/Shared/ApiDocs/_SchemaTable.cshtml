@@ -31,6 +31,16 @@
         }
         return type;
     }
+
+    bool IsMapType(string type)
+    {
+        return type.StartsWith("map<string, ") && type.EndsWith(">");
+    }
+
+    string GetMapValueType(string type)
+    {
+        return type["map<string, ".Length..^1];
+    }
 }
 
 <div class="overflow-hidden" style="border-radius: var(--md-sys-shape-corner-medium);">
@@ -62,6 +72,11 @@
                         {
                             <a href="#@GetSchemaAnchor(prop.Type)" onclick="openSchemaDetails('@GetSchemaAnchor(prop.Type)')"
                                class="text-xs px-1.5 py-0.5 font-mono" style="background: var(--md-sys-color-primary-container); color: var(--md-sys-color-on-primary-container); border-radius: var(--md-sys-shape-corner-small); text-decoration: none; cursor: pointer;">@GetDisplayType(prop.Type) &#8599;</a>
+                        }
+                        else if (IsMapType(prop.Type))
+                        {
+                            var valueType = GetMapValueType(prop.Type);
+                            <span class="text-xs px-1.5 py-0.5 font-mono" style="background: var(--md-sys-color-surface-container-high); color: var(--md-sys-color-on-surface); border-radius: var(--md-sys-shape-corner-small);">map&lt;string, <a href="#schema-@valueType" onclick="openSchemaDetails('schema-@valueType')" style="color: var(--md-sys-color-primary); text-decoration: underline; cursor: pointer;">@valueType</a>&gt;</span>
                         }
                         else
                         {

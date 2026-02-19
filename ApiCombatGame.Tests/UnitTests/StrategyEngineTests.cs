@@ -23,9 +23,9 @@ public class StrategyEngineTests
     {
         var strategy = new StrategyConfig();
 
-        Assert.Equal("balanced", strategy.Formation);
+        Assert.Equal(Formation.balanced, strategy.Formation);
         Assert.NotNull(strategy.TargetPriority);
-        Assert.Contains("lowest_hp", strategy.TargetPriority);
+        Assert.Contains(TargetPriority.lowest_hp, strategy.TargetPriority);
         Assert.NotNull(strategy.Abilities);
     }
 
@@ -34,12 +34,12 @@ public class StrategyEngineTests
     {
         var strategy = new StrategyConfig
         {
-            Formation = "aggressive",
-            TargetPriority = new List<string> { "healers", "lowest_hp" },
+            Formation = Formation.aggressive,
+            TargetPriority = new List<TargetPriority> { TargetPriority.healers, TargetPriority.lowest_hp },
             Abilities = new Dictionary<string, AbilityCondition>
             {
-                ["Fireball"] = new AbilityCondition { When = "always", Target = "priority" },
-                ["Heal"] = new AbilityCondition { When = "ally_hp_below_50", Target = "lowest_ally_hp" }
+                ["Fireball"] = new AbilityCondition { When = AbilityWhen.always, Target = AbilityTarget.priority },
+                ["Heal"] = new AbilityCondition { When = AbilityWhen.ally_hp_below_50, Target = AbilityTarget.lowest_ally_hp }
             }
         };
 
@@ -47,11 +47,11 @@ public class StrategyEngineTests
         var deserialized = JsonSerializer.Deserialize<StrategyConfig>(json, JsonOptions);
 
         Assert.NotNull(deserialized);
-        Assert.Equal("aggressive", deserialized!.Formation);
+        Assert.Equal(Formation.aggressive, deserialized!.Formation);
         Assert.Equal(2, deserialized.TargetPriority.Count);
         Assert.Equal(2, deserialized.Abilities.Count);
-        Assert.Equal("always", deserialized.Abilities["Fireball"].When);
-        Assert.Equal("ally_hp_below_50", deserialized.Abilities["Heal"].When);
+        Assert.Equal(AbilityWhen.always, deserialized.Abilities["Fireball"].When);
+        Assert.Equal(AbilityWhen.ally_hp_below_50, deserialized.Abilities["Heal"].When);
     }
 
     [Fact]
@@ -61,7 +61,7 @@ public class StrategyEngineTests
         var strategy = JsonSerializer.Deserialize<StrategyConfig>(json, JsonOptions);
 
         Assert.NotNull(strategy);
-        Assert.Equal("balanced", strategy!.Formation);
+        Assert.Equal(Formation.balanced, strategy!.Formation);
     }
 
     [Fact]
@@ -79,15 +79,15 @@ public class StrategyEngineTests
         // Use strategy that tells healer to heal when ally HP is below 50%
         var strategy = new StrategyConfig
         {
-            Formation = "balanced",
-            TargetPriority = new List<string> { "lowest_hp" },
+            Formation = Formation.balanced,
+            TargetPriority = new List<TargetPriority> { TargetPriority.lowest_hp },
             Abilities = new Dictionary<string, AbilityCondition>
             {
-                ["Heal"] = new AbilityCondition { When = "ally_hp_below_50", Target = "lowest_ally_hp" }
+                ["Heal"] = new AbilityCondition { When = AbilityWhen.ally_hp_below_50, Target = AbilityTarget.lowest_ally_hp }
             }
         };
 
-        var enemyStrategy = new StrategyConfig { Formation = "balanced" };
+        var enemyStrategy = new StrategyConfig { Formation = Formation.balanced };
 
         var result = _engine.ResolveBattle(team1, strategy, team2, enemyStrategy, 50, seed: 42);
 
@@ -109,10 +109,10 @@ public class StrategyEngineTests
 
         var strategy = new StrategyConfig
         {
-            Formation = "balanced",
-            TargetPriority = new List<string> { "healers", "lowest_hp" }
+            Formation = Formation.balanced,
+            TargetPriority = new List<TargetPriority> { TargetPriority.healers, TargetPriority.lowest_hp }
         };
-        var enemyStrategy = new StrategyConfig { Formation = "balanced" };
+        var enemyStrategy = new StrategyConfig { Formation = Formation.balanced };
 
         var result = _engine.ResolveBattle(team1, strategy, team2, enemyStrategy, 50, seed: 42);
 
@@ -130,8 +130,8 @@ public class StrategyEngineTests
         var team1 = new List<Unit> { attacker };
         var team2 = new List<Unit> { defender };
 
-        var normalStrategy = new StrategyConfig { Formation = "balanced" };
-        var defensiveStrategy = new StrategyConfig { Formation = "defensive" };
+        var normalStrategy = new StrategyConfig { Formation = Formation.balanced };
+        var defensiveStrategy = new StrategyConfig { Formation = Formation.defensive };
 
         // Normal vs normal
         var normalResult = _engine.ResolveBattle(team1, normalStrategy, team2, normalStrategy, 50, seed: 42);

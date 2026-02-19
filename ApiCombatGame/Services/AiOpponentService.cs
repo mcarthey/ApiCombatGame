@@ -58,7 +58,7 @@ public class AiOpponentService : IAiOpponentService
                 ApproximateRating = p.ApproximateRating,
                 TeamSize = p.Units.Count,
                 TeamClasses = p.Units.Select(u => u.Class.ToString()).ToList(),
-                Formation = p.Strategy.Formation
+                Formation = p.Strategy.Formation.ToString()
             }).ToList(),
             RewardMultiplier = PracticeRewardMultiplier,
             RatingAffected = false,
@@ -339,7 +339,7 @@ public class AiOpponentService : IAiOpponentService
             Description = "A slow-moving practice target. Perfect for learning the basics of team building and strategy configuration.",
             Difficulty = "novice",
             ApproximateRating = 600,
-            Strategy = new StrategyConfig { Formation = "balanced", TargetPriority = new() { "lowest_hp" } },
+            Strategy = new StrategyConfig { Formation = Formation.balanced, TargetPriority = new List<TargetPriority> { TargetPriority.lowest_hp } },
             Units = new()
             {
                 new AiUnitTemplate("Recruit Fighter", UnitClass.Warrior, 100, 18, 15, 8),
@@ -354,7 +354,7 @@ public class AiOpponentService : IAiOpponentService
             Description = "A small town guard patrol. They fight in defensive formation but lack coordination.",
             Difficulty = "novice",
             ApproximateRating = 700,
-            Strategy = new StrategyConfig { Formation = "defensive", TargetPriority = new() { "lowest_hp" } },
+            Strategy = new StrategyConfig { Formation = Formation.defensive, TargetPriority = new List<TargetPriority> { TargetPriority.lowest_hp } },
             Units = new()
             {
                 new AiUnitTemplate("Town Guard", UnitClass.Tank, 130, 16, 25, 5),
@@ -371,11 +371,11 @@ public class AiOpponentService : IAiOpponentService
             ApproximateRating = 800,
             Strategy = new StrategyConfig
             {
-                Formation = "aggressive",
-                TargetPriority = new() { "lowest_hp" },
+                Formation = Formation.aggressive,
+                TargetPriority = new List<TargetPriority> { TargetPriority.lowest_hp },
                 Abilities = new()
                 {
-                    ["Cleave"] = new AbilityCondition { When = "enemy_count_gte_3", Target = "all_enemies" }
+                    ["Cleave"] = new AbilityCondition { When = AbilityWhen.enemy_count_gte_3, Target = AbilityTarget.all_enemies }
                 }
             },
             Units = new()
@@ -396,12 +396,12 @@ public class AiOpponentService : IAiOpponentService
             ApproximateRating = 900,
             Strategy = new StrategyConfig
             {
-                Formation = "balanced",
-                TargetPriority = new() { "healers", "lowest_hp" },
+                Formation = Formation.balanced,
+                TargetPriority = new List<TargetPriority> { TargetPriority.healers, TargetPriority.lowest_hp },
                 Abilities = new()
                 {
-                    ["Heal"] = new AbilityCondition { When = "ally_hp_below_50", Target = "lowest_ally_hp" },
-                    ["Fireball"] = new AbilityCondition { When = "always", Target = "priority" }
+                    ["Heal"] = new AbilityCondition { When = AbilityWhen.ally_hp_below_50, Target = AbilityTarget.lowest_ally_hp },
+                    ["Fireball"] = new AbilityCondition { When = AbilityWhen.always, Target = AbilityTarget.priority }
                 }
             },
             Units = new()
@@ -421,13 +421,13 @@ public class AiOpponentService : IAiOpponentService
             ApproximateRating = 1000,
             Strategy = new StrategyConfig
             {
-                Formation = "defensive",
-                TargetPriority = new() { "mages", "healers", "lowest_hp" },
+                Formation = Formation.defensive,
+                TargetPriority = new List<TargetPriority> { TargetPriority.mages, TargetPriority.healers, TargetPriority.lowest_hp },
                 Abilities = new()
                 {
-                    ["Fortify"] = new AbilityCondition { When = "self_hp_below_50", Target = "self" },
-                    ["Heal"] = new AbilityCondition { When = "ally_hp_below_50", Target = "lowest_ally_hp" },
-                    ["Meteor Storm"] = new AbilityCondition { When = "enemy_count_gte_2", Target = "all_enemies" }
+                    ["Fortify"] = new AbilityCondition { When = AbilityWhen.self_hp_below_50, Target = AbilityTarget.self },
+                    ["Heal"] = new AbilityCondition { When = AbilityWhen.ally_hp_below_50, Target = AbilityTarget.lowest_ally_hp },
+                    ["Meteor Storm"] = new AbilityCondition { When = AbilityWhen.enemy_count_gte_2, Target = AbilityTarget.all_enemies }
                 }
             },
             Units = new()
@@ -447,13 +447,13 @@ public class AiOpponentService : IAiOpponentService
             ApproximateRating = 1100,
             Strategy = new StrategyConfig
             {
-                Formation = "aggressive",
-                TargetPriority = new() { "healers", "mages", "lowest_hp" },
+                Formation = Formation.aggressive,
+                TargetPriority = new List<TargetPriority> { TargetPriority.healers, TargetPriority.mages, TargetPriority.lowest_hp },
                 Abilities = new()
                 {
-                    ["Aimed Shot"] = new AbilityCondition { When = "always", Target = "priority" },
-                    ["Berserker Rage"] = new AbilityCondition { When = "always", Target = "priority" },
-                    ["Arrow Rain"] = new AbilityCondition { When = "enemy_count_gte_3", Target = "all_enemies" }
+                    ["Aimed Shot"] = new AbilityCondition { When = AbilityWhen.always, Target = AbilityTarget.priority },
+                    ["Berserker Rage"] = new AbilityCondition { When = AbilityWhen.always, Target = AbilityTarget.priority },
+                    ["Arrow Rain"] = new AbilityCondition { When = AbilityWhen.enemy_count_gte_3, Target = AbilityTarget.all_enemies }
                 }
             },
             Units = new()
@@ -475,16 +475,16 @@ public class AiOpponentService : IAiOpponentService
             ApproximateRating = 1200,
             Strategy = new StrategyConfig
             {
-                Formation = "balanced",
-                TargetPriority = new() { "healers", "mages", "highest_threat" },
+                Formation = Formation.balanced,
+                TargetPriority = new List<TargetPriority> { TargetPriority.healers, TargetPriority.mages, TargetPriority.highest_threat },
                 Abilities = new()
                 {
-                    ["Heal"] = new AbilityCondition { When = "ally_hp_below_50", Target = "lowest_ally_hp" },
-                    ["Divine Light"] = new AbilityCondition { When = "ally_hp_below_30", Target = "all_allies" },
-                    ["Fortify"] = new AbilityCondition { When = "self_hp_below_50", Target = "self" },
-                    ["Meteor Storm"] = new AbilityCondition { When = "enemy_count_gte_3", Target = "all_enemies" },
-                    ["Berserker Rage"] = new AbilityCondition { When = "always", Target = "priority" },
-                    ["Cleave"] = new AbilityCondition { When = "enemy_count_gte_2", Target = "all_enemies" }
+                    ["Heal"] = new AbilityCondition { When = AbilityWhen.ally_hp_below_50, Target = AbilityTarget.lowest_ally_hp },
+                    ["Divine Light"] = new AbilityCondition { When = AbilityWhen.ally_hp_below_30, Target = AbilityTarget.all_allies },
+                    ["Fortify"] = new AbilityCondition { When = AbilityWhen.self_hp_below_50, Target = AbilityTarget.self },
+                    ["Meteor Storm"] = new AbilityCondition { When = AbilityWhen.enemy_count_gte_3, Target = AbilityTarget.all_enemies },
+                    ["Berserker Rage"] = new AbilityCondition { When = AbilityWhen.always, Target = AbilityTarget.priority },
+                    ["Cleave"] = new AbilityCondition { When = AbilityWhen.enemy_count_gte_2, Target = AbilityTarget.all_enemies }
                 }
             },
             Units = new()
@@ -505,15 +505,15 @@ public class AiOpponentService : IAiOpponentService
             ApproximateRating = 1350,
             Strategy = new StrategyConfig
             {
-                Formation = "aggressive",
-                TargetPriority = new() { "healers", "lowest_hp" },
+                Formation = Formation.aggressive,
+                TargetPriority = new List<TargetPriority> { TargetPriority.healers, TargetPriority.lowest_hp },
                 Abilities = new()
                 {
-                    ["Meteor Storm"] = new AbilityCondition { When = "enemy_count_gte_2", Target = "all_enemies" },
-                    ["Fireball"] = new AbilityCondition { When = "always", Target = "priority" },
-                    ["Fortify"] = new AbilityCondition { When = "self_hp_below_50", Target = "self" },
-                    ["Heal"] = new AbilityCondition { When = "ally_hp_below_30", Target = "lowest_ally_hp" },
-                    ["Divine Light"] = new AbilityCondition { When = "ally_hp_below_30", Target = "all_allies" }
+                    ["Meteor Storm"] = new AbilityCondition { When = AbilityWhen.enemy_count_gte_2, Target = AbilityTarget.all_enemies },
+                    ["Fireball"] = new AbilityCondition { When = AbilityWhen.always, Target = AbilityTarget.priority },
+                    ["Fortify"] = new AbilityCondition { When = AbilityWhen.self_hp_below_50, Target = AbilityTarget.self },
+                    ["Heal"] = new AbilityCondition { When = AbilityWhen.ally_hp_below_30, Target = AbilityTarget.lowest_ally_hp },
+                    ["Divine Light"] = new AbilityCondition { When = AbilityWhen.ally_hp_below_30, Target = AbilityTarget.all_allies }
                 }
             },
             Units = new()
@@ -534,18 +534,18 @@ public class AiOpponentService : IAiOpponentService
             ApproximateRating = 1500,
             Strategy = new StrategyConfig
             {
-                Formation = "aggressive",
-                TargetPriority = new() { "healers", "mages", "highest_threat", "lowest_hp" },
+                Formation = Formation.aggressive,
+                TargetPriority = new List<TargetPriority> { TargetPriority.healers, TargetPriority.mages, TargetPriority.highest_threat, TargetPriority.lowest_hp },
                 Abilities = new()
                 {
-                    ["Berserker Rage"] = new AbilityCondition { When = "always", Target = "priority" },
-                    ["Cleave"] = new AbilityCondition { When = "enemy_count_gte_2", Target = "all_enemies" },
-                    ["Aimed Shot"] = new AbilityCondition { When = "always", Target = "priority" },
-                    ["Arrow Rain"] = new AbilityCondition { When = "enemy_count_gte_3", Target = "all_enemies" },
-                    ["Meteor Storm"] = new AbilityCondition { When = "enemy_count_gte_2", Target = "all_enemies" },
-                    ["Heal"] = new AbilityCondition { When = "ally_hp_below_50", Target = "lowest_ally_hp" },
-                    ["Divine Light"] = new AbilityCondition { When = "ally_hp_below_30", Target = "all_allies" },
-                    ["Fortify"] = new AbilityCondition { When = "self_hp_below_50", Target = "self" }
+                    ["Berserker Rage"] = new AbilityCondition { When = AbilityWhen.always, Target = AbilityTarget.priority },
+                    ["Cleave"] = new AbilityCondition { When = AbilityWhen.enemy_count_gte_2, Target = AbilityTarget.all_enemies },
+                    ["Aimed Shot"] = new AbilityCondition { When = AbilityWhen.always, Target = AbilityTarget.priority },
+                    ["Arrow Rain"] = new AbilityCondition { When = AbilityWhen.enemy_count_gte_3, Target = AbilityTarget.all_enemies },
+                    ["Meteor Storm"] = new AbilityCondition { When = AbilityWhen.enemy_count_gte_2, Target = AbilityTarget.all_enemies },
+                    ["Heal"] = new AbilityCondition { When = AbilityWhen.ally_hp_below_50, Target = AbilityTarget.lowest_ally_hp },
+                    ["Divine Light"] = new AbilityCondition { When = AbilityWhen.ally_hp_below_30, Target = AbilityTarget.all_allies },
+                    ["Fortify"] = new AbilityCondition { When = AbilityWhen.self_hp_below_50, Target = AbilityTarget.self }
                 }
             },
             Units = new()

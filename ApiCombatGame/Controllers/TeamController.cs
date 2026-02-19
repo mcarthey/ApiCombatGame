@@ -92,6 +92,28 @@ public class TeamController : ControllerBase
         if (playerUnits.Count != request.UnitIds.Count)
             return BadRequest(new { error = "One or more units not found in your roster." });
 
+        // Validate ability names in strategy match actual unit abilities
+        if (request.Strategy?.Abilities.Any() == true)
+        {
+            var unitAbilityNames = await _context.Abilities
+                .Where(a => request.UnitIds.Contains(a.UnitId))
+                .Select(a => a.Name)
+                .Distinct()
+                .ToListAsync();
+
+            var unknownAbilities = request.Strategy.Abilities.Keys
+                .Where(k => !unitAbilityNames.Contains(k))
+                .ToList();
+
+            if (unknownAbilities.Count > 0)
+                return BadRequest(new
+                {
+                    error = $"Strategy references abilities not on your units: {string.Join(", ", unknownAbilities)}. Available: {string.Join(", ", unitAbilityNames)}.",
+                    unknownAbilities,
+                    availableAbilities = unitAbilityNames
+                });
+        }
+
         var team = new Team
         {
             Id = Guid.NewGuid(),
@@ -233,6 +255,28 @@ public class TeamController : ControllerBase
 
         if (playerUnits.Count != request.UnitIds.Count)
             return BadRequest(new { error = "One or more units not found in your roster." });
+
+        // Validate ability names in strategy match actual unit abilities
+        if (request.Strategy?.Abilities.Any() == true)
+        {
+            var unitAbilityNames = await _context.Abilities
+                .Where(a => request.UnitIds.Contains(a.UnitId))
+                .Select(a => a.Name)
+                .Distinct()
+                .ToListAsync();
+
+            var unknownAbilities = request.Strategy.Abilities.Keys
+                .Where(k => !unitAbilityNames.Contains(k))
+                .ToList();
+
+            if (unknownAbilities.Count > 0)
+                return BadRequest(new
+                {
+                    error = $"Strategy references abilities not on your units: {string.Join(", ", unknownAbilities)}. Available: {string.Join(", ", unitAbilityNames)}.",
+                    unknownAbilities,
+                    availableAbilities = unitAbilityNames
+                });
+        }
 
         team.Name = request.Name;
         team.UnitIdsJson = JsonSerializer.Serialize(request.UnitIds, JsonOptions);

@@ -76,8 +76,8 @@ public class BattleFlowTests : IClassFixture<WebApplicationFactory<Program>>
             UnitIds = unitIds,
             Strategy = new StrategyConfig
             {
-                Formation = "aggressive",
-                TargetPriority = new List<string> { "lowest_hp" }
+                Formation = Formation.aggressive,
+                TargetPriority = new List<TargetPriority> { TargetPriority.lowest_hp }
             }
         };
 

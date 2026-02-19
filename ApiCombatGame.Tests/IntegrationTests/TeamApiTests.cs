@@ -33,7 +33,7 @@ public class TeamApiTests : IntegrationTestBase
         {
             Name = "My Team",
             UnitIds = unitIds,
-            Strategy = new StrategyConfig { Formation = "aggressive", TargetPriority = new List<string> { "healers", "lowest_hp" } }
+            Strategy = new StrategyConfig { Formation = Formation.aggressive, TargetPriority = new List<TargetPriority> { TargetPriority.healers, TargetPriority.lowest_hp } }
         });
 
         Assert.Equal(HttpStatusCode.Created, response.StatusCode);
@@ -98,7 +98,7 @@ public class TeamApiTests : IntegrationTestBase
         {
             Name = "Detail Team",
             UnitIds = unitIds,
-            Strategy = new StrategyConfig { Formation = "defensive" }
+            Strategy = new StrategyConfig { Formation = Formation.defensive }
         });
         var created = JsonSerializer.Deserialize<TeamResponse>(
             await createResponse.Content.ReadAsStringAsync(), Json)!;
@@ -111,7 +111,7 @@ public class TeamApiTests : IntegrationTestBase
         Assert.Equal("Detail Team", team.Name);
         Assert.Equal(unitIds.Count, team.Units.Count);
         Assert.NotNull(team.Strategy);
-        Assert.Equal("defensive", team.Strategy!.Formation);
+        Assert.Equal(Formation.defensive, team.Strategy!.Formation);
     }
 
     [Fact]
@@ -162,7 +162,7 @@ public class TeamApiTests : IntegrationTestBase
         {
             Name = "Original",
             UnitIds = unitIds,
-            Strategy = new StrategyConfig { Formation = "balanced" }
+            Strategy = new StrategyConfig { Formation = Formation.balanced }
         });
         var created = JsonSerializer.Deserialize<TeamResponse>(
             await createResponse.Content.ReadAsStringAsync(), Json)!;
@@ -172,7 +172,7 @@ public class TeamApiTests : IntegrationTestBase
         {
             Name = "Updated",
             UnitIds = unitIds.Take(1).ToList(),
-            Strategy = new StrategyConfig { Formation = "aggressive" }
+            Strategy = new StrategyConfig { Formation = Formation.aggressive }
         });
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
@@ -181,7 +181,7 @@ public class TeamApiTests : IntegrationTestBase
             await response.Content.ReadAsStringAsync(), Json)!;
         Assert.Equal("Updated", updated.Name);
         Assert.Single(updated.Units);
-        Assert.Equal("aggressive", updated.Strategy?.Formation);
+        Assert.Equal(Formation.aggressive, updated.Strategy?.Formation);
     }
 
     [Fact]
@@ -211,5 +211,81 @@ public class TeamApiTests : IntegrationTestBase
         var roster = JsonSerializer.Deserialize<List<JsonElement>>(
             await rosterResponse.Content.ReadAsStringAsync(), Json)!;
         Assert.Equal(3, roster.Count); // Starter units still there
+    }
+
+    [Fact]
+    public async Task ConfigureTeam_InvalidFormation_Returns400WithValidValues()
+    {
+        var (client, _) = await CreateAuthenticatedClient();
+        var unitIds = await GetRosterUnitIds(client);
+
+        // Send raw JSON with an invalid formation value
+        var json = JsonSerializer.Serialize(new
+        {
+            name = "Bad Formation Team",
+            unitIds,
+            strategy = new { formation = "turtle", targetPriority = new[] { "lowest_hp" } }
+        }, Json);
+
+        var response = await client.PostAsync("/api/v1/team/configure",
+            new StringContent(json, System.Text.Encoding.UTF8, "application/json"));
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        var content = await response.Content.ReadAsStringAsync();
+        Assert.Contains("error", content);
+    }
+
+    [Fact]
+    public async Task ConfigureTeam_InvalidAbilityCondition_Returns400()
+    {
+        var (client, _) = await CreateAuthenticatedClient();
+        var unitIds = await GetRosterUnitIds(client);
+
+        var json = JsonSerializer.Serialize(new
+        {
+            name = "Bad Ability Team",
+            unitIds,
+            strategy = new
+            {
+                formation = "balanced",
+                targetPriority = new[] { "lowest_hp" },
+                abilities = new Dictionary<string, object>
+                {
+                    ["Fireball"] = new { when = "cooldown_ready", target = "priority" }
+                }
+            }
+        }, Json);
+
+        var response = await client.PostAsync("/api/v1/team/configure",
+            new StringContent(json, System.Text.Encoding.UTF8, "application/json"));
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        var content = await response.Content.ReadAsStringAsync();
+        Assert.Contains("error", content);
+    }
+
+    [Fact]
+    public async Task ConfigureTeam_UnknownAbilityName_Returns400()
+    {
+        var (client, _) = await CreateAuthenticatedClient();
+        var unitIds = await GetRosterUnitIds(client);
+
+        var response = await client.PostAsJsonAsync("/api/v1/team/configure", new TeamConfigRequest
+        {
+            Name = "Unknown Ability Team",
+            UnitIds = unitIds,
+            Strategy = new StrategyConfig
+            {
+                Formation = Formation.balanced,
+                Abilities = new Dictionary<string, AbilityCondition>
+                {
+                    ["NonExistentSpell"] = new() { When = AbilityWhen.always, Target = AbilityTarget.priority }
+                }
+            }
+        });
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        var content = await response.Content.ReadAsStringAsync();
+        Assert.Contains("not on your units", content);
     }
 }

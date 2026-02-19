@@ -26,8 +26,8 @@ public class DeclarativeStrategyEngine : IStrategyEngine
         var log = new List<BattleLogEntry>();
 
         // Create battle state copies and apply formations from strategy configs
-        var team1 = team1Units.Select(u => new BattleUnitState(u, 1) { Formation = team1Strategy.Formation ?? "balanced" }).ToList();
-        var team2 = team2Units.Select(u => new BattleUnitState(u, 2) { Formation = team2Strategy.Formation ?? "balanced" }).ToList();
+        var team1 = team1Units.Select(u => new BattleUnitState(u, 1) { Formation = team1Strategy.Formation }).ToList();
+        var team2 = team2Units.Select(u => new BattleUnitState(u, 2) { Formation = team2Strategy.Formation }).ToList();
 
         int turn = 0;
 
@@ -204,21 +204,21 @@ public class DeclarativeStrategyEngine : IStrategyEngine
         return (basicAttack, new List<BattleUnitState> { enemies.First() }, false);
     }
 
-    private bool EvaluateCondition(string condition, BattleUnitState actor, List<BattleUnitState> allies, List<BattleUnitState> enemies)
+    private bool EvaluateCondition(AbilityWhen condition, BattleUnitState actor, List<BattleUnitState> allies, List<BattleUnitState> enemies)
     {
         return condition switch
         {
-            "always" => true,
-            "ally_hp_below_50" => allies.Any(a => (double)a.CurrentHp / a.MaxHp < 0.5),
-            "ally_hp_below_30" => allies.Any(a => (double)a.CurrentHp / a.MaxHp < 0.3),
-            "enemy_count_gte_2" => enemies.Count >= 2,
-            "enemy_count_gte_3" => enemies.Count >= 3,
-            "self_hp_below_50" => (double)actor.CurrentHp / actor.MaxHp < 0.5,
+            AbilityWhen.always => true,
+            AbilityWhen.ally_hp_below_50 => allies.Any(a => (double)a.CurrentHp / a.MaxHp < 0.5),
+            AbilityWhen.ally_hp_below_30 => allies.Any(a => (double)a.CurrentHp / a.MaxHp < 0.3),
+            AbilityWhen.enemy_count_gte_2 => enemies.Count >= 2,
+            AbilityWhen.enemy_count_gte_3 => enemies.Count >= 3,
+            AbilityWhen.self_hp_below_50 => (double)actor.CurrentHp / actor.MaxHp < 0.5,
             _ => true
         };
     }
 
-    private List<BattleUnitState> SelectTargets(string targetMode, BattleAbility ability, BattleUnitState actor,
+    private List<BattleUnitState> SelectTargets(AbilityTarget targetMode, BattleAbility ability, BattleUnitState actor,
         List<BattleUnitState> allies, List<BattleUnitState> enemies, StrategyConfig strategy)
     {
         if (ability.IsAoE)
@@ -228,41 +228,41 @@ public class DeclarativeStrategyEngine : IStrategyEngine
         {
             return targetMode switch
             {
-                "lowest_ally_hp" => new List<BattleUnitState> { allies.OrderBy(a => a.CurrentHp).First() },
-                "self" => new List<BattleUnitState> { actor },
+                AbilityTarget.lowest_ally_hp => new List<BattleUnitState> { allies.OrderBy(a => a.CurrentHp).First() },
+                AbilityTarget.self => new List<BattleUnitState> { actor },
                 _ => new List<BattleUnitState> { allies.OrderBy(a => (double)a.CurrentHp / a.MaxHp).First() }
             };
         }
 
         return targetMode switch
         {
-            "priority" => SelectTargetByPriority(strategy.TargetPriority, enemies),
-            "lowest_hp" => new List<BattleUnitState> { enemies.OrderBy(e => e.CurrentHp).First() },
-            "highest_threat" => new List<BattleUnitState> { enemies.OrderByDescending(e => e.Attack).First() },
-            "all_enemies" => enemies,
+            AbilityTarget.priority => SelectTargetByPriority(strategy.TargetPriority, enemies),
+            AbilityTarget.lowest_hp => new List<BattleUnitState> { enemies.OrderBy(e => e.CurrentHp).First() },
+            AbilityTarget.highest_threat => new List<BattleUnitState> { enemies.OrderByDescending(e => e.Attack).First() },
+            AbilityTarget.all_enemies => enemies,
             _ => SelectTargetByPriority(strategy.TargetPriority, enemies)
         };
     }
 
-    private List<BattleUnitState> SelectTargetByPriority(List<string> priorities, List<BattleUnitState> enemies)
+    private List<BattleUnitState> SelectTargetByPriority(List<TargetPriority> priorities, List<BattleUnitState> enemies)
     {
         foreach (var priority in priorities)
         {
             switch (priority)
             {
-                case "lowest_hp":
+                case TargetPriority.lowest_hp:
                     return new List<BattleUnitState> { enemies.OrderBy(e => e.CurrentHp).First() };
-                case "healers":
+                case TargetPriority.healers:
                     var healers = enemies.Where(e => e.Class == UnitClass.Healer).ToList();
                     if (healers.Count > 0) return new List<BattleUnitState> { healers.First() };
                     break;
-                case "highest_threat":
+                case TargetPriority.highest_threat:
                     return new List<BattleUnitState> { enemies.OrderByDescending(e => e.Attack).First() };
-                case "mages":
+                case TargetPriority.mages:
                     var mages = enemies.Where(e => e.Class == UnitClass.Mage).ToList();
                     if (mages.Count > 0) return new List<BattleUnitState> { mages.First() };
                     break;
-                case "tanks":
+                case TargetPriority.tanks:
                     var tanks = enemies.Where(e => e.Class == UnitClass.Tank).ToList();
                     if (tanks.Count > 0) return new List<BattleUnitState> { tanks.First() };
                     break;
@@ -288,12 +288,12 @@ public class DeclarativeStrategyEngine : IStrategyEngine
         if (baseDamage < 1) baseDamage = 1;
 
         // Formation bonus
-        if (attacker.Formation == "aggressive")
+        if (attacker.Formation == Formation.aggressive)
         {
             baseDamage = (int)(baseDamage * 1.15);
             effects.Add("aggressive_bonus");
         }
-        else if (target.Formation == "defensive")
+        else if (target.Formation == Formation.defensive)
         {
             baseDamage = (int)(baseDamage * 0.85);
             effects.Add("defensive_reduction");
@@ -359,7 +359,7 @@ public class BattleUnitState
     public int Defense { get; }
     public int Speed { get; }
     public int TeamNumber { get; }
-    public string Formation { get; set; } = "balanced";
+    public Formation Formation { get; set; } = Formation.balanced;
     public List<BattleAbility> Abilities { get; }
     private Dictionary<string, int> Cooldowns { get; } = new();
 

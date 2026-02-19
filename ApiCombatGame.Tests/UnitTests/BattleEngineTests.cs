@@ -22,7 +22,7 @@ public class BattleEngineTests
     {
         var team1 = CreateTestTeam1();
         var team2 = CreateTestTeam2();
-        var strategy = new StrategyConfig { Formation = "balanced" };
+        var strategy = new StrategyConfig { Formation = Formation.balanced };
 
         var result1 = _engine.ResolveBattle(team1, strategy, team2, strategy, 50, seed: 42);
         var result2 = _engine.ResolveBattle(team1, strategy, team2, strategy, 50, seed: 42);
@@ -46,7 +46,7 @@ public class BattleEngineTests
     {
         var team1 = CreateTestTeam1();
         var team2 = CreateTestTeam2();
-        var strategy = new StrategyConfig { Formation = "balanced" };
+        var strategy = new StrategyConfig { Formation = Formation.balanced };
 
         var result1 = _engine.ResolveBattle(team1, strategy, team2, strategy, 50, seed: 42);
         var result2 = _engine.ResolveBattle(team1, strategy, team2, strategy, 50, seed: 999);
@@ -70,7 +70,7 @@ public class BattleEngineTests
     {
         var team1 = CreateTestTeam1();
         var team2 = CreateTestTeam2();
-        var strategy = new StrategyConfig { Formation = "balanced" };
+        var strategy = new StrategyConfig { Formation = Formation.balanced };
         int maxTurns = 10;
 
         var result = _engine.ResolveBattle(team1, strategy, team2, strategy, maxTurns, seed: 42);
@@ -83,7 +83,7 @@ public class BattleEngineTests
     {
         var team1 = CreateTestTeam1();
         var team2 = CreateTestTeam2();
-        var strategy = new StrategyConfig { Formation = "balanced" };
+        var strategy = new StrategyConfig { Formation = Formation.balanced };
 
         var result = _engine.ResolveBattle(team1, strategy, team2, strategy, 50, seed: 42);
 
@@ -96,7 +96,7 @@ public class BattleEngineTests
     {
         var team1 = CreateTestTeam1();
         var team2 = CreateTestTeam2();
-        var strategy = new StrategyConfig { Formation = "balanced" };
+        var strategy = new StrategyConfig { Formation = Formation.balanced };
 
         var result = _engine.ResolveBattle(team1, strategy, team2, strategy, 50, seed: 42);
 
@@ -115,7 +115,7 @@ public class BattleEngineTests
     {
         var team1 = CreateTestTeam1();
         var team2 = CreateTestTeam2();
-        var strategy = new StrategyConfig { Formation = "balanced" };
+        var strategy = new StrategyConfig { Formation = Formation.balanced };
 
         var result = _engine.ResolveBattle(team1, strategy, team2, strategy, 50, seed: 42);
 
@@ -172,8 +172,8 @@ public class BattleEngineTests
             CreateUnit("Warrior", UnitClass.Warrior, 200, 30, 10, 10)
         };
 
-        var aggressiveStrategy = new StrategyConfig { Formation = "aggressive" };
-        var balancedStrategy = new StrategyConfig { Formation = "balanced" };
+        var aggressiveStrategy = new StrategyConfig { Formation = Formation.aggressive };
+        var balancedStrategy = new StrategyConfig { Formation = Formation.balanced };
 
         // Run with aggressive team1 vs balanced team2
         var aggressiveResult = _engine.ResolveBattle(team1, aggressiveStrategy, team2, balancedStrategy, 50, seed: 42);

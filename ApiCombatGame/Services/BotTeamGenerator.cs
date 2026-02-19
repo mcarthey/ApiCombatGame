@@ -154,26 +154,26 @@ public class BotTeamGenerator : IBotTeamGenerator
         // Formation selection based on rating
         if (rating < 1000)
         {
-            strategy.Formation = "balanced";
-            strategy.TargetPriority = new List<string> { "lowest_hp" };
+            strategy.Formation = Formation.balanced;
+            strategy.TargetPriority = new List<TargetPriority> { TargetPriority.lowest_hp };
         }
         else if (rating < 1200)
         {
-            var formations = new[] { "aggressive", "defensive", "balanced" };
+            var formations = new[] { Formation.aggressive, Formation.defensive, Formation.balanced };
             strategy.Formation = formations[Random.Shared.Next(formations.Length)];
-            strategy.TargetPriority = new List<string> { "lowest_hp", "healers" };
+            strategy.TargetPriority = new List<TargetPriority> { TargetPriority.lowest_hp, TargetPriority.healers };
         }
         else if (rating < 1400)
         {
-            var formations = new[] { "aggressive", "defensive" };
+            var formations = new[] { Formation.aggressive, Formation.defensive };
             strategy.Formation = formations[Random.Shared.Next(formations.Length)];
-            strategy.TargetPriority = new List<string> { "highest_threat", "healers", "lowest_hp" };
+            strategy.TargetPriority = new List<TargetPriority> { TargetPriority.highest_threat, TargetPriority.healers, TargetPriority.lowest_hp };
         }
         else
         {
             // Expert bots use sophisticated strategies
-            strategy.Formation = rating > 1600 ? "aggressive" : "defensive";
-            strategy.TargetPriority = new List<string> { "healers", "highest_threat", "lowest_hp" };
+            strategy.Formation = rating > 1600 ? Formation.aggressive : Formation.defensive;
+            strategy.TargetPriority = new List<TargetPriority> { TargetPriority.healers, TargetPriority.highest_threat, TargetPriority.lowest_hp };
 
             // Add ability conditions for higher-rated bots
             // (In a full implementation, this would be based on actual unit abilities)
@@ -181,18 +181,18 @@ public class BotTeamGenerator : IBotTeamGenerator
             {
                 ["Heal"] = new AbilityCondition
                 {
-                    When = "ally_hp_below_50",
-                    Target = "lowest_ally_hp"
+                    When = AbilityWhen.ally_hp_below_50,
+                    Target = AbilityTarget.lowest_ally_hp
                 },
                 ["Fireball"] = new AbilityCondition
                 {
-                    When = "enemy_count_gte_2",
-                    Target = "priority"
+                    When = AbilityWhen.enemy_count_gte_2,
+                    Target = AbilityTarget.priority
                 },
                 ["Shield"] = new AbilityCondition
                 {
-                    When = "ally_hp_below_25",
-                    Target = "lowest_ally_hp"
+                    When = AbilityWhen.ally_hp_below_30,
+                    Target = AbilityTarget.lowest_ally_hp
                 }
             };
         }

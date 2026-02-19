@@ -52,8 +52,8 @@ public class FullGameFlowTests : IntegrationTestBase
             UnitIds = unitIdsA,
             Strategy = new StrategyConfig
             {
-                Formation = "aggressive",
-                TargetPriority = new List<string> { "lowest_hp" }
+                Formation = Formation.aggressive,
+                TargetPriority = new List<TargetPriority> { TargetPriority.lowest_hp }
             }
         };
 
@@ -83,8 +83,8 @@ public class FullGameFlowTests : IntegrationTestBase
             UnitIds = unitIdsB,
             Strategy = new StrategyConfig
             {
-                Formation = "defensive",
-                TargetPriority = new List<string> { "highest_hp" }
+                Formation = Formation.defensive,
+                TargetPriority = new List<TargetPriority> { TargetPriority.highest_threat }
             }
         };
 
@@ -226,8 +226,8 @@ public class FullGameFlowTests : IntegrationTestBase
             UnitIds = unitIds,
             Strategy = new StrategyConfig
             {
-                Formation = "aggressive",
-                TargetPriority = new List<string> { "lowest_hp" }
+                Formation = Formation.aggressive,
+                TargetPriority = new List<TargetPriority> { TargetPriority.lowest_hp }
             }
         };
 
@@ -241,8 +241,8 @@ public class FullGameFlowTests : IntegrationTestBase
             UnitIds = unitIds,
             Strategy = new StrategyConfig
             {
-                Formation = "defensive",
-                TargetPriority = new List<string> { "highest_hp", "healers" }
+                Formation = Formation.defensive,
+                TargetPriority = new List<TargetPriority> { TargetPriority.highest_threat, TargetPriority.healers }
             }
         };
 

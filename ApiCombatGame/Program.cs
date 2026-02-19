@@ -197,6 +197,39 @@ builder.Services.AddControllers(options =>
     .AddJsonOptions(options =>
     {
         options.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
+    })
+    .ConfigureApiBehaviorOptions(options =>
+    {
+        options.InvalidModelStateResponseFactory = context =>
+        {
+            var errors = context.ModelState
+                .Where(e => e.Value?.Errors.Count > 0)
+                .SelectMany(e => e.Value!.Errors.Select(err =>
+                {
+                    var message = err.ErrorMessage;
+
+                    // Improve cryptic JSON deserialization errors
+                    if (!string.IsNullOrEmpty(err.Exception?.Message))
+                    {
+                        if (err.Exception.Message.Contains("could not be converted"))
+                            message = $"Invalid value for '{e.Key}'. Check the field type and format — see the Strategy Guide in the API docs for valid values.";
+                        else
+                            message = $"Invalid value for '{e.Key}': {err.Exception.Message}";
+                    }
+
+                    if (string.IsNullOrEmpty(message))
+                        message = $"The '{e.Key}' field is invalid.";
+
+                    return message;
+                }))
+                .ToList();
+
+            return new Microsoft.AspNetCore.Mvc.BadRequestObjectResult(new
+            {
+                error = errors.Count == 1 ? errors[0] : "One or more validation errors occurred.",
+                details = errors
+            });
+        };
     });
 
 // Razor Pages (Web UI)
