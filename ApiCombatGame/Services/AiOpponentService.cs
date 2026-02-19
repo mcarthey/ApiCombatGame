@@ -184,6 +184,24 @@ public class AiOpponentService : IAiOpponentService
 
         await _context.SaveChangesAsync();
 
+        // Auto-create replay
+        try
+        {
+            _context.BattleReplays.Add(new BattleReplay
+            {
+                Id = Guid.NewGuid(),
+                BattleId = battle.Id,
+                ShareUrl = GenerateShareUrl(),
+                ViewCount = 0,
+                CreatedAt = DateTime.UtcNow
+            });
+            await _context.SaveChangesAsync();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Auto-replay creation failed for practice battle {BattleId}", battle.Id);
+        }
+
         _logger.LogInformation(
             "Practice battle {BattleId}: Player {PlayerId} vs AI '{AiName}' — {Result} in {Turns} turns",
             battle.Id, playerId, preset.Name, playerWon ? "Won" : isDraw ? "Draw" : "Lost", resolution.TotalTurns);
@@ -572,6 +590,16 @@ public class AiOpponentService : IAiOpponentService
         public int ApproximateRating { get; init; }
         public StrategyConfig Strategy { get; init; } = new();
         public List<AiUnitTemplate> Units { get; init; } = new();
+    }
+
+    private static string GenerateShareUrl()
+    {
+        const string chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+        var bytes = Guid.NewGuid().ToByteArray();
+        var result = new char[8];
+        for (int i = 0; i < 8; i++)
+            result[i] = chars[bytes[i] % chars.Length];
+        return new string(result);
     }
 
     private class AiUnitTemplate

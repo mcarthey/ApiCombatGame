@@ -335,6 +335,25 @@ public class BattleService : IBattleService
 
             await _context.SaveChangesAsync(cancellationToken);
 
+            // Auto-create replay so HATEOAS links work immediately
+            try
+            {
+                var replay = new BattleReplay
+                {
+                    Id = Guid.NewGuid(),
+                    BattleId = battle1.Id,
+                    ShareUrl = GenerateShareUrl(),
+                    ViewCount = 0,
+                    CreatedAt = DateTime.UtcNow
+                };
+                _context.BattleReplays.Add(replay);
+                await _context.SaveChangesAsync(cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Auto-replay creation failed for battle {BattleId}", battle1.Id);
+            }
+
             _logger.LogInformation(
                 "Battle {BattleId} completed: {Turns} turns, Winner: {Winner}",
                 battle1.Id, resolution.TotalTurns, battle1.WinnerId?.ToString() ?? "Draw");
@@ -348,6 +367,16 @@ public class BattleService : IBattleService
                 await RefundDailyBattleUsageAsync(battle1.Player2Id.Value, cancellationToken);
             await _context.SaveChangesAsync(cancellationToken);
         }
+    }
+
+    private static string GenerateShareUrl()
+    {
+        const string chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+        var bytes = Guid.NewGuid().ToByteArray();
+        var result = new char[8];
+        for (int i = 0; i < 8; i++)
+            result[i] = chars[bytes[i] % chars.Length];
+        return new string(result);
     }
 
     private async Task RefundDailyBattleUsageAsync(Guid playerId, CancellationToken ct)

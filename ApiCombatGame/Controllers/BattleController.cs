@@ -7,6 +7,7 @@ using ApiCombatGame.Models.Enums;
 using ApiCombatGame.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace ApiCombatGame.Controllers;
 
@@ -153,9 +154,13 @@ public class BattleController : ControllerBase
             response.Links = new Dictionary<string, ApiLink>
             {
                 ["self"] = Links.Get($"/api/v1/battle/results/{battleId}"),
-                ["replay"] = Links.Get($"/api/v1/replays/{battleId}", "Watch replay"),
                 ["queue_again"] = Links.Post("/api/v1/battle/queue", "Queue another battle")
             };
+            var replay = await _context.BattleReplays.FirstOrDefaultAsync(r => r.BattleId == battleId);
+            if (replay != null)
+                response.Links["replay"] = Links.Get($"/api/v1/replays/{replay.ShareUrl}", "Watch replay");
+            else
+                response.Links["create_replay"] = Links.Post("/api/v1/replays/create", "Create replay");
             if (response.WinnerId.HasValue)
                 response.Links["winner"] = Links.Get($"/api/v1/leaderboard/player/{response.WinnerId}");
             if (response.LoserId.HasValue)
@@ -187,13 +192,19 @@ public class BattleController : ControllerBase
         offset = Math.Max(0, offset);
 
         var results = await _battleService.GetBattleHistoryAsync(playerId, limit, offset);
+        var battleIds = results.Select(r => r.BattleId).ToList();
+        var replays = await _context.BattleReplays
+            .Where(r => battleIds.Contains(r.BattleId))
+            .ToDictionaryAsync(r => r.BattleId, r => r.ShareUrl);
+
         foreach (var r in results)
         {
             r.Links = new Dictionary<string, ApiLink>
             {
-                ["self"] = Links.Get($"/api/v1/battle/results/{r.BattleId}"),
-                ["replay"] = Links.Get($"/api/v1/replays/{r.BattleId}", "Watch replay")
+                ["self"] = Links.Get($"/api/v1/battle/results/{r.BattleId}")
             };
+            if (replays.TryGetValue(r.BattleId, out var shareUrl))
+                r.Links["replay"] = Links.Get($"/api/v1/replays/{shareUrl}", "Watch replay");
         }
         return Ok(results);
     }
