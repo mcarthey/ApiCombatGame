@@ -40,17 +40,18 @@ public class SettingsModel : PageModel
     public DateTime MemberSince { get; set; }
     public NotificationPreferences NotifPrefs { get; set; } = new();
 
-    public async Task OnGetAsync()
+    public async Task<IActionResult> OnGetAsync()
     {
         var playerId = GetPlayerId();
         var player = await _context.Players.FindAsync(playerId);
-        if (player == null) return;
+        if (player == null) return RedirectToPage("/Auth/Login");
 
         CurrentUsername = player.Username;
         CurrentEmail = player.Email;
         MemberSince = player.CreatedAt;
         Input.Email = player.Email;
         NotifPrefs = await _notifications.GetPreferencesAsync(playerId);
+        return Page();
     }
 
     public async Task<IActionResult> OnPostUpdateEmailAsync()
@@ -59,9 +60,9 @@ public class SettingsModel : PageModel
         var player = await _context.Players.FindAsync(playerId);
         if (player == null) return RedirectToPage("/Auth/Login");
 
-        if (string.IsNullOrWhiteSpace(Input.Email))
+        if (string.IsNullOrWhiteSpace(Input.Email) || !Input.Email.Contains('@') || !Input.Email.Contains('.'))
         {
-            ErrorMessage = "Email is required.";
+            ErrorMessage = "A valid email address is required.";
             await LoadPlayerInfo(player);
             return Page();
         }
@@ -75,10 +76,16 @@ public class SettingsModel : PageModel
             return Page();
         }
 
+        var emailChanged = !string.Equals(player.Email, Input.Email, StringComparison.OrdinalIgnoreCase);
         player.Email = Input.Email;
+        if (emailChanged)
+        {
+            player.EmailConfirmed = false;
+            player.EmailConfirmationToken = null;
+        }
         await _context.SaveChangesAsync();
 
-        SuccessMessage = "Email updated successfully.";
+        SuccessMessage = emailChanged ? "Email updated. Please verify your new email address." : "Email updated successfully.";
         await LoadPlayerInfo(player);
         return Page();
     }
@@ -174,7 +181,9 @@ public class SettingsModel : PageModel
     private Guid GetPlayerId()
     {
         var claim = User.FindFirst("PlayerId") ?? User.FindFirst(ClaimTypes.NameIdentifier);
-        return Guid.Parse(claim!.Value);
+        if (claim?.Value == null || !Guid.TryParse(claim.Value, out var playerId))
+            throw new UnauthorizedAccessException("PlayerId claim not found.");
+        return playerId;
     }
 
     public class SettingsInputModel

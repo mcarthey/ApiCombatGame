@@ -34,7 +34,13 @@ public class ToolsModel : PageModel
     [BindProperty]
     public DateTime? Since { get; set; }
 
-    private Guid GetAdminId() => Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+    private Guid GetAdminId()
+    {
+        var claim = User.FindFirst(ClaimTypes.NameIdentifier);
+        if (claim?.Value == null || !Guid.TryParse(claim.Value, out var adminId))
+            throw new UnauthorizedAccessException("Admin identity claim missing.");
+        return adminId;
+    }
 
     public async Task OnGetAsync(string? message)
     {

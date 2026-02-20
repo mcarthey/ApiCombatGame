@@ -67,6 +67,7 @@ public class BattleController : ControllerBase
                 {
                     player.DailyBattlesUsed = 0;
                     player.LastBattleResetDate = DateTime.UtcNow.Date;
+                    await _context.SaveChangesAsync();
                 }
 
                 if (player.DailyBattlesUsed >= 10)

@@ -19,6 +19,7 @@ public class NotificationsModel : PageModel
 
     public List<Notification> NotificationList { get; set; } = new();
     public int UnreadCount { get; set; }
+    public bool HasNextPage { get; set; }
 
     [BindProperty(SupportsGet = true)]
     public new int Page { get; set; } = 1;
@@ -28,8 +29,11 @@ public class NotificationsModel : PageModel
 
     public async Task OnGetAsync()
     {
+        Page = Math.Max(1, Page);
         var playerId = GetPlayerId();
-        NotificationList = await _notifications.GetNotificationsAsync(playerId, Page, 20, UnreadOnly);
+        NotificationList = await _notifications.GetNotificationsAsync(playerId, Page, 21, UnreadOnly);
+        HasNextPage = NotificationList.Count > 20;
+        if (HasNextPage) NotificationList = NotificationList.Take(20).ToList();
         UnreadCount = await _notifications.GetUnreadCountAsync(playerId);
     }
 
@@ -50,6 +54,8 @@ public class NotificationsModel : PageModel
     private Guid GetPlayerId()
     {
         var claim = User.FindFirst("PlayerId") ?? User.FindFirst(ClaimTypes.NameIdentifier);
-        return Guid.Parse(claim!.Value);
+        if (claim?.Value == null || !Guid.TryParse(claim.Value, out var playerId))
+            throw new UnauthorizedAccessException("PlayerId claim not found.");
+        return playerId;
     }
 }

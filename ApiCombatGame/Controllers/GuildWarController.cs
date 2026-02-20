@@ -62,6 +62,7 @@ public class GuildWarController : ControllerBase
     public async Task<IActionResult> GetWarHistory([FromQuery] int limit = 10)
     {
         var playerId = GetPlayerId();
+        limit = Math.Clamp(limit, 1, 50);
         var result = await _guildWarService.GetWarHistoryAsync(playerId, limit);
         return Ok(result);
     }

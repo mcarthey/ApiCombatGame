@@ -133,7 +133,7 @@ public class StripeWebhookController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error processing Stripe webhook event");
-            return Ok();  // Return 200 to prevent Stripe from retrying unprocessable events
+            return StatusCode(500, new { error = "Webhook processing failed." });
         }
     }
 }

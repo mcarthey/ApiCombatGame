@@ -41,6 +41,7 @@ public class ActivityFeedController : ControllerBase
         [FromQuery] int page = 1, [FromQuery] int pageSize = 20)
     {
         var playerId = GetPlayerId();
+        page = Math.Max(1, page);
         pageSize = Math.Clamp(pageSize, 1, 50);
         var feed = await _activityService.GetFeedAsync(playerId, page, pageSize);
         return Ok(feed);
@@ -67,6 +68,7 @@ public class ActivityFeedController : ControllerBase
     {
         try
         {
+            page = Math.Max(1, page);
             pageSize = Math.Clamp(pageSize, 1, 50);
             var feed = await _activityService.GetPublicFeedAsync(username, page, pageSize);
             return Ok(feed);

@@ -114,6 +114,8 @@ public class DashboardModel : PageModel
     private Guid GetPlayerId()
     {
         var claim = User.FindFirst("PlayerId") ?? User.FindFirst(ClaimTypes.NameIdentifier);
-        return Guid.Parse(claim!.Value);
+        if (claim?.Value == null || !Guid.TryParse(claim.Value, out var playerId))
+            throw new UnauthorizedAccessException("PlayerId claim not found.");
+        return playerId;
     }
 }

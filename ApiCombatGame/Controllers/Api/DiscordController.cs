@@ -198,6 +198,9 @@ public class DiscordController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<DiscordProfileResponse>> LookupByDiscord(string discordUserId)
     {
+        if (string.IsNullOrWhiteSpace(discordUserId) || !ulong.TryParse(discordUserId, out _))
+            return BadRequest(new { error = "Invalid Discord user ID." });
+
         var profile = await _discordService.GetProfileByDiscordIdAsync(discordUserId);
         if (profile == null)
             return NotFound(new { error = "No verified account linked to this Discord user." });

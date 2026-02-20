@@ -3,6 +3,11 @@
 @using ApiCombatGame.Helpers
 @{
     ViewData["Title"] = "Dashboard";
+    if (Model.Dashboard == null)
+    {
+        <meta http-equiv="refresh" content="0;url=/Auth/Login" />
+        return;
+    }
     var (apiTierName, apiTierFlavor, apiTierCss) = RatingTierHelper.GetTier(Model.Dashboard.Rating);
 }
 

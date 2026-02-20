@@ -81,6 +81,9 @@ public class ReplayController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<ReplayResponse>> GetReplay(string shareUrl)
     {
+        if (string.IsNullOrWhiteSpace(shareUrl) || shareUrl.Length > 100)
+            return BadRequest(new { error = "Invalid share URL." });
+
         var replay = await _replayService.GetReplay(shareUrl);
         if (replay == null)
         {

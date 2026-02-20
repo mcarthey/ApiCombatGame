@@ -138,7 +138,7 @@ public class AuthService : IAuthService
     public async Task<AuthResponse> RefreshTokenAsync(Guid playerId)
     {
         var player = await _context.Players.FindAsync(playerId);
-        if (player == null)
+        if (player == null || player.IsDeleted)
             throw new UnauthorizedAccessException("Player not found.");
 
         return new AuthResponse

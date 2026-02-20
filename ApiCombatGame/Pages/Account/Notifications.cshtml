@@ -99,7 +99,7 @@
                 <span></span>
             }
             <span class="text-sm" style="color: var(--md-sys-color-on-surface-variant);">Page @Model.Page</span>
-            @if (Model.NotificationList.Count == 20)
+            @if (Model.HasNextPage)
             {
                 <a asp-page="/Account/Notifications" asp-route-page="@(Model.Page + 1)" asp-route-unreadOnly="@Model.UnreadOnly"
                    class="md3-btn-text" style="text-decoration: none;">

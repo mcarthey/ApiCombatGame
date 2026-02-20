@@ -331,7 +331,7 @@ public class TeamController : ControllerBase
         if (!string.IsNullOrEmpty(team.StrategyJson) && team.StrategyJson != "{}")
         {
             try { strategy = JsonSerializer.Deserialize<StrategyConfig>(team.StrategyJson, JsonOptions); }
-            catch { /* ignore parse errors */ }
+            catch (Exception ex) { _logger.LogWarning(ex, "Failed to deserialize strategy for team {TeamId}", team.Id); }
         }
 
         return new TeamResponse

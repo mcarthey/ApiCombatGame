@@ -32,11 +32,18 @@ public class PlayerDetailModel : PageModel
     public PlayerReconciliationDelta? ReconciliationPreview { get; set; }
     public List<LedgerTimelineEntry> LedgerEntries { get; set; } = new();
 
-    private Guid GetAdminId() => Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+    private Guid GetAdminId()
+    {
+        var claim = User.FindFirst(ClaimTypes.NameIdentifier);
+        if (claim?.Value == null || !Guid.TryParse(claim.Value, out var adminId))
+            throw new UnauthorizedAccessException("Admin identity claim missing.");
+        return adminId;
+    }
 
     public async Task<IActionResult> OnGetAsync(string? message)
     {
         if (message == "updated") SuccessMessage = "Player updated successfully.";
+        if (message == "error_password_too_short") ErrorMessage = "Password must be at least 8 characters.";
 
         PlayerData = await _analytics.GetPlayerDetailAsync(Id);
         if (PlayerData == null) return RedirectToPage("Players");
@@ -94,10 +101,12 @@ public class PlayerDetailModel : PageModel
 
     public async Task<IActionResult> OnPostResetPasswordAsync(Guid playerId, string newPassword)
     {
-        if (!string.IsNullOrWhiteSpace(newPassword) && newPassword.Length >= 8)
+        if (string.IsNullOrWhiteSpace(newPassword) || newPassword.Length < 8)
         {
-            await _analytics.ResetPasswordAsync(GetAdminId(), playerId, newPassword);
+            return RedirectToPage("PlayerDetail", new { id = playerId, message = "error_password_too_short" });
         }
+
+        await _analytics.ResetPasswordAsync(GetAdminId(), playerId, newPassword);
         return RedirectToPage("PlayerDetail", new { id = playerId, message = "updated" });
     }
 
