@@ -837,15 +837,15 @@ After each battle resolves, the following hooks execute (in order):
 - [ ] Integrate SubscriptionEvents into player detail view
 - [ ] Add notification count/stats to admin technical page
 
-### Additional Notification Sources (Not Yet Wired)
+### Additional Notification Sources ✅ COMPLETE
 
-- [ ] Modifier rotation → NewModifierActive notification
-- [ ] Daily challenge generation → DailyChallengesAvailable notification
-- [ ] Strategy rated → StrategyRated notification to creator
-- [ ] Strategy download milestone → StrategyDownloadMilestone
-- [ ] Guild treasury upgrade → GuildTreasuryUpgrade notification
-- [ ] Guild strategy published → GuildStrategyPublished notification
-- [ ] Rating milestone → RatingMilestone (e.g., reaching 1500, 2000 rating)
+- [x] Modifier rotation → NewModifierActive notification (all players notified)
+- [x] Daily challenge generation → DailyChallengesAvailable notification
+- [x] Strategy rated → StrategyRated notification to creator
+- [x] Strategy download milestone → StrategyDownloadMilestone (10/50/100/250/500/1000)
+- [x] Guild treasury upgrade → GuildTreasuryUpgrade notification (all guild members)
+- [x] Guild strategy published → GuildStrategyPublished notification (all guild members)
+- [x] Rating milestone → RatingMilestone (crossing 500/1000/1500/2000/2500/3000 thresholds)
 
 ---
 
@@ -896,16 +896,17 @@ After each battle resolves, the following hooks execute (in order):
 
 ---
 
-## Phase 7: Launch Preparation ⏳ DEFERRED
+## Phase 7: Launch Preparation ✅ PARTIAL
 
-- [ ] Performance optimization
-- [ ] Security audit
-- [ ] Load testing (10K+ concurrent users)
-- [ ] Error monitoring (Sentry or similar)
-- [ ] Backup/recovery procedures
-- [ ] Documentation polish
-- [ ] Marketing materials
-- [ ] Support channels (Discord, email)
+- [x] Performance: Response caching on public/read-heavy endpoints (leaderboard 30s, SDK 1h, AI opponents 1h, game status 60s)
+- [x] Security headers: X-Content-Type-Options, X-Frame-Options, Referrer-Policy, Permissions-Policy
+- [x] Error handling: GlobalExceptionMiddleware + JSON error responses for API routes
+- [x] Documentation polish: IMPLEMENTATION_TASK_LIST.md, MANUAL_TEST.md fully updated
+- [ ] Load testing (10K+ concurrent users) — requires production environment
+- [ ] Error monitoring (Sentry or similar) — infrastructure decision
+- [ ] Backup/recovery procedures — infrastructure decision
+- [x] Marketing materials: HN post, Education page, About page, Landing page
+- [x] Support channels: Contact form, Discord links in nav
 
 ---
 
