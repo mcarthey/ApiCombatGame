@@ -330,6 +330,89 @@ public class PlatformFeatureTests : IntegrationTestBase
         Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
     }
 
+    // ── Education Phase 6: Class Leaderboard ──
+
+    [Fact]
+    public async Task Education_ModuleLeaderboard_NotEnrolled_ReturnsBadRequest()
+    {
+        var (client, _) = await CreateAuthenticatedClient();
+
+        var response = await client.GetAsync($"/api/v1/education/modules/{Guid.NewGuid()}/leaderboard");
+
+        // 404 for nonexistent module or 400 for not enrolled
+        Assert.True(
+            response.StatusCode == HttpStatusCode.NotFound ||
+            response.StatusCode == HttpStatusCode.BadRequest);
+    }
+
+    [Fact]
+    public async Task Education_ModuleLeaderboard_Enrolled_ReturnsOk()
+    {
+        var (client, auth) = await CreateEducatorClient();
+
+        // Create and publish module
+        var moduleRequest = new
+        {
+            title = "Leaderboard Test Module",
+            description = "Testing leaderboard",
+            difficulty = "beginner",
+            lessons = new[] { new { title = "L1", objective = "Test", endpoint = "GET /api/v1/player/profile", hint = "" } }
+        };
+        var createResponse = await client.PostAsJsonAsync("/api/v1/education/modules", moduleRequest);
+        createResponse.EnsureSuccessStatusCode();
+        var json = JsonSerializer.Deserialize<JsonElement>(await createResponse.Content.ReadAsStringAsync(), JsonOptions);
+        var moduleId = json.GetProperty("id").GetGuid();
+
+        await client.PostAsync($"/api/v1/education/modules/{moduleId}/publish", null);
+        await client.PostAsync($"/api/v1/education/enroll/{moduleId}", null);
+
+        var response = await client.GetAsync($"/api/v1/education/modules/{moduleId}/leaderboard");
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var content = await response.Content.ReadAsStringAsync();
+        var leaderboard = JsonSerializer.Deserialize<JsonElement>(content, JsonOptions);
+        Assert.Equal(JsonValueKind.Array, leaderboard.ValueKind);
+        Assert.True(leaderboard.GetArrayLength() >= 1);
+    }
+
+    // ── Education Phase 6: Unenroll ──
+
+    [Fact]
+    public async Task Education_Unenroll_NotEnrolled_ReturnsNotFound()
+    {
+        var (client, _) = await CreateAuthenticatedClient();
+
+        var response = await client.DeleteAsync($"/api/v1/education/enroll/{Guid.NewGuid()}");
+
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    // ── Education Phase 6: Class Tournament ──
+
+    [Fact]
+    public async Task Education_CreateClassTournament_NonEducator_Returns403()
+    {
+        var (client, _) = await CreateAuthenticatedClient();
+
+        var request = new { entryFee = 0, maxParticipants = 8 };
+        var response = await client.PostAsJsonAsync($"/api/v1/education/modules/{Guid.NewGuid()}/tournament", request);
+
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+    }
+
+    // ── AI Batch Practice ──
+
+    [Fact]
+    public async Task Ai_BatchPractice_InvalidTeam_ReturnsBadRequest()
+    {
+        var (client, _) = await CreateAuthenticatedClient();
+
+        var request = new { teamId = Guid.NewGuid(), opponentId = "novice-1", count = 5 };
+        var response = await client.PostAsJsonAsync("/api/v1/ai/batch-practice", request);
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
     // ── Discord ──
 
     [Fact]

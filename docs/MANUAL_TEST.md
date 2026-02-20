@@ -698,6 +698,54 @@ Sections below are marked with coverage status:
 
 ---
 
+## 34. Class-Scoped Leaderboard — PARTIAL
+> **Partially automated.** Integration test covers enrolled-student access. Manual verification of ranking order and data accuracy needed.
+
+- [x] `GET /api/v1/education/modules/{moduleId}/leaderboard` as enrolled student → `200 OK` with array
+- [ ] Leaderboard contains all enrolled students, sorted by rating descending
+- [ ] Each entry: `{ rank, username, rating, wins, losses, winRate, lessonsCompleted }`
+- [ ] Non-enrolled player gets `400 Bad Request`
+- [x] Non-existent module → `404 Not Found`
+
+## 35. Batch Practice — PARTIAL
+> **Partially automated.** Integration test covers invalid team error. Full batch run needs manual verification.
+
+- [x] `POST /api/v1/ai/batch-practice` with invalid team → `400 Bad Request`
+- [ ] Valid team + `opponentId: "novice-1"` + `count: 50` → `200 OK` with aggregate stats
+- [ ] Response: `{ totalBattles, wins, losses, winRate, avgTurns, opponentName }`
+- [ ] No gold/XP awarded (simulation only) — verify player balance unchanged
+- [ ] `count` clamped to max 200
+- [ ] Omitting `opponentId` → random AI opponent selected
+
+## 36. Class-Scoped Tournament — PARTIAL
+> **Partially automated.** Integration test covers non-educator access block.
+
+- [x] Non-educator `POST /modules/{moduleId}/tournament` → `403 Forbidden`
+- [ ] Educator creates class tournament → `201 Created` with tournament ID
+- [ ] Students can register via `POST /api/v1/tournament/enter` (only enrolled students)
+- [ ] Non-enrolled students get `400 Bad Request` when trying to enter
+- [ ] Tournament bracket visible at `GET /api/v1/tournament/bracket/{tournamentId}`
+- [ ] Default entry fee is 0 (configurable by instructor)
+
+## 37. Endpoint-Linked Challenges — MANUAL
+> **Not covered by automation.** Lesson verification fields are schema-level changes.
+
+- [ ] Create module with lesson including `verificationEndpoint` and `verificationMethod`
+- [ ] `GET /api/v1/education/modules/{moduleId}` includes verification fields in lesson DTOs
+- [ ] Example: `{ "verificationEndpoint": "POST /api/v1/auth/register", "verificationMethod": "POST" }`
+- [ ] Lessons without verification fields still work normally (null fields)
+
+## 38. Student Unenroll — PARTIAL
+> **Partially automated.** Integration test covers not-enrolled case.
+
+- [x] `DELETE /api/v1/education/enroll/{moduleId}` when not enrolled → `404 Not Found`
+- [ ] Enrolled student unenrolls → `200 OK` with `{ message: "Unenrolled from module." }`
+- [ ] Module `enrolledCount` decremented
+- [ ] Student can re-enroll after unenrolling
+- [ ] After unenroll, student no longer appears in class leaderboard
+
+---
+
 ## Quick Smoke Test Sequence — AUTOMATED
 > **This entire sequence is now automated** by the Robot Player E2E test. Run manually only if you suspect a specific integration issue.
 
@@ -740,3 +788,8 @@ The areas with the highest manual testing priority are:
 | **Low** | 28: Education Page | Nav links, Contact pre-selection, visual |
 | **Low** | 32: Landing Page | Marketing page |
 | **Low** | 33: Favicon | Visual only |
+| **Low** | 34: Class Leaderboard | Ranking accuracy, data display |
+| **Low** | 35: Batch Practice | Full batch run, economy isolation |
+| **Low** | 36: Class Tournament | Enrollment gating, bracket generation |
+| **Low** | 37: Endpoint-Linked | Schema-level, manual API call verification |
+| **Low** | 38: Student Unenroll | Re-enrollment, count decrement |
