@@ -45,6 +45,9 @@ public class Player
     public bool IsAdmin { get; set; } = false;
     public AdminRole AdminRole { get; set; } = AdminRole.None;
 
+    // Educator (verified .edu email or admin-granted for accredited institutions)
+    public bool IsEducator { get; set; } = false;
+
     // Bot players (AI opponents for matchmaking)
     public bool IsBot { get; set; } = false;
 
