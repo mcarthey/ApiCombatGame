@@ -34,6 +34,7 @@ public class LeaderboardController : ControllerBase
     [ApiGameTip("Fetch the top 10 and inspect their win rates. Players above 70% win rate often rely on specific unit-class synergies you can reverse-engineer by reviewing their public battle replays.")]
     [ApiPrerequisite("Register and login")]
     [HttpGet]
+    [ResponseCache(Duration = 30)]
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> GetLeaderboard([FromQuery] int limit = 100)
     {

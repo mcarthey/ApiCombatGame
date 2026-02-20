@@ -31,6 +31,7 @@ public class SdkController : ControllerBase
     [ApiDifficulty("beginner")]
     [ApiGameTip("Start here! This endpoint gives you everything you need to build your first client.")]
     [HttpGet("quickstart")]
+    [ResponseCache(Duration = 3600)]
     [ProducesResponseType(typeof(QuickStartResponse), StatusCodes.Status200OK)]
     public ActionResult<QuickStartResponse> GetQuickStart()
     {
@@ -48,6 +49,7 @@ public class SdkController : ControllerBase
     [ApiDifficulty("beginner")]
     [ApiGameTip("Pair this with the OpenAPI spec at /openapi/v1.json for full request/response schemas.")]
     [HttpGet("endpoints")]
+    [ResponseCache(Duration = 3600)]
     [ProducesResponseType(typeof(EndpointCatalogResponse), StatusCodes.Status200OK)]
     public ActionResult<EndpointCatalogResponse> GetEndpointCatalog()
     {
@@ -65,6 +67,7 @@ public class SdkController : ControllerBase
     [ApiDifficulty("beginner")]
     [ApiGameTip("Use this endpoint for health checks and status monitoring in your bot or client.")]
     [HttpGet("status")]
+    [ResponseCache(Duration = 60)]
     [ProducesResponseType(typeof(GameStatusResponse), StatusCodes.Status200OK)]
     public async Task<ActionResult<GameStatusResponse>> GetGameStatus()
     {

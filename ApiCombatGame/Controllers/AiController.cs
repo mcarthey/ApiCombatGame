@@ -41,6 +41,7 @@ public class AiController : ControllerBase
     [ApiPrerequisite("Register and login")]
     [ApiExample("List AI Opponents", Response = "{\n  \"opponents\": [\n    {\n      \"id\": \"novice-1\",\n      \"name\": \"Training Dummy\",\n      \"difficulty\": \"novice\",\n      \"approximateRating\": 600,\n      \"teamSize\": 3,\n      \"teamClasses\": [\"Warrior\", \"Ranger\", \"Mage\"],\n      \"formation\": \"balanced\"\n    }\n  ],\n  \"rewardMultiplier\": 0.5,\n  \"ratingAffected\": false,\n  \"countsTowardDailyLimit\": false\n}")]
     [HttpGet("opponents")]
+    [ResponseCache(Duration = 3600)]
     [ProducesResponseType(typeof(AiOpponentListResponse), StatusCodes.Status200OK)]
     public IActionResult GetOpponents()
     {
