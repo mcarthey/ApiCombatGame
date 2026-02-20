@@ -161,8 +161,9 @@ public class StrategyMarketplaceService : IStrategyMarketplaceService
             });
         }
 
-        // Recalculate average
-        strategy.AverageRating = strategy.Ratings.Average(r => r.Rating);
+        // Recalculate average (defensive: default to 0 if somehow empty)
+        strategy.AverageRating = strategy.Ratings.Count > 0
+            ? strategy.Ratings.Average(r => r.Rating) : 0;
         strategy.UpdatedAt = DateTime.UtcNow;
 
         await _context.SaveChangesAsync();

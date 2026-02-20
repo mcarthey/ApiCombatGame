@@ -91,7 +91,11 @@ public class ChallengeService : IChallengeService
         }
 
         var player = await _context.Players.FindAsync(playerId);
-        if (player == null) return;
+        if (player == null)
+        {
+            _logger.LogWarning("Player {PlayerId} not found in GenerateDailyChallenges", playerId);
+            return;
+        }
 
         int needed = 3 - existingChallenges;
         var newChallenges = GenerateMixedDifficulty(player, needed);
@@ -119,7 +123,12 @@ public class ChallengeService : IChallengeService
         foreach (var challenge in challenges.Where(c => !c.IsCompleted))
         {
             var generator = _generators.FirstOrDefault(g => g.ChallengeType == challenge.ChallengeType);
-            if (generator != null && generator.CheckProgress(challenge, battle))
+            if (generator == null)
+            {
+                _logger.LogWarning("No generator found for challenge type {Type}", challenge.ChallengeType);
+                continue;
+            }
+            if (generator.CheckProgress(challenge, battle))
             {
                 challenge.Progress++;
                 if (challenge.Progress >= challenge.RequiredProgress)

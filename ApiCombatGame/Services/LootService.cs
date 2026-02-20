@@ -33,7 +33,11 @@ public class LootService : ILootService
     {
         var drops = new List<LootDrop>();
         var player = await _context.Players.FindAsync(playerId);
-        if (player == null) return new List<LootDropResponse>();
+        if (player == null)
+        {
+            _logger.LogWarning("Player {PlayerId} not found in RollLoot", playerId);
+            return new List<LootDropResponse>();
+        }
 
         // Calculate effective drop chance
         double dropChance = BaseDropChance;
@@ -114,6 +118,8 @@ public class LootService : ILootService
         var player = await _context.Players.FindAsync(playerId)
             ?? throw new KeyNotFoundException("Player not found.");
 
+        await using var transaction = await _context.Database.BeginTransactionAsync();
+
         int totalGold = 0;
         int totalXp = 0;
         var titles = new List<string>();
@@ -157,6 +163,7 @@ public class LootService : ILootService
         _ledger.LogPlayer(playerId, "Currency", oldCurrency, player.Currency, "Loot", "LootClaimed");
         _ledger.LogPlayer(playerId, "ExperiencePoints", oldXp, player.ExperiencePoints, "Loot", "LootClaimed");
         await _context.SaveChangesAsync();
+        await transaction.CommitAsync();
 
         return new ClaimLootResponse
         {

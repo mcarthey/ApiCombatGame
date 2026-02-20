@@ -85,7 +85,10 @@ public class SubscriptionService : ISubscriptionService
         _logger.LogInformation("Created Stripe Checkout session {SessionId} for player {PlayerId}, tier: {Tier}",
             session.Id, playerId, tier);
 
-        return session.Url!;
+        if (string.IsNullOrEmpty(session.Url))
+            throw new InvalidOperationException("Stripe session creation failed: no checkout URL returned.");
+
+        return session.Url;
     }
 
     public async Task ChangeTierAsync(Guid playerId, string newTier)
@@ -173,7 +176,10 @@ public class SubscriptionService : ISubscriptionService
         Guid? playerId = null;
         if (stripeSub.Metadata.TryGetValue("playerId", out var playerIdStr))
         {
-            playerId = Guid.Parse(playerIdStr);
+            if (Guid.TryParse(playerIdStr, out var parsedId))
+                playerId = parsedId;
+            else
+                _logger.LogWarning("Invalid playerId in Stripe metadata: {PlayerIdStr}", playerIdStr);
         }
 
         // Also try to find by customer ID from existing subscription records
@@ -399,6 +405,9 @@ public class SubscriptionService : ISubscriptionService
         var service = new Stripe.BillingPortal.SessionService();
         var session = await service.CreateAsync(options);
 
+        if (string.IsNullOrEmpty(session.Url))
+            throw new InvalidOperationException("Stripe portal session creation failed: no URL returned.");
+
         return session.Url;
     }
 
@@ -408,6 +417,8 @@ public class SubscriptionService : ISubscriptionService
             return SubscriptionTier.Premium;
         if (priceId == _config["Stripe:PriceIds:PremiumPlus"])
             return SubscriptionTier.PremiumPlus;
+
+        _logger.LogWarning("Unknown Stripe priceId: {PriceId} — defaulting to Free tier", priceId);
         return SubscriptionTier.Free;
     }
 }
