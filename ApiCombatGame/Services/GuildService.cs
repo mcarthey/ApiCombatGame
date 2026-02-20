@@ -42,6 +42,13 @@ public class GuildService : IGuildService
 
     public async Task<Guild> CreateGuildAsync(Guid playerId, string name, string tag, string description)
     {
+        if (string.IsNullOrWhiteSpace(name) || name.Length > 50)
+            throw new InvalidOperationException("Guild name must be 1-50 characters.");
+        if (string.IsNullOrWhiteSpace(tag) || tag.Length > 5)
+            throw new InvalidOperationException("Guild tag must be 1-5 characters.");
+        if (description != null && description.Length > 500)
+            throw new InvalidOperationException("Description must be under 500 characters.");
+
         var player = await _context.Players.FindAsync(playerId)
             ?? throw new KeyNotFoundException("Player not found.");
 
@@ -159,8 +166,9 @@ public class GuildService : IGuildService
         if (pendingInvite)
             throw new InvalidOperationException($"{targetUsername} already has a pending invite to this guild.");
 
-        var guild = await _context.Guilds.Include(g => g.Members).FirstAsync(g => g.Id == guildId);
-        if (guild.Members.Count >= guild.MaxMembers)
+        var guild = await _context.Guilds.FirstAsync(g => g.Id == guildId);
+        var memberCount = await _context.GuildMemberships.CountAsync(m => m.GuildId == guildId);
+        if (memberCount >= guild.MaxMembers)
             throw new InvalidOperationException("Guild is full.");
 
         var invite = new GuildInvite
@@ -207,7 +215,9 @@ public class GuildService : IGuildService
         if (existingMembership)
             throw new InvalidOperationException("You are already in a guild. Leave your current guild first.");
 
-        if (invite.Guild.Members.Count >= invite.Guild.MaxMembers)
+        // Re-check with DB-level count to prevent over-capacity race condition
+        var currentMembers = await _context.GuildMemberships.CountAsync(m => m.GuildId == invite.GuildId);
+        if (currentMembers >= invite.Guild.MaxMembers)
             throw new InvalidOperationException("Guild is full.");
 
         invite.Status = GuildInviteStatus.Accepted;

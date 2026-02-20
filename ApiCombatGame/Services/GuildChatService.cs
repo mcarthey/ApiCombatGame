@@ -9,6 +9,8 @@ public class GuildChatService : IGuildChatService
 {
     private readonly GameDbContext _context;
     private readonly INotificationService _notifications;
+    private static readonly System.Text.RegularExpressions.Regex MentionPattern =
+        new(@"@(\w{1,32})", System.Text.RegularExpressions.RegexOptions.Compiled);
 
     public GuildChatService(GameDbContext context, INotificationService notifications)
     {
@@ -38,6 +40,7 @@ public class GuildChatService : IGuildChatService
 
     public async Task<GuildChatMessage> PostMessageAsync(Guid guildId, Guid playerId, string message)
     {
+        message = message?.Trim() ?? string.Empty;
         if (string.IsNullOrWhiteSpace(message))
             throw new InvalidOperationException("Message cannot be empty.");
 
@@ -54,7 +57,7 @@ public class GuildChatService : IGuildChatService
             Id = Guid.NewGuid(),
             GuildId = guildId,
             PlayerId = playerId,
-            Message = message.Trim(),
+            Message = message,
             MessageType = "chat",
             CreatedAt = DateTime.UtcNow
         };
@@ -66,8 +69,7 @@ public class GuildChatService : IGuildChatService
         await _context.Entry(chatMessage).Reference(m => m.Player).LoadAsync();
 
         // Detect @mentions and notify mentioned players
-        var mentionPattern = new System.Text.RegularExpressions.Regex(@"@(\w+)");
-        var matches = mentionPattern.Matches(message);
+        var matches = MentionPattern.Matches(message);
         if (matches.Count > 0)
         {
             var senderName = chatMessage.Player?.Username ?? "Someone";

@@ -105,6 +105,12 @@ public class TournamentService : ITournamentService
         player.Currency -= tournament.EntryFee;
         _ledger.LogPlayer(playerId, "Currency", oldCurrency, player.Currency, "Tournament", "TournamentEntry", tournament.Id);
 
+        // Re-check participant count to prevent over-capacity race condition
+        var currentCount = await _context.Set<TournamentEntry>()
+            .CountAsync(e => e.TournamentId == tournament.Id);
+        if (currentCount >= tournament.MaxParticipants)
+            throw new InvalidOperationException("Tournament is full.");
+
         var entry = new TournamentEntry
         {
             Id = Guid.NewGuid(),
@@ -113,7 +119,7 @@ public class TournamentService : ITournamentService
             TeamId = request.TeamId
         };
 
-        tournament.Entries.Add(entry);
+        _context.Set<TournamentEntry>().Add(entry);
         await _context.SaveChangesAsync();
 
         _logger.LogInformation("Player {PlayerId} entered tournament {TournamentId}", playerId, tournament.Id);

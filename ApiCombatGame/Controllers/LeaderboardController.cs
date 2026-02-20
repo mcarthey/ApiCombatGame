@@ -38,7 +38,7 @@ public class LeaderboardController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> GetLeaderboard([FromQuery] int limit = 100)
     {
-        limit = Math.Clamp(limit, 1, 500);
+        limit = Math.Clamp(limit, 1, 100);
 
         var players = await _context.Players
             .Where(p => !p.IsBot && !p.IsDeleted)

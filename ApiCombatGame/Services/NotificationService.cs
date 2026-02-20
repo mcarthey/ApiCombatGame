@@ -50,12 +50,9 @@ public class NotificationService : INotificationService
     public async Task SendToGuildAsync(Guid guildId, NotificationType type, string title, string message, string? actionUrl = null, Guid? excludePlayerId = null)
     {
         var memberIds = await _context.GuildMemberships
-            .Where(m => m.GuildId == guildId)
+            .Where(m => m.GuildId == guildId && (!excludePlayerId.HasValue || m.PlayerId != excludePlayerId.Value))
             .Select(m => m.PlayerId)
             .ToListAsync();
-
-        if (excludePlayerId.HasValue)
-            memberIds.Remove(excludePlayerId.Value);
 
         var category = GetCategory(type);
 
@@ -102,6 +99,9 @@ public class NotificationService : INotificationService
 
     public async Task<List<Notification>> GetNotificationsAsync(Guid playerId, int page = 1, int pageSize = 20, bool unreadOnly = false)
     {
+        page = Math.Max(1, page);
+        pageSize = Math.Clamp(pageSize, 1, 100);
+
         var query = _context.Notifications
             .Where(n => n.PlayerId == playerId && (n.ExpiresAt == null || n.ExpiresAt > DateTime.UtcNow));
 
@@ -308,7 +308,7 @@ public class NotificationService : INotificationService
         }
     }
 
-    private static NotificationPreferences DeserializePreferences(string? json)
+    private NotificationPreferences DeserializePreferences(string? json)
     {
         if (string.IsNullOrEmpty(json))
             return new NotificationPreferences();
@@ -317,8 +317,9 @@ public class NotificationService : INotificationService
         {
             return JsonSerializer.Deserialize<NotificationPreferences>(json) ?? new NotificationPreferences();
         }
-        catch
+        catch (JsonException ex)
         {
+            _logger.LogWarning(ex, "Failed to deserialize notification preferences, using defaults");
             return new NotificationPreferences();
         }
     }

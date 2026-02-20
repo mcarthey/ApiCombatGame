@@ -39,7 +39,6 @@ public class GuildTreasuryService : IGuildTreasuryService
         var upgradeList = Upgrades.Select(u =>
         {
             var available = u.IsAvailable(guild);
-            var alreadyPurchased = !available && !u.IsAvailable(guild);
             return (u.Id, u.Name, u.Description, u.Cost, CanAfford: guild.TreasuryBalance >= u.Cost && available, AlreadyPurchased: !available);
         }).ToList();
 
@@ -63,6 +62,8 @@ public class GuildTreasuryService : IGuildTreasuryService
         if (guild.TreasuryBalance < upgrade.Cost)
             throw new InvalidOperationException($"Insufficient treasury balance. Need {upgrade.Cost:N0}, have {guild.TreasuryBalance:N0}.");
 
+        await using var transaction = await _context.Database.BeginTransactionAsync();
+
         var oldBalance = guild.TreasuryBalance;
         guild.TreasuryBalance -= upgrade.Cost;
         _ledger.LogGuild(guildId, "TreasuryBalance", oldBalance, guild.TreasuryBalance, "GuildTreasury", "UpgradePurchased");
@@ -70,6 +71,7 @@ public class GuildTreasuryService : IGuildTreasuryService
         guild.UpdatedAt = DateTime.UtcNow;
 
         await _context.SaveChangesAsync();
+        await transaction.CommitAsync();
 
         // Notify all guild members about the upgrade
         var memberIds = await _context.GuildMemberships
@@ -106,8 +108,11 @@ public class GuildTreasuryService : IGuildTreasuryService
         if (player.Currency < amount)
             throw new InvalidOperationException($"Insufficient currency. You have {player.Currency:N0}, tried to deposit {amount:N0}.");
 
+        await using var transaction = await _context.Database.BeginTransactionAsync();
+
         var oldCurrency = player.Currency;
         var oldTreasury = guild.TreasuryBalance;
+
         player.Currency -= amount;
         guild.TreasuryBalance += amount;
         _ledger.LogPlayer(playerId, "Currency", oldCurrency, player.Currency, "GuildTreasury", "TreasuryDeposit", guildId);
@@ -116,6 +121,7 @@ public class GuildTreasuryService : IGuildTreasuryService
         guild.UpdatedAt = DateTime.UtcNow;
 
         await _context.SaveChangesAsync();
+        await transaction.CommitAsync();
 
         _logger.LogInformation("Player {PlayerId} deposited {Amount}g to guild {GuildId} treasury",
             playerId, amount, guildId);

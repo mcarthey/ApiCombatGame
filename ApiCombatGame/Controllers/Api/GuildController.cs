@@ -683,7 +683,7 @@ public class GuildController : ControllerBase
             Name = s.Name,
             Description = s.Description,
             CreatorUsername = s.Creator?.Username ?? "",
-            Strategy = System.Text.Json.JsonSerializer.Deserialize<object>(s.StrategyJson),
+            Strategy = SafeDeserializeJson(s.StrategyJson),
             UsageCount = s.UsageCount,
             CreatedAt = s.CreatedAt,
             UpdatedAt = s.UpdatedAt
@@ -815,5 +815,12 @@ public class GuildController : ControllerBase
         if (claim == null || !Guid.TryParse(claim.Value, out var playerId))
             throw new UnauthorizedAccessException("Invalid token.");
         return playerId;
+    }
+
+    private static object? SafeDeserializeJson(string? json)
+    {
+        if (string.IsNullOrEmpty(json)) return null;
+        try { return System.Text.Json.JsonSerializer.Deserialize<object>(json); }
+        catch { return null; }
     }
 }

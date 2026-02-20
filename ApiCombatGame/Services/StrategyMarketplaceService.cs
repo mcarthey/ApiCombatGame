@@ -23,6 +23,13 @@ public class StrategyMarketplaceService : IStrategyMarketplaceService
 
     public async Task<Strategy> UploadStrategy(Guid playerId, string name, string description, string strategyJson, int price)
     {
+        if (string.IsNullOrWhiteSpace(name) || name.Length > 100)
+            throw new InvalidOperationException("Strategy name must be 1-100 characters.");
+        if (description != null && description.Length > 1000)
+            throw new InvalidOperationException("Description must be under 1000 characters.");
+        if (string.IsNullOrWhiteSpace(strategyJson) || strategyJson.Length > 50000)
+            throw new InvalidOperationException("Invalid strategy data.");
+
         var strategy = new Strategy
         {
             Id = Guid.NewGuid(),
@@ -81,6 +88,8 @@ public class StrategyMarketplaceService : IStrategyMarketplaceService
         if (strategy == null)
             throw new KeyNotFoundException("Strategy not found");
 
+        await using var transaction = await _context.Database.BeginTransactionAsync();
+
         // Check if strategy costs currency
         if (strategy.Price > 0 && strategy.CreatorId != playerId)
         {
@@ -116,6 +125,7 @@ public class StrategyMarketplaceService : IStrategyMarketplaceService
         }
 
         await _context.SaveChangesAsync();
+        await transaction.CommitAsync();
 
         return strategy;
     }
