@@ -34,8 +34,10 @@ public class ContactModel : PageModel
     public string? ErrorMessage { get; set; }
     public string RecaptchaSiteKey => _recaptchaSettings.SiteKey;
 
-    public void OnGet()
+    public void OnGet([FromQuery] string? subject)
     {
+        if (!string.IsNullOrEmpty(subject))
+            Input.Subject = subject;
     }
 
     public async Task<IActionResult> OnPostAsync()

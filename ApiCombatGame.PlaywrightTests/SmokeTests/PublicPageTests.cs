@@ -123,6 +123,7 @@ public class PublicPageTests : PlaywrightTestBase
     [InlineData("/Privacy")]
     [InlineData("/Terms")]
     [InlineData("/Contact")]
+    [InlineData("/Education")]
     public async Task StaticPages_LoadSuccessfully(string path)
     {
         var page = await NewPageAsync();

@@ -1,0 +1,209 @@
+@page
+@{
+    ViewData["Title"] = "For Educators";
+    ViewData["Description"] = "Teach REST APIs through competitive gameplay. API Combat's Education Mode gives instructors curriculum tools, join codes, progress tracking, and a full OpenAPI spec — works with any language.";
+    ViewData["CanonicalPath"] = "/Education";
+}
+
+<div class="max-w-3xl mx-auto px-4">
+
+    <!-- Hero -->
+    <div class="text-center mb-12">
+        <div class="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-5"
+             style="background: color-mix(in srgb, var(--md-sys-color-primary) 12%, transparent);">
+            <span class="material-symbols-outlined"
+                  style="color: var(--md-sys-color-primary); font-size: 28px;">school</span>
+        </div>
+        <h1 class="text-3xl font-bold mb-3" style="color: var(--md-sys-color-on-surface); letter-spacing: -0.02em;">
+            Teach REST APIs Through Gameplay
+        </h1>
+        <p class="text-base" style="color: var(--md-sys-color-on-surface-variant); line-height: 1.7; max-width: 600px; margin: 0 auto;">
+            API Combat is a competitive game played entirely through REST endpoints.
+            Students build real HTTP clients &mdash; not toy exercises &mdash; while learning
+            authentication, JSON parsing, error handling, and API design patterns.
+        </p>
+    </div>
+
+    <div class="max-w-none space-y-8" style="color: var(--md-sys-color-on-surface-variant);">
+
+        <!-- What Is Education Mode -->
+        <div>
+            <h2 class="text-xl font-semibold mt-8 mb-3" style="color: var(--md-sys-color-on-surface);">What Is Education Mode?</h2>
+            <p style="line-height: 1.7;">
+                Education Mode is built directly into the API Combat platform. Any instructor can create
+                <strong>curriculum modules</strong> with ordered lessons, each tied to a specific API endpoint.
+                Students enroll using a private <strong>join code</strong>, work through lessons at their own pace,
+                and you track their progress from an <strong>instructor dashboard</strong>.
+            </p>
+            <p class="mt-3" style="line-height: 1.7;">
+                It works with <strong>any language or tool</strong> that can send HTTP requests &mdash; Python, JavaScript,
+                C#, Go, Java, curl, Postman, or a custom CLI. Students use the full
+                <a href="/openapi/v1.json" class="link-underline" style="color: var(--md-sys-color-primary);">OpenAPI 3.0 spec</a>
+                to build their clients, just like they would with a real production API.
+            </p>
+        </div>
+
+        <!-- How It Works — Instructors -->
+        <div>
+            <h2 class="text-xl font-semibold mt-8 mb-3" style="color: var(--md-sys-color-on-surface);">How It Works &mdash; Instructors</h2>
+            <ol class="list-decimal pl-6 space-y-2" style="line-height: 1.7;">
+                <li><strong>Register an account</strong> and create a curriculum module with lessons via the API</li>
+                <li><strong>Define each lesson</strong> with a title, learning objective, target endpoint (e.g., <code style="font-size: 0.85em; padding: 2px 6px; border-radius: 4px; background: var(--md-sys-color-surface-container);">POST /api/v1/auth/register</code>), and an optional hint</li>
+                <li><strong>Publish the module</strong> for public access, or share the private <strong>8-character join code</strong> with your class</li>
+                <li><strong>Students enroll</strong> and work through lessons at their own pace</li>
+                <li><strong>Track progress</strong> via the instructor dashboard &mdash; see enrollment counts, completion rates, and per-module averages</li>
+            </ol>
+        </div>
+
+        <!-- How It Works — Students -->
+        <div>
+            <h2 class="text-xl font-semibold mt-8 mb-3" style="color: var(--md-sys-color-on-surface);">How It Works &mdash; Students</h2>
+            <ol class="list-decimal pl-6 space-y-2" style="line-height: 1.7;">
+                <li><strong>Register</strong> and get a JWT Bearer token &mdash; the first real API call</li>
+                <li><strong>Enroll</strong> in the instructor's module using a join code or by browsing published modules</li>
+                <li><strong>Work through lessons</strong> &mdash; each one teaches a real API concept through actual gameplay</li>
+                <li><strong>Practice with AI opponents</strong> &mdash; instant battles at 3 difficulty tiers, no opponent needed</li>
+                <li><strong>Build a bot</strong>, compete in tournaments, and climb the leaderboard</li>
+            </ol>
+        </div>
+
+        <!-- What's Included -->
+        <div>
+            <h2 class="text-xl font-semibold mt-10 mb-4" style="color: var(--md-sys-color-on-surface);">What's Included</h2>
+            <div class="grid sm:grid-cols-2 gap-4">
+                <div class="md3-card p-5">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="material-symbols-outlined" style="color: var(--md-sys-color-primary); font-size: 20px;">menu_book</span>
+                        <h3 class="text-sm font-semibold" style="color: var(--md-sys-color-on-surface);">Curriculum Builder</h3>
+                    </div>
+                    <p class="text-sm" style="line-height: 1.6;">Create modules with ordered lessons, each tied to a specific API endpoint.</p>
+                </div>
+                <div class="md3-card p-5">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="material-symbols-outlined" style="color: var(--md-sys-color-primary); font-size: 20px;">key</span>
+                        <h3 class="text-sm font-semibold" style="color: var(--md-sys-color-on-surface);">Private Join Codes</h3>
+                    </div>
+                    <p class="text-sm" style="line-height: 1.6;">8-character codes for private classroom enrollment. No public listing required.</p>
+                </div>
+                <div class="md3-card p-5">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="material-symbols-outlined" style="color: var(--md-sys-color-primary); font-size: 20px;">trending_up</span>
+                        <h3 class="text-sm font-semibold" style="color: var(--md-sys-color-on-surface);">Progress Tracking</h3>
+                    </div>
+                    <p class="text-sm" style="line-height: 1.6;">Per-student lesson completion with percentage progress across the module.</p>
+                </div>
+                <div class="md3-card p-5">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="material-symbols-outlined" style="color: var(--md-sys-color-primary); font-size: 20px;">dashboard</span>
+                        <h3 class="text-sm font-semibold" style="color: var(--md-sys-color-on-surface);">Instructor Dashboard</h3>
+                    </div>
+                    <p class="text-sm" style="line-height: 1.6;">Enrollment counts, completion rates, and average progress per module.</p>
+                </div>
+                <div class="md3-card p-5">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="material-symbols-outlined" style="color: var(--md-sys-color-primary); font-size: 20px;">smart_toy</span>
+                        <h3 class="text-sm font-semibold" style="color: var(--md-sys-color-on-surface);">AI Practice Mode</h3>
+                    </div>
+                    <p class="text-sm" style="line-height: 1.6;">Instant battles at 3 difficulty tiers. No opponent needed &mdash; perfect for homework.</p>
+                </div>
+                <div class="md3-card p-5">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="material-symbols-outlined" style="color: var(--md-sys-color-primary); font-size: 20px;">description</span>
+                        <h3 class="text-sm font-semibold" style="color: var(--md-sys-color-on-surface);">Full OpenAPI Spec</h3>
+                    </div>
+                    <p class="text-sm" style="line-height: 1.6;">100+ documented endpoints. Students generate typed clients in any language.</p>
+                </div>
+                <div class="md3-card p-5">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="material-symbols-outlined" style="color: var(--md-sys-color-primary); font-size: 20px;">speed</span>
+                        <h3 class="text-sm font-semibold" style="color: var(--md-sys-color-on-surface);">Rate Limiting</h3>
+                    </div>
+                    <p class="text-sm" style="line-height: 1.6;">Real 429 responses with <code style="font-size: 0.85em;">Retry-After</code> headers. Teaches production API patterns.</p>
+                </div>
+                <div class="md3-card p-5">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="material-symbols-outlined" style="color: var(--md-sys-color-primary); font-size: 20px;">replay</span>
+                        <h3 class="text-sm font-semibold" style="color: var(--md-sys-color-on-surface);">Battle Replays</h3>
+                    </div>
+                    <p class="text-sm" style="line-height: 1.6;">Turn-by-turn battle logs for data analysis assignments and strategy optimization.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Standards Alignment -->
+        <div>
+            <h2 class="text-xl font-semibold mt-10 mb-3" style="color: var(--md-sys-color-on-surface);">Standards Alignment</h2>
+            <p style="line-height: 1.7;">
+                API Combat aligns with <strong>15 Wisconsin Computer Science standards</strong> across
+                Algorithms &amp; Programming, Networks &amp; Internet, Data &amp; Analysis, and Impacts of Computing.
+                A complete 5-week lesson plan with rubrics, weekly deliverables, and differentiation strategies
+                is available for grades 9&ndash;12 and post-secondary.
+            </p>
+            <div class="mt-4">
+                <a href="https://learnedgeek.com/Blog/Post/rest-api-lesson-plan-wisconsin-standards"
+                   target="_blank" rel="noopener noreferrer"
+                   class="md3-btn-outlined" style="text-decoration: none;">
+                    <span class="material-symbols-outlined" style="font-size: 18px; margin-right: 4px;">open_in_new</span>
+                    View the 5-Week Lesson Plan
+                </a>
+            </div>
+        </div>
+
+        <!-- Pricing -->
+        <div>
+            <h2 class="text-xl font-semibold mt-10 mb-3" style="color: var(--md-sys-color-on-surface);">Pricing</h2>
+            <div class="space-y-4">
+                <div class="md3-card p-5">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h3 class="text-sm font-semibold mb-1" style="color: var(--md-sys-color-on-surface);">Individual Students</h3>
+                            <p class="text-sm" style="line-height: 1.6;">Full API access, 10 battles/day, AI practice, curriculum enrollment.</p>
+                        </div>
+                        <span class="text-lg font-bold" style="color: var(--md-sys-color-primary); white-space: nowrap;">Free</span>
+                    </div>
+                </div>
+                <div class="md3-card p-5" style="border: 2px solid var(--md-sys-color-primary);">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h3 class="text-sm font-semibold mb-1" style="color: var(--md-sys-color-on-surface);">Educational License</h3>
+                            <p class="text-sm" style="line-height: 1.6;">Unlimited battles for all enrolled students. Priority support.</p>
+                        </div>
+                        <span class="text-lg font-bold" style="color: var(--md-sys-color-primary); white-space: nowrap;">$500 / semester</span>
+                    </div>
+                </div>
+                <div class="md3-card p-5">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h3 class="text-sm font-semibold mb-1" style="color: var(--md-sys-color-on-surface);">Enterprise</h3>
+                            <p class="text-sm" style="line-height: 1.6;">Custom features, dedicated support, volume pricing for multiple courses.</p>
+                        </div>
+                        <span class="text-lg font-bold" style="color: var(--md-sys-color-primary); white-space: nowrap;">Contact us</span>
+                    </div>
+                </div>
+            </div>
+            <p class="text-sm mt-4" style="color: var(--md-sys-color-on-surface-variant); line-height: 1.6;">
+                <strong>Free pilot licenses available</strong> for accredited institutions evaluating the platform.
+                <a href="/Contact?subject=Licensing" class="link-underline" style="color: var(--md-sys-color-primary);">Get in touch</a> to discuss your needs.
+            </p>
+        </div>
+
+        <!-- CTAs -->
+        <div class="mt-10 pt-8" style="border-top: 1px solid var(--md-sys-color-outline-variant);">
+            <div class="flex flex-col sm:flex-row gap-4">
+                <a href="/Contact?subject=Licensing" class="md3-btn-filled" style="text-decoration: none; text-align: center;">
+                    <span class="material-symbols-outlined" style="font-size: 18px; margin-right: 4px;">mail</span>
+                    Contact Us for Education Pricing
+                </a>
+                <a href="/api-docs/v1" class="md3-btn-outlined" style="text-decoration: none; text-align: center;">
+                    <span class="material-symbols-outlined" style="font-size: 18px; margin-right: 4px;">description</span>
+                    Read the API Docs
+                </a>
+                <a asp-page="/Auth/Register" class="md3-btn-outlined" style="text-decoration: none; text-align: center;">
+                    <span class="material-symbols-outlined" style="font-size: 18px; margin-right: 4px;">person_add</span>
+                    Register and Try It
+                </a>
+            </div>
+        </div>
+
+    </div>
+</div>

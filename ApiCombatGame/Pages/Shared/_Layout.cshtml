@@ -208,6 +208,9 @@
                         <a asp-page="/Leaderboard" class="@NavClass(currentPath == "/Leaderboard")" style="text-decoration: none;">
                             Leaderboard
                         </a>
+                        <a asp-page="/Education" class="@NavClass(currentPath == "/Education")" style="text-decoration: none;">
+                            For Educators
+                        </a>
                         @if (User.Identity?.IsAuthenticated == true)
                         {
                             <a asp-page="/Dashboard" class="@NavClass(currentPath == "/Dashboard")" style="text-decoration: none;">
@@ -282,6 +285,9 @@
                 <a asp-page="/Contact" class="@MobileNavClass(currentPath == "/Contact")" style="@MobileNavStyle(currentPath == "/Contact")">
                     <span class="material-symbols-outlined" style="font-size: 20px;">mail</span> Contact
                 </a>
+                <a asp-page="/Education" class="@MobileNavClass(currentPath == "/Education")" style="@MobileNavStyle(currentPath == "/Education")">
+                    <span class="material-symbols-outlined" style="font-size: 20px;">school</span> For Educators
+                </a>
                 @if (User.Identity?.IsAuthenticated == true)
                 {
                     <div class="mx-4 my-2" style="border-top: 1px solid var(--md-sys-color-outline-variant);"></div>
@@ -347,6 +353,7 @@
                         <a href="/api-docs/v1" class="block text-sm link-underline" style="color: var(--md-sys-color-on-surface-variant);">API Documentation</a>
                         <a href="/openapi/v1.json" class="block text-sm link-underline" style="color: var(--md-sys-color-on-surface-variant);">OpenAPI Spec</a>
                         <a asp-page="/About" class="block text-sm link-underline" style="color: var(--md-sys-color-on-surface-variant);">About</a>
+                        <a asp-page="/Education" class="block text-sm link-underline" style="color: var(--md-sys-color-on-surface-variant);">For Educators</a>
                         <a href="https://discord.gg/jfSCSfAN49" target="_blank" rel="noopener noreferrer" class="block text-sm link-underline" style="color: var(--md-sys-color-on-surface-variant);">Discord</a>
                         <a href="https://github.com/api-combat-game" target="_blank" rel="noopener noreferrer" class="block text-sm link-underline" style="color: var(--md-sys-color-on-surface-variant);">GitHub</a>
                     </div>

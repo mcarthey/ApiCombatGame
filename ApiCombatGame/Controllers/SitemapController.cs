@@ -18,6 +18,7 @@ public class SitemapController : Controller
             ("/api-docs/v1", "weekly", "0.9"),
             ("/Leaderboard", "daily", "0.8"),
             ("/Auth/Register", "monthly", "0.8"),
+            ("/Education", "monthly", "0.8"),
             ("/About", "monthly", "0.7"),
             ("/Auth/Login", "monthly", "0.7"),
             ("/Contact", "yearly", "0.5"),
