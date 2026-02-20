@@ -14,7 +14,7 @@ The following test suites reduce the manual testing burden significantly:
 
 | Suite | Count | What it covers |
 |-------|-------|----------------|
-| **Unit + Integration Tests** | ~595 tests | Individual endpoint validation, error cases, auth, DB operations |
+| **Unit + Integration Tests** | ~607 tests | Individual endpoint validation, error cases, auth, DB operations |
 | **Robot Player E2E** | 10 tests | Full player journey via raw HTTP — register → login → profile → roster → unlock → team → battle → results → history → leaderboard → challenges → mastery → modifiers → replays → strategies → cosmetics → referral → season. Reads OpenAPI spec, follows every HATEOAS `_links` entry, validates responses against spec schemas. |
 | **Playwright Smoke Tests** | 12 tests | Browser rendering of Homepage, API Docs, Leaderboard, Login, Register, About, Privacy, Terms, Contact, Education, Dashboard redirect, 404 handling |
 
@@ -746,6 +746,44 @@ Sections below are marked with coverage status:
 
 ---
 
+## 39. Notification Hooks — PARTIAL
+
+> **Automated:** Integration tests verify notification service is called for key events.
+> **Manual:** Verify notification delivery and content for the following triggers.
+
+- [ ] **Modifier rotation** — When a new environmental modifier activates, all players receive a `NewModifierActive` notification with the modifier name and description
+- [ ] **Daily challenge generation** — Players receive `DailyChallengesAvailable` notification when new daily challenges are created
+- [ ] **Strategy rated** — After rating another player's strategy, the creator receives a `StrategyRated` notification with star count
+- [ ] **Strategy download milestones** — Creator receives `StrategyDownloadMilestone` at 10, 50, 100, 250, 500, and 1000 downloads
+- [ ] **Guild treasury upgrade** — All guild members receive `GuildTreasuryUpgrade` notification when leader purchases an upgrade
+- [ ] **Guild strategy published** — All guild members (except creator) receive `GuildStrategyPublished` notification
+- [ ] **Rating milestones** — Players receive `RatingMilestone` notification when crossing 500, 1000, 1500, 2000, 2500, or 3000 rating thresholds (both up and down)
+
+---
+
+## 40. Response Caching — MANUAL
+
+- [ ] `GET /api/v1/leaderboard` — verify `Cache-Control: public,max-age=30` header in response
+- [ ] `GET /api/v1/sdk/quickstart` — verify `Cache-Control: public,max-age=3600` header
+- [ ] `GET /api/v1/sdk/endpoints` — verify `Cache-Control: public,max-age=3600` header
+- [ ] `GET /api/v1/sdk/status` — verify `Cache-Control: public,max-age=60` header
+- [ ] `GET /api/v1/ai/opponents` — verify `Cache-Control: public,max-age=3600` header
+- [ ] Hit a cached endpoint twice quickly — second response should be faster (server-side cache)
+
+---
+
+## 41. Security Headers — MANUAL
+
+- [ ] Make any request to the application and verify these response headers:
+  - `X-Content-Type-Options: nosniff`
+  - `X-Frame-Options: DENY`
+  - `Referrer-Policy: strict-origin-when-cross-origin`
+  - `Permissions-Policy: camera=(), microphone=(), geolocation=()`
+- [ ] Verify headers are present on both page responses and API responses
+- [ ] Attempt to embed the site in an `<iframe>` — should be blocked by X-Frame-Options
+
+---
+
 ## Quick Smoke Test Sequence — AUTOMATED
 > **This entire sequence is now automated** by the Robot Player E2E test. Run manually only if you suspect a specific integration issue.
 
@@ -793,3 +831,6 @@ The areas with the highest manual testing priority are:
 | **Low** | 36: Class Tournament | Enrollment gating, bracket generation |
 | **Low** | 37: Endpoint-Linked | Schema-level, manual API call verification |
 | **Low** | 38: Student Unenroll | Re-enrollment, count decrement |
+| **Low** | 39: Notification Hooks | Event-driven, check delivery + content |
+| **Low** | 40: Response Caching | Verify Cache-Control headers in browser devtools |
+| **Low** | 41: Security Headers | Verify headers present on all responses |

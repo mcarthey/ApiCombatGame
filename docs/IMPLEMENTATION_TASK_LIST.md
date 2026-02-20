@@ -994,7 +994,7 @@ After each battle resolves, the following hooks execute (in order):
 ## Build Status
 
 - **Build**: 0 errors, 0 warnings
-- **Tests**: 614+ passing (602 unit/integration + 12 Playwright), 0 failing, 0 skipped
+- **Tests**: 619 passing (607 unit/integration + 12 Playwright), 0 failing, 0 skipped
 - **API Endpoints**: 100+ across 28 tagged controllers
 - **Background Jobs**: 10 hosted services
 - **OpenAPI Tags**: 28 (Auth, Player, Team, Battle, Leaderboard, Strategy Marketplace, Guild, Guild Boss, Challenges, Mastery, Modifiers, Replays, AI Practice, Ranked Seasons, Loot, Referral, Unit Customization, Rival, Battle Pass, Guild Wars, Tournament, Cosmetics, Premium Plus, Activity Feed, Education, SDK, Discord, Creators)
