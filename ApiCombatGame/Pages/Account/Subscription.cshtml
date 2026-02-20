@@ -47,6 +47,56 @@
         </div>
     }
 
+    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+    {
+        <div class="md3-alert-error p-4 mb-8">
+            <div class="flex items-center">
+                <span class="material-symbols-outlined" style="color: var(--md-sys-color-error); margin-right: 12px;">error</span>
+                <p class="text-sm" style="color: var(--md-sys-color-on-surface);">@Model.ErrorMessage</p>
+            </div>
+        </div>
+    }
+
+    @if (!Model.EmailVerified)
+    {
+        @if (TempData["VerificationResent"] != null)
+        {
+            <div class="md3-card p-4 mb-8 flex items-center gap-3" style="border: 1px solid var(--md-sys-color-primary); background: color-mix(in srgb, var(--md-sys-color-primary) 8%, transparent);">
+                <span class="material-symbols-outlined" style="color: var(--md-sys-color-primary);">check_circle</span>
+                <p class="text-sm" style="color: var(--md-sys-color-on-surface);">
+                    Verification email sent! Check your inbox.
+                </p>
+            </div>
+        }
+        else
+        {
+            <div class="md3-card p-4 mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3"
+                 style="border: 1px solid var(--md-sys-color-tertiary); background: color-mix(in srgb, var(--md-sys-color-tertiary) 8%, transparent);">
+                <div class="flex items-center gap-3">
+                    <span class="material-symbols-outlined" style="color: var(--md-sys-color-tertiary);">mail</span>
+                    <p class="text-sm" style="color: var(--md-sys-color-on-surface);">
+                        <strong>Verify your email to upgrade.</strong> Check your inbox for the verification link, or request a new one.
+                    </p>
+                </div>
+                <form method="post" asp-page-handler="ResendVerification">
+                    <button type="submit" class="md3-btn-outlined text-sm" style="white-space: nowrap;"
+                            onclick="this.disabled=true;this.textContent='Sending...';this.form.submit();">Resend Link</button>
+                </form>
+            </div>
+        }
+    }
+
+    @if (Model.IsEnrolledStudent)
+    {
+        <div class="md3-card p-4 mb-8 flex items-center gap-3"
+             style="border: 1px solid var(--md-sys-color-error); background: color-mix(in srgb, var(--md-sys-color-error) 8%, transparent);">
+            <span class="material-symbols-outlined" style="color: var(--md-sys-color-error);">school</span>
+            <p class="text-sm" style="color: var(--md-sys-color-on-surface);">
+                <strong>Student accounts cannot purchase subscriptions.</strong> You're currently enrolled in an education module. Complete or unenroll from all modules to enable purchases.
+            </p>
+        </div>
+    }
+
     <!-- Current Plan Status -->
     <div class="md3-card p-6 mb-8">
         <div>

@@ -67,13 +67,14 @@ public class EducationController : ControllerBase
 
     /// <summary>Create a curriculum module (instructor).</summary>
     /// <remarks>
-    /// Any player can create educational modules. Define lessons that guide students
-    /// through specific API endpoints. The module starts as unpublished — publish it
-    /// when you're ready for students to enroll.
+    /// Requires educator access: a verified .edu email address or admin-granted educator status.
+    /// Define lessons that guide students through specific API endpoints. The module starts
+    /// as unpublished — publish it when you're ready for students to enroll.
     /// </remarks>
     /// <param name="request">Module definition with lessons.</param>
     /// <response code="201">Module created. Use the join code or publish it for public access.</response>
     /// <response code="400">Invalid module data.</response>
+    /// <response code="403">Not an educator. Requires verified .edu email or admin-granted educator status.</response>
     [ApiDifficulty("intermediate")]
     [ApiGameTip("Structure lessons from simple (register, login) to complex (strategies, battles) for best learning flow.")]
     [ApiPrerequisite("Register and login")]
@@ -81,6 +82,7 @@ public class EducationController : ControllerBase
     [HttpPost("modules")]
     [ProducesResponseType(typeof(CurriculumModuleResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<ActionResult<CurriculumModuleResponse>> CreateModule([FromBody] CreateModuleRequest request)
     {
         try
@@ -88,6 +90,10 @@ public class EducationController : ControllerBase
             var playerId = GetPlayerId();
             var module = await _educationService.CreateModuleAsync(playerId, request);
             return Created($"/api/v1/education/modules/{module.Id}", module);
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return StatusCode(403, new { error = ex.Message });
         }
         catch (InvalidOperationException ex)
         {
@@ -98,11 +104,13 @@ public class EducationController : ControllerBase
     /// <summary>Publish a module for public access.</summary>
     /// <param name="moduleId">Module ID to publish.</param>
     /// <response code="200">Module published.</response>
+    /// <response code="403">Not an educator.</response>
     /// <response code="404">Module not found or you are not the instructor.</response>
     [ApiDifficulty("beginner")]
     [ApiPrerequisite("Create a module")]
     [HttpPost("modules/{moduleId:guid}/publish")]
     [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult> PublishModule(Guid moduleId)
     {
@@ -111,6 +119,10 @@ public class EducationController : ControllerBase
             var playerId = GetPlayerId();
             await _educationService.PublishModuleAsync(playerId, moduleId);
             return Ok(new { message = "Module published and visible to all players." });
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return StatusCode(403, new { error = ex.Message });
         }
         catch (KeyNotFoundException ex)
         {
@@ -224,15 +236,24 @@ public class EducationController : ControllerBase
     /// and average student progress. Use this data to improve your curriculum.
     /// </remarks>
     /// <response code="200">Dashboard with module stats.</response>
+    /// <response code="403">Not an educator.</response>
     [ApiDifficulty("intermediate")]
     [ApiPrerequisite("Create at least one module")]
     [HttpGet("instructor/dashboard")]
     [ProducesResponseType(typeof(InstructorDashboardResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<ActionResult<InstructorDashboardResponse>> GetInstructorDashboard()
     {
-        var playerId = GetPlayerId();
-        var dashboard = await _educationService.GetInstructorDashboardAsync(playerId);
-        return Ok(dashboard);
+        try
+        {
+            var playerId = GetPlayerId();
+            var dashboard = await _educationService.GetInstructorDashboardAsync(playerId);
+            return Ok(dashboard);
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return StatusCode(403, new { error = ex.Message });
+        }
     }
 
     private Guid GetPlayerId()

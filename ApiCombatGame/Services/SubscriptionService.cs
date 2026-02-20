@@ -26,6 +26,14 @@ public class SubscriptionService : ISubscriptionService
         var player = await _context.Players.FindAsync(playerId)
             ?? throw new InvalidOperationException("Player not found.");
 
+        if (!player.EmailConfirmed)
+            throw new InvalidOperationException("Email must be verified before purchasing a subscription.");
+
+        var isEnrolled = await _context.StudentEnrollments
+            .AnyAsync(e => e.PlayerId == playerId && !e.IsCompleted);
+        if (isEnrolled)
+            throw new InvalidOperationException("Students enrolled in education modules cannot purchase subscriptions. Please unenroll first.");
+
         var priceId = tier.ToLower() switch
         {
             "premium" => _config["Stripe:PriceIds:Premium"],
@@ -82,6 +90,17 @@ public class SubscriptionService : ISubscriptionService
 
     public async Task ChangeTierAsync(Guid playerId, string newTier)
     {
+        var player = await _context.Players.FindAsync(playerId)
+            ?? throw new InvalidOperationException("Player not found.");
+
+        if (!player.EmailConfirmed)
+            throw new InvalidOperationException("Email must be verified before changing subscription tier.");
+
+        var isEnrolled = await _context.StudentEnrollments
+            .AnyAsync(e => e.PlayerId == playerId && !e.IsCompleted);
+        if (isEnrolled)
+            throw new InvalidOperationException("Students enrolled in education modules cannot purchase subscriptions. Please unenroll first.");
+
         var subscription = await _context.Subscriptions
             .FirstOrDefaultAsync(s => s.PlayerId == playerId && s.Status == SubscriptionStatus.Active);
 
@@ -137,12 +156,8 @@ public class SubscriptionService : ISubscriptionService
         if (updatedSub.CurrentPeriodEnd > minValid)
             subscription.CurrentPeriodEnd = updatedSub.CurrentPeriodEnd;
 
-        var player = await _context.Players.FindAsync(playerId);
-        if (player != null)
-        {
-            player.CurrentTier = tier;
-            player.DailyBattlesUsed = 0;
-        }
+        player.CurrentTier = tier;
+        player.DailyBattlesUsed = 0;
 
         await _context.SaveChangesAsync();
 

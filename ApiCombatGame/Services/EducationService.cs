@@ -21,8 +21,7 @@ public class EducationService : IEducationService
 
     public async Task<CurriculumModuleResponse> CreateModuleAsync(Guid instructorId, CreateModuleRequest request)
     {
-        var instructor = await _context.Players.FindAsync(instructorId)
-            ?? throw new KeyNotFoundException("Player not found.");
+        var instructor = await RequireEducatorAsync(instructorId);
 
         if (string.IsNullOrWhiteSpace(request.Title))
             throw new InvalidOperationException("Module title is required.");
@@ -118,6 +117,8 @@ public class EducationService : IEducationService
 
     public async Task<InstructorDashboardResponse> GetInstructorDashboardAsync(Guid instructorId)
     {
+        await RequireEducatorAsync(instructorId);
+
         var modules = await _context.Set<CurriculumModule>()
             .Where(m => m.InstructorId == instructorId)
             .ToListAsync();
@@ -243,6 +244,8 @@ public class EducationService : IEducationService
 
     public async Task PublishModuleAsync(Guid instructorId, Guid moduleId)
     {
+        await RequireEducatorAsync(instructorId);
+
         var module = await _context.Set<CurriculumModule>()
             .FirstOrDefaultAsync(m => m.Id == moduleId && m.InstructorId == instructorId)
             ?? throw new KeyNotFoundException("Module not found or you are not the instructor.");
@@ -271,6 +274,22 @@ public class EducationService : IEducationService
                 IsCompleted = e.IsCompleted
             };
         }).ToList();
+    }
+
+    private async Task<Player> RequireEducatorAsync(Guid playerId)
+    {
+        var player = await _context.Players.FindAsync(playerId)
+            ?? throw new KeyNotFoundException("Player not found.");
+
+        var isVerifiedEduEmail = player.Email.EndsWith(".edu", StringComparison.OrdinalIgnoreCase)
+                              && player.EmailConfirmed;
+
+        if (!isVerifiedEduEmail && !player.IsEducator)
+            throw new UnauthorizedAccessException(
+                "Educator access requires a verified .edu email address or educator status granted by an administrator. "
+                + "If you're an educator at an accredited institution without a .edu domain, please contact us.");
+
+        return player;
     }
 
     private static CurriculumModuleResponse ToResponse(CurriculumModule m, string instructorUsername) => new()

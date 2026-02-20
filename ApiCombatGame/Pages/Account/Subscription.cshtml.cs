@@ -15,17 +15,20 @@ public class SubscriptionModel : PageModel
 {
     private readonly GameDbContext _context;
     private readonly ISubscriptionService _subscriptionService;
+    private readonly IAuthService _authService;
     private readonly IConfiguration _config;
     private readonly ILogger<SubscriptionModel> _logger;
 
     public SubscriptionModel(
         GameDbContext context,
         ISubscriptionService subscriptionService,
+        IAuthService authService,
         IConfiguration config,
         ILogger<SubscriptionModel> logger)
     {
         _context = context;
         _subscriptionService = subscriptionService;
+        _authService = authService;
         _config = config;
         _logger = logger;
     }
@@ -40,6 +43,10 @@ public class SubscriptionModel : PageModel
     public bool IsCancellationPending { get; set; }
     public DateTime? ExpiresOn { get; set; }
     public DateTime? CurrentPeriodStart { get; set; }
+    public bool EmailVerified { get; set; }
+    public bool IsEnrolledStudent { get; set; }
+    public bool CanPurchase => EmailVerified && !IsEnrolledStudent;
+    public string? ErrorMessage { get; set; }
 
     public async Task OnGetAsync(bool? success, bool? canceled)
     {
@@ -77,10 +84,18 @@ public class SubscriptionModel : PageModel
             var checkoutUrl = await _subscriptionService.CreateCheckoutSessionAsync(playerId, tier, baseUrl);
             return Redirect(checkoutUrl);
         }
+        catch (InvalidOperationException ex)
+        {
+            _logger.LogWarning(ex, "Upgrade blocked for player {PlayerId}: {Reason}", playerId, ex.Message);
+            await LoadSubscriptionDataAsync();
+            ErrorMessage = ex.Message;
+            return Page();
+        }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to upgrade subscription for player {PlayerId}", playerId);
             await LoadSubscriptionDataAsync();
+            ErrorMessage = "Something went wrong. Please try again later.";
             return Page();
         }
     }
@@ -117,6 +132,14 @@ public class SubscriptionModel : PageModel
         }
     }
 
+    public async Task<IActionResult> OnPostResendVerificationAsync()
+    {
+        var playerId = GetPlayerId();
+        await _authService.SendVerificationEmailAsync(playerId);
+        TempData["VerificationResent"] = true;
+        return RedirectToPage();
+    }
+
     private async Task LoadSubscriptionDataAsync()
     {
         var playerId = GetPlayerId();
@@ -124,6 +147,9 @@ public class SubscriptionModel : PageModel
         if (player == null) return;
 
         CurrentTier = player.CurrentTier.ToString();
+        EmailVerified = player.EmailConfirmed;
+        IsEnrolledStudent = await _context.StudentEnrollments
+            .AnyAsync(e => e.PlayerId == playerId && !e.IsCompleted);
 
         var sub = await _subscriptionService.GetSubscriptionAsync(playerId);
         if (sub != null && sub.Status == SubscriptionStatus.Active)
