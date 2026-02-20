@@ -13,4 +13,7 @@ public interface IEducationService
     Task<EnrollmentProgressDto> CompleteLessonAsync(Guid playerId, Guid moduleId, int lessonIndex);
     Task PublishModuleAsync(Guid instructorId, Guid moduleId);
     Task<List<EnrollmentProgressDto>> GetMyEnrollmentsAsync(Guid playerId);
+    Task<List<ClassLeaderboardEntry>> GetModuleLeaderboardAsync(Guid moduleId, Guid playerId);
+    Task<Guid> CreateClassTournamentAsync(Guid instructorId, Guid moduleId, CreateClassTournamentRequest request);
+    Task UnenrollAsync(Guid playerId, Guid moduleId);
 }

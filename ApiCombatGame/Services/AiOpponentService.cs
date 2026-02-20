@@ -3,6 +3,7 @@ using ApiCombatGame.Data;
 using ApiCombatGame.Models.Domain;
 using ApiCombatGame.Models.DTOs.AI;
 using ApiCombatGame.Models.DTOs.Battle;
+using ApiCombatGame.Models.DTOs.Education;
 using ApiCombatGame.Models.DTOs.Strategy;
 using ApiCombatGame.Models.Enums;
 using ApiCombatGame.Services.Interfaces;
@@ -225,6 +226,65 @@ public class AiOpponentService : IAiOpponentService
                 TierMultiplier = tierMultiplier
             },
             CompletedAt = battle.CompletedAt
+        };
+    }
+
+    public async Task<BatchPracticeResponse> BatchPracticeAsync(Guid playerId, BatchPracticeRequest request)
+    {
+        int count = Math.Clamp(request.Count, 1, 200);
+
+        var preset = !string.IsNullOrEmpty(request.OpponentId)
+            ? AiPresets.FirstOrDefault(p => p.Id == request.OpponentId)
+                ?? throw new KeyNotFoundException($"AI opponent '{request.OpponentId}' not found.")
+            : AiPresets[Random.Shared.Next(AiPresets.Count)];
+
+        var team = await _context.Teams.FirstOrDefaultAsync(t => t.Id == request.TeamId && t.PlayerId == playerId)
+            ?? throw new InvalidOperationException("Team not found or doesn't belong to you.");
+
+        var playerUnitIds = JsonSerializer.Deserialize<List<Guid>>(team.UnitIdsJson, JsonOptions) ?? new();
+        if (playerUnitIds.Count == 0)
+            throw new InvalidOperationException("Team has no units configured.");
+
+        var playerUnits = await _context.Units
+            .Include(u => u.Abilities)
+            .Where(u => playerUnitIds.Contains(u.Id))
+            .ToListAsync();
+
+        if (playerUnits.Count == 0)
+            throw new InvalidOperationException("No valid units found in team.");
+
+        var playerStrategy = !string.IsNullOrEmpty(team.StrategyJson) && team.StrategyJson != "{}"
+            ? JsonSerializer.Deserialize<StrategyConfig>(team.StrategyJson, JsonOptions) ?? new()
+            : new StrategyConfig();
+
+        int maxTurns = _config.GetValue<int>("GameSettings:MaxTurnsPerBattle", 50);
+        int wins = 0, losses = 0;
+        double totalTurns = 0;
+
+        for (int i = 0; i < count; i++)
+        {
+            var aiUnits = GenerateAiUnits(preset);
+            var resolution = _strategyEngine.ResolveBattle(
+                playerUnits, playerStrategy,
+                aiUnits, preset.Strategy,
+                maxTurns);
+
+            if (resolution.WinnerTeam == 1) wins++;
+            else losses++;
+            totalTurns += resolution.TotalTurns;
+        }
+
+        _logger.LogInformation("Batch practice: Player {PlayerId} ran {Count} battles vs '{AiName}' — {Wins}W {Losses}L",
+            playerId, count, preset.Name, wins, losses);
+
+        return new BatchPracticeResponse
+        {
+            TotalBattles = count,
+            Wins = wins,
+            Losses = losses,
+            WinRate = count > 0 ? Math.Round((double)wins / count * 100, 1) : 0,
+            AvgTurns = count > 0 ? Math.Round(totalTurns / count, 1) : 0,
+            OpponentName = preset.Name
         };
     }
 

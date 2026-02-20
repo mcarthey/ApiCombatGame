@@ -31,6 +31,8 @@ public class LessonDto
     public string Objective { get; set; } = string.Empty;
     public string Endpoint { get; set; } = string.Empty;
     public string? Hint { get; set; }
+    public string? VerificationEndpoint { get; set; }
+    public string? VerificationMethod { get; set; }
 }
 
 public class EnrollmentProgressDto
@@ -56,6 +58,10 @@ public class CreateLessonRequest
     public string Objective { get; set; } = string.Empty;
     public string Endpoint { get; set; } = string.Empty;
     public string? Hint { get; set; }
+    /// <summary>If set, calling this endpoint successfully auto-completes the lesson.</summary>
+    public string? VerificationEndpoint { get; set; }
+    /// <summary>HTTP method for verification (GET, POST, PUT, DELETE). Defaults to the endpoint's method.</summary>
+    public string? VerificationMethod { get; set; }
 }
 
 public class InstructorDashboardResponse
@@ -74,4 +80,38 @@ public class ModuleStatsDto
     public int EnrolledCount { get; set; }
     public int CompletedCount { get; set; }
     public double AverageProgress { get; set; }
+}
+
+public class ClassLeaderboardEntry
+{
+    public int Rank { get; set; }
+    public string Username { get; set; } = string.Empty;
+    public int Rating { get; set; }
+    public int Wins { get; set; }
+    public int Losses { get; set; }
+    public double WinRate { get; set; }
+    public int LessonsCompleted { get; set; }
+}
+
+public class BatchPracticeRequest
+{
+    public Guid TeamId { get; set; }
+    public string? OpponentId { get; set; }
+    public int Count { get; set; } = 10;
+}
+
+public class BatchPracticeResponse
+{
+    public int TotalBattles { get; set; }
+    public int Wins { get; set; }
+    public int Losses { get; set; }
+    public double WinRate { get; set; }
+    public double AvgTurns { get; set; }
+    public string OpponentName { get; set; } = string.Empty;
+}
+
+public class CreateClassTournamentRequest
+{
+    public int EntryFee { get; set; } = 0;
+    public int MaxParticipants { get; set; } = 16;
 }

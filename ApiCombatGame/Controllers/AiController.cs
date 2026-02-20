@@ -90,6 +90,43 @@ public class AiController : ControllerBase
         }
     }
 
+    /// <summary>Run batch practice battles for statistical analysis.</summary>
+    /// <remarks>
+    /// Runs N practice battles server-side and returns aggregate statistics. No gold, XP, or
+    /// rating changes — this is a pure simulation for strategy analysis.
+    ///
+    /// Ideal for classrooms: students can test their strategies against AI opponents and compare
+    /// win rates without any economy impact. Rate limited to 1 request per minute.
+    /// </remarks>
+    /// <param name="request">Team ID, optional opponent ID, and battle count (max 200).</param>
+    /// <response code="200">Aggregate battle statistics.</response>
+    /// <response code="400">Invalid team or parameters.</response>
+    /// <response code="404">AI opponent not found.</response>
+    [ApiDifficulty("intermediate")]
+    [ApiGameTip("Use batch practice to A/B test strategy changes. Run 100 battles with your current config, tweak it, run 100 more, and compare win rates.")]
+    [ApiPrerequisite("Register and login", "Build a team")]
+    [HttpPost("batch-practice")]
+    [ProducesResponseType(typeof(ApiCombatGame.Models.DTOs.Education.BatchPracticeResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> BatchPractice([FromBody] ApiCombatGame.Models.DTOs.Education.BatchPracticeRequest request)
+    {
+        try
+        {
+            var playerId = GetPlayerId();
+            var result = await _aiService.BatchPracticeAsync(playerId, request);
+            return Ok(result);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new { error = ex.Message });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { error = ex.Message });
+        }
+    }
+
     private Guid GetPlayerId()
     {
         var claim = User.FindFirst("PlayerId") ?? User.FindFirst(ClaimTypes.NameIdentifier);

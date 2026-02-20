@@ -26,6 +26,9 @@ public class Tournament
 
     public Guid? WinnerId { get; set; }
 
+    /// <summary>If set, this is a class tournament restricted to enrolled students.</summary>
+    public Guid? ModuleId { get; set; }
+
     public DateTime RegistrationOpens { get; set; }
     public DateTime StartsAt { get; set; }
     public DateTime? CompletedAt { get; set; }

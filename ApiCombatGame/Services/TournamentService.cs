@@ -79,6 +79,15 @@ public class TournamentService : ITournamentService
         if (tournament.Entries.Any(e => e.PlayerId == playerId))
             throw new InvalidOperationException("You are already registered for this tournament.");
 
+        // Class tournaments require enrollment in the associated module
+        if (tournament.ModuleId.HasValue)
+        {
+            var isEnrolled = await _context.Set<StudentEnrollment>()
+                .AnyAsync(e => e.PlayerId == playerId && e.ModuleId == tournament.ModuleId.Value);
+            if (!isEnrolled)
+                throw new InvalidOperationException("This is a class tournament. You must be enrolled in the module to participate.");
+        }
+
         // Verify team ownership
         var team = await _context.Teams.FirstOrDefaultAsync(t => t.Id == request.TeamId && t.PlayerId == playerId);
         if (team == null)

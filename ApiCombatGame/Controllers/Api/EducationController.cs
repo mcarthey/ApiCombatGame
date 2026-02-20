@@ -230,6 +230,96 @@ public class EducationController : ControllerBase
         return Ok(enrollments);
     }
 
+    /// <summary>View the class leaderboard for a module.</summary>
+    /// <remarks>
+    /// Shows enrolled students ranked by rating with win/loss stats and lesson progress.
+    /// Only accessible to enrolled students and the module instructor.
+    /// </remarks>
+    /// <param name="moduleId">Module ID.</param>
+    /// <response code="200">Class leaderboard.</response>
+    /// <response code="400">Not enrolled or not the instructor.</response>
+    /// <response code="404">Module not found.</response>
+    [ApiDifficulty("beginner")]
+    [ApiPrerequisite("Enroll in a module")]
+    [HttpGet("modules/{moduleId:guid}/leaderboard")]
+    [ProducesResponseType(typeof(List<ClassLeaderboardEntry>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<List<ClassLeaderboardEntry>>> GetModuleLeaderboard(Guid moduleId)
+    {
+        try
+        {
+            var playerId = GetPlayerId();
+            var leaderboard = await _educationService.GetModuleLeaderboardAsync(moduleId, playerId);
+            return Ok(leaderboard);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new { error = ex.Message });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { error = ex.Message });
+        }
+    }
+
+    /// <summary>Create a class tournament for enrolled students.</summary>
+    /// <remarks>
+    /// Instructor-only. Creates a tournament restricted to students enrolled in the module.
+    /// Entry fee is optional (defaults to 0 for classroom use).
+    /// </remarks>
+    /// <param name="moduleId">Module ID.</param>
+    /// <param name="request">Tournament settings.</param>
+    /// <response code="201">Class tournament created.</response>
+    /// <response code="403">Not an educator.</response>
+    /// <response code="404">Module not found or not the instructor.</response>
+    [ApiDifficulty("intermediate")]
+    [ApiPrerequisite("Create and publish a module")]
+    [HttpPost("modules/{moduleId:guid}/tournament")]
+    [ProducesResponseType(StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult> CreateClassTournament(Guid moduleId, [FromBody] CreateClassTournamentRequest request)
+    {
+        try
+        {
+            var playerId = GetPlayerId();
+            var tournamentId = await _educationService.CreateClassTournamentAsync(playerId, moduleId, request);
+            return Created($"/api/v1/tournament/bracket/{tournamentId}", new { tournamentId, message = "Class tournament created. Students can register now." });
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return StatusCode(403, new { error = ex.Message });
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new { error = ex.Message });
+        }
+    }
+
+    /// <summary>Unenroll from a module.</summary>
+    /// <param name="moduleId">Module ID to unenroll from.</param>
+    /// <response code="200">Unenrolled successfully.</response>
+    /// <response code="404">Not enrolled.</response>
+    [ApiDifficulty("beginner")]
+    [ApiPrerequisite("Enroll in a module")]
+    [HttpDelete("enroll/{moduleId:guid}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult> Unenroll(Guid moduleId)
+    {
+        try
+        {
+            var playerId = GetPlayerId();
+            await _educationService.UnenrollAsync(playerId, moduleId);
+            return Ok(new { message = "Unenrolled from module." });
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new { error = ex.Message });
+        }
+    }
+
     /// <summary>Instructor dashboard with student analytics.</summary>
     /// <remarks>
     /// View stats for all modules you've created: enrollment counts, completion rates,

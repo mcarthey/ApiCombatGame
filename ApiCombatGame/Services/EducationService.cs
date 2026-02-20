@@ -109,7 +109,9 @@ public class EducationService : IEducationService
                 Title = l.Title,
                 Objective = l.Objective,
                 Endpoint = l.Endpoint,
-                Hint = l.Hint
+                Hint = l.Hint,
+                VerificationEndpoint = l.VerificationEndpoint,
+                VerificationMethod = l.VerificationMethod
             }).ToList(),
             MyProgress = progress
         };
@@ -276,6 +278,91 @@ public class EducationService : IEducationService
         }).ToList();
     }
 
+    public async Task<List<ClassLeaderboardEntry>> GetModuleLeaderboardAsync(Guid moduleId, Guid playerId)
+    {
+        var module = await _context.Set<CurriculumModule>().FindAsync(moduleId)
+            ?? throw new KeyNotFoundException("Module not found.");
+
+        // Verify the requester is enrolled or is the instructor
+        var isInstructor = module.InstructorId == playerId;
+        if (!isInstructor)
+        {
+            var enrolled = await _context.Set<StudentEnrollment>()
+                .AnyAsync(e => e.PlayerId == playerId && e.ModuleId == moduleId);
+            if (!enrolled)
+                throw new InvalidOperationException("You must be enrolled in this module or be the instructor to view the leaderboard.");
+        }
+
+        var enrollments = await _context.Set<StudentEnrollment>()
+            .Where(e => e.ModuleId == moduleId)
+            .Include(e => e.Player)
+            .ToListAsync();
+
+        var leaderboard = enrollments
+            .Select(e => new ClassLeaderboardEntry
+            {
+                Username = e.Player.Username,
+                Rating = e.Player.Rating,
+                Wins = e.Player.TotalBattlesWon,
+                Losses = e.Player.TotalBattlesPlayed - e.Player.TotalBattlesWon,
+                WinRate = e.Player.TotalBattlesPlayed > 0
+                    ? Math.Round((double)e.Player.TotalBattlesWon / e.Player.TotalBattlesPlayed * 100, 1)
+                    : 0,
+                LessonsCompleted = e.LessonsCompleted
+            })
+            .OrderByDescending(e => e.Rating)
+            .Select((e, i) => { e.Rank = i + 1; return e; })
+            .ToList();
+
+        return leaderboard;
+    }
+
+    public async Task<Guid> CreateClassTournamentAsync(Guid instructorId, Guid moduleId, CreateClassTournamentRequest request)
+    {
+        var instructor = await RequireEducatorAsync(instructorId);
+
+        var module = await _context.Set<CurriculumModule>()
+            .FirstOrDefaultAsync(m => m.Id == moduleId && m.InstructorId == instructorId)
+            ?? throw new KeyNotFoundException("Module not found or you are not the instructor.");
+
+        var tournament = new Models.Domain.Tournament
+        {
+            Id = Guid.NewGuid(),
+            Name = $"Class Tournament: {module.Title}",
+            Status = "registration",
+            MaxParticipants = Math.Clamp(request.MaxParticipants, 4, 32),
+            EntryFee = Math.Max(0, request.EntryFee),
+            ModuleId = moduleId,
+            RegistrationOpens = DateTime.UtcNow,
+            StartsAt = DateTime.UtcNow.AddHours(24),
+            PrizePoolJson = "[]"
+        };
+
+        _context.Set<Models.Domain.Tournament>().Add(tournament);
+        await _context.SaveChangesAsync();
+
+        _logger.LogInformation("Instructor {InstructorId} created class tournament {TournamentId} for module {ModuleId}",
+            instructorId, tournament.Id, moduleId);
+
+        return tournament.Id;
+    }
+
+    public async Task UnenrollAsync(Guid playerId, Guid moduleId)
+    {
+        var enrollment = await _context.Set<StudentEnrollment>()
+            .FirstOrDefaultAsync(e => e.PlayerId == playerId && e.ModuleId == moduleId)
+            ?? throw new KeyNotFoundException("Not enrolled in this module.");
+
+        var module = await _context.Set<CurriculumModule>().FindAsync(moduleId);
+        if (module != null && module.EnrolledCount > 0)
+            module.EnrolledCount--;
+
+        _context.Set<StudentEnrollment>().Remove(enrollment);
+        await _context.SaveChangesAsync();
+
+        _logger.LogInformation("Player {PlayerId} unenrolled from module {ModuleId}", playerId, moduleId);
+    }
+
     private async Task<Player> RequireEducatorAsync(Guid playerId)
     {
         var player = await _context.Players.FindAsync(playerId)
@@ -337,5 +424,7 @@ public class EducationService : IEducationService
         public string Objective { get; set; } = string.Empty;
         public string Endpoint { get; set; } = string.Empty;
         public string? Hint { get; set; }
+        public string? VerificationEndpoint { get; set; }
+        public string? VerificationMethod { get; set; }
     }
 }
