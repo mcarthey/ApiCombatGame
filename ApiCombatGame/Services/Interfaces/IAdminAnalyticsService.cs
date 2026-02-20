@@ -23,6 +23,7 @@ public interface IAdminAnalyticsService
 
     // Admin actions (adminPlayerId is the admin performing the action, for audit logging)
     Task<bool> ToggleAdminAsync(Guid adminPlayerId, Guid playerId, bool isAdmin, AdminRole role = AdminRole.SuperAdmin);
+    Task<bool> ToggleEducatorAsync(Guid adminPlayerId, Guid playerId, bool isEducator);
     Task<bool> AdjustCurrencyAsync(Guid adminPlayerId, Guid playerId, int amount);
     Task<bool> AdjustRatingAsync(Guid adminPlayerId, Guid playerId, int amount);
     Task<bool> SetTierAsync(Guid adminPlayerId, Guid playerId, SubscriptionTier tier);

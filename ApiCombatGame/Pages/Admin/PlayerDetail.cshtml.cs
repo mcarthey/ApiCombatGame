@@ -86,6 +86,12 @@ public class PlayerDetailModel : PageModel
         return RedirectToPage("PlayerDetail", new { id = playerId, message = "updated" });
     }
 
+    public async Task<IActionResult> OnPostToggleEducatorAsync(Guid playerId, bool makeEducator)
+    {
+        await _analytics.ToggleEducatorAsync(GetAdminId(), playerId, makeEducator);
+        return RedirectToPage("PlayerDetail", new { id = playerId, message = "updated" });
+    }
+
     public async Task<IActionResult> OnPostResetPasswordAsync(Guid playerId, string newPassword)
     {
         if (!string.IsNullOrWhiteSpace(newPassword) && newPassword.Length >= 8)

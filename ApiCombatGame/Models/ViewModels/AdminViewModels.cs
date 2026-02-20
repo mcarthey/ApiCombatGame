@@ -47,6 +47,7 @@ public class AdminPlayerSummary
     public int TotalBattles { get; set; }
     public double WinRate { get; set; }
     public bool IsAdmin { get; set; }
+    public bool IsEducator { get; set; }
     public bool IsBot { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime LastLoginAt { get; set; }
@@ -65,6 +66,7 @@ public class AdminPlayerDetailData
     public int WinStreak { get; set; }
     public string CurrentTier { get; set; } = "Free";
     public bool IsAdmin { get; set; }
+    public bool IsEducator { get; set; }
     public string AdminRole { get; set; } = "None";
     public DateTime CreatedAt { get; set; }
     public DateTime LastLoginAt { get; set; }

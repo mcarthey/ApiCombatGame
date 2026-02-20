@@ -43,6 +43,10 @@
                 {
                     <span class="md3-badge-error ml-2">@p.AdminRole</span>
                 }
+                @if (p.IsEducator)
+                {
+                    <span class="md3-badge-primary ml-2"><span class="material-symbols-outlined" style="font-size: 14px; vertical-align: text-bottom;">school</span> Educator</span>
+                }
             </h2>
             <p class="mt-1" style="color: var(--md-sys-color-on-surface-variant);">@p.Email</p>
             <p class="text-sm mt-1" style="color: var(--md-sys-color-outline);">ID: @p.Id</p>
@@ -188,6 +192,26 @@
                 {
                     <button class="md3-btn-tonal w-full" type="submit">
                         Make Admin
+                    </button>
+                }
+            </form>
+
+            <!-- Toggle Educator -->
+            <form method="post" asp-page-handler="ToggleEducator" class="flex gap-2">
+                <input type="hidden" name="playerId" value="@p.Id" />
+                <input type="hidden" name="makeEducator" value="@(!p.IsEducator)" />
+                @if (p.IsEducator)
+                {
+                    <button class="md3-btn-filled w-full" type="submit" style="background: var(--md-sys-color-error-container); color: var(--md-sys-color-on-error-container);">
+                        <span class="material-symbols-outlined" style="font-size: 18px; vertical-align: text-bottom; margin-right: 4px;">school</span>
+                        Remove Educator
+                    </button>
+                }
+                else
+                {
+                    <button class="md3-btn-tonal w-full" type="submit">
+                        <span class="material-symbols-outlined" style="font-size: 18px; vertical-align: text-bottom; margin-right: 4px;">school</span>
+                        Grant Educator
                     </button>
                 }
             </form>

@@ -154,6 +154,10 @@
                                         {
                                             <span class="md3-badge-error ml-1">Admin</span>
                                         }
+                                        @if (player.IsEducator)
+                                        {
+                                            <span class="md3-badge-primary ml-1"><span class="material-symbols-outlined" style="font-size: 12px; vertical-align: text-bottom;">school</span> Edu</span>
+                                        }
                                         @if (player.IsBot)
                                         {
                                             <span class="text-xs font-medium px-2 py-0.5 rounded ml-1" style="background: var(--md-sys-color-secondary-container); color: var(--md-sys-color-on-secondary-container);">Bot</span>

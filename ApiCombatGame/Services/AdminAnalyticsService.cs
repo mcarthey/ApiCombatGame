@@ -153,6 +153,7 @@ public class AdminAnalyticsService : IAdminAnalyticsService
                 CurrentTier = p.CurrentTier.ToString(),
                 WinStreak = p.WinStreak,
                 IsAdmin = p.IsAdmin,
+                IsEducator = p.IsEducator,
                 IsBot = p.IsBot,
                 CreatedAt = p.CreatedAt,
                 LastLoginAt = p.LastLoginAt
@@ -240,6 +241,7 @@ public class AdminAnalyticsService : IAdminAnalyticsService
             WinStreak = player.WinStreak,
             CurrentTier = player.CurrentTier.ToString(),
             IsAdmin = player.IsAdmin,
+            IsEducator = player.IsEducator,
             AdminRole = player.AdminRole.ToString(),
             CreatedAt = player.CreatedAt,
             LastLoginAt = player.LastLoginAt,
@@ -457,6 +459,19 @@ public class AdminAnalyticsService : IAdminAnalyticsService
             isAdmin ? $"You have been granted admin role: {role}" : "Your admin access has been removed.");
 
         _logger.LogInformation("Admin status changed for {Username}: IsAdmin={IsAdmin}, Role={Role}", player.Username, isAdmin, role);
+        return true;
+    }
+
+    public async Task<bool> ToggleEducatorAsync(Guid adminPlayerId, Guid playerId, bool isEducator)
+    {
+        var player = await _context.Players.FindAsync(playerId);
+        if (player == null) return false;
+
+        player.IsEducator = isEducator;
+        await _context.SaveChangesAsync();
+
+        await AuditLogAsync(adminPlayerId, "ToggleEducator", playerId, $"{{\"isEducator\":{isEducator.ToString().ToLower()}}}");
+        _logger.LogInformation("Educator status changed for {Username}: IsEducator={IsEducator}", player.Username, isEducator);
         return true;
     }
 
