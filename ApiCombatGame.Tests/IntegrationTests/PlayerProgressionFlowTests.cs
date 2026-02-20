@@ -31,7 +31,8 @@ public class PlayerProgressionFlowTests : IClassFixture<WebApplicationFactory<Pr
                     services.Remove(descriptor);
 
                 services.AddDbContext<GameDbContext>(options =>
-                    options.UseInMemoryDatabase(dbName));
+                    options.UseInMemoryDatabase(dbName)
+                        .ConfigureWarnings(w => w.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.InMemoryEventId.TransactionIgnoredWarning)));
             });
         });
     }

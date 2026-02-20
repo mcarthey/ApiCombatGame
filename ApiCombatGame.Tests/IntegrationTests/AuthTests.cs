@@ -33,7 +33,8 @@ public class AuthTests : IClassFixture<WebApplicationFactory<Program>>
 
                 // Add in-memory database for testing
                 services.AddDbContext<GameDbContext>(options =>
-                    options.UseInMemoryDatabase(dbName));
+                    options.UseInMemoryDatabase(dbName)
+                        .ConfigureWarnings(w => w.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.InMemoryEventId.TransactionIgnoredWarning)));
             });
         }).CreateClient();
     }

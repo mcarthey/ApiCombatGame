@@ -14,6 +14,7 @@ public class PlayerAnalyticsServiceTests
     {
         var options = new DbContextOptionsBuilder<GameDbContext>()
             .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+            .ConfigureWarnings(w => w.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.InMemoryEventId.TransactionIgnoredWarning))
             .Options;
 
         return new GameDbContext(options);

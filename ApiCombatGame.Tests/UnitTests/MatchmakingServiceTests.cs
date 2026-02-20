@@ -16,6 +16,7 @@ public class MatchmakingServiceTests
     {
         var options = new DbContextOptionsBuilder<GameDbContext>()
             .UseInMemoryDatabase($"TestDb_Matchmaking_{Guid.NewGuid()}")
+            .ConfigureWarnings(w => w.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.InMemoryEventId.TransactionIgnoredWarning))
             .Options;
         return new GameDbContext(options);
     }

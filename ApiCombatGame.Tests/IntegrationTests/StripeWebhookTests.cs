@@ -209,35 +209,35 @@ public class StripeWebhookTests
         _mockSubscriptionService.VerifyNoOtherCalls();
     }
 
-    // ── Error Handling (Best Practice: never return 500 to Stripe) ──
+    // ── Error Handling (return 500 so Stripe retries on transient failures) ──
 
     [Fact]
-    public async Task Webhook_InvalidJson_ReturnsOk_NotServerError()
+    public async Task Webhook_InvalidJson_Returns500()
     {
-        // Best practice: return 200 even for unparseable events to prevent
-        // Stripe from endlessly retrying an event that will never succeed.
         SetRequestBody("not valid json at all {{{");
 
         var result = await _controller.HandleWebhook();
 
-        Assert.IsType<OkResult>(result);
+        var objectResult = Assert.IsType<ObjectResult>(result);
+        Assert.Equal(500, objectResult.StatusCode);
     }
 
     [Fact]
-    public async Task Webhook_EmptyBody_ReturnsOk_NotServerError()
+    public async Task Webhook_EmptyBody_Returns500()
     {
         SetRequestBody("");
 
         var result = await _controller.HandleWebhook();
 
-        Assert.IsType<OkResult>(result);
+        var objectResult = Assert.IsType<ObjectResult>(result);
+        Assert.Equal(500, objectResult.StatusCode);
     }
 
     [Fact]
-    public async Task Webhook_ServiceThrows_ReturnsOk_NotServerError()
+    public async Task Webhook_ServiceThrows_Returns500_ForRetry()
     {
-        // Best practice: if our own service fails (DB down, etc.), return 200
-        // and log the error. Stripe retrying won't help if our DB is down.
+        // Return 500 so Stripe retries — transient failures (DB down, etc.)
+        // will resolve on retry.
         _mockSubscriptionService
             .Setup(s => s.HandleSubscriptionCreatedAsync(
                 It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(),
@@ -250,7 +250,8 @@ public class StripeWebhookTests
 
         var result = await _controller.HandleWebhook();
 
-        Assert.IsType<OkResult>(result);
+        var objectResult = Assert.IsType<ObjectResult>(result);
+        Assert.Equal(500, objectResult.StatusCode);
     }
 
     // ── Null Deserialization (API version mismatch resilience) ──

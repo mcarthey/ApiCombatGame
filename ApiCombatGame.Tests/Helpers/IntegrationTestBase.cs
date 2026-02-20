@@ -5,6 +5,7 @@ using ApiCombatGame.Data;
 using ApiCombatGame.Models.DTOs.Auth;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
@@ -34,7 +35,8 @@ public abstract class IntegrationTestBase : IClassFixture<WebApplicationFactory<
                     services.Remove(descriptor);
 
                 services.AddDbContext<GameDbContext>(options =>
-                    options.UseInMemoryDatabase(dbName));
+                    options.UseInMemoryDatabase(dbName)
+                        .ConfigureWarnings(w => w.Ignore(InMemoryEventId.TransactionIgnoredWarning)));
             });
         });
     }

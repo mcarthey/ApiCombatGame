@@ -2,6 +2,7 @@ using ApiCombatGame.Data;
 using ApiCombatGame.Models.Domain;
 using ApiCombatGame.Models.Enums;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 
 namespace ApiCombatGame.Tests.Helpers;
 
@@ -16,6 +17,7 @@ public static class TestDbContextFactory
         dbName ??= $"TestDb_{Guid.NewGuid()}";
         var options = new DbContextOptionsBuilder<GameDbContext>()
             .UseInMemoryDatabase(dbName)
+            .ConfigureWarnings(w => w.Ignore(InMemoryEventId.TransactionIgnoredWarning))
             .Options;
 
         var context = new GameDbContext(options);

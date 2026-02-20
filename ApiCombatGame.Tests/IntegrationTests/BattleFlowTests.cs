@@ -34,7 +34,8 @@ public class BattleFlowTests : IClassFixture<WebApplicationFactory<Program>>
                     services.Remove(descriptor);
 
                 services.AddDbContext<GameDbContext>(options =>
-                    options.UseInMemoryDatabase(dbName));
+                    options.UseInMemoryDatabase(dbName)
+                        .ConfigureWarnings(w => w.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.InMemoryEventId.TransactionIgnoredWarning)));
             });
         });
     }
