@@ -35,7 +35,7 @@ public class StrategyMarketplaceService : IStrategyMarketplaceService
             Id = Guid.NewGuid(),
             CreatorId = playerId,
             Name = name,
-            Description = description,
+            Description = description ?? string.Empty,
             StrategyJson = strategyJson,
             Price = Math.Max(0, price),
             IsPublic = true,

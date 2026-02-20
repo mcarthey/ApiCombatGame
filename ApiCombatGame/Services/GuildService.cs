@@ -71,7 +71,7 @@ public class GuildService : IGuildService
             Id = Guid.NewGuid(),
             Name = name,
             Tag = tag.ToUpperInvariant(),
-            Description = description,
+            Description = description ?? string.Empty,
             LeaderId = playerId,
             Level = 1,
             MaxMembers = 20,

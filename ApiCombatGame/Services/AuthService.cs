@@ -53,6 +53,9 @@ public class AuthService : IAuthService
             .Where(u => u.IsTemplate && u.UnlockCost == 200)
             .ToListAsync();
 
+        if (starterTemplates.Count < 3)
+            _logger.LogWarning("Only {Count} starter templates available (expected 3+)", starterTemplates.Count);
+
         var starterUnits = starterTemplates.Take(3).Select(template => new Unit
         {
             Id = Guid.NewGuid(),
@@ -262,7 +265,7 @@ public class AuthService : IAuthService
         var player = await _context.Players
             .FirstOrDefaultAsync(p => p.EmailConfirmationToken == token && !p.IsDeleted);
 
-        if (player == null || (player.EmailConfirmationExpiresAt.HasValue && player.EmailConfirmationExpiresAt < DateTime.UtcNow))
+        if (player == null || !player.EmailConfirmationExpiresAt.HasValue || player.EmailConfirmationExpiresAt < DateTime.UtcNow)
             return false;
 
         player.EmailConfirmed = true;

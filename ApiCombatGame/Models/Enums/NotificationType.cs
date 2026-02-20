@@ -4,6 +4,7 @@ public enum NotificationType
 {
     // Battle
     BattleCompleted,
+    BattleCancelled,
     WinStreakMilestone,
     RatingMilestone,
 

@@ -272,6 +272,21 @@ public class BattleService : IBattleService
                 if (battle1.Player2Id.HasValue)
                     await RefundDailyBattleUsageAsync(battle1.Player2Id.Value, cancellationToken);
                 await _context.SaveChangesAsync(cancellationToken);
+
+                // Notify affected players about the cancellation
+                try
+                {
+                    await _notifications.SendAsync(battle1.Player1Id, NotificationType.BattleCancelled,
+                        "Battle Cancelled", "Your battle was cancelled because team units were unavailable. Please reconfigure your team.");
+                    if (battle1.Player2Id.HasValue)
+                        await _notifications.SendAsync(battle1.Player2Id.Value, NotificationType.BattleCancelled,
+                            "Battle Cancelled", "Your battle was cancelled because the opponent's team was unavailable.");
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Failed to send battle cancellation notification for {BattleId}", battle1.Id);
+                }
+
                 return;
             }
 
