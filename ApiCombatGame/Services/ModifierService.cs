@@ -1,5 +1,6 @@
 using ApiCombatGame.Data;
 using ApiCombatGame.Models.Domain;
+using ApiCombatGame.Models.Enums;
 using ApiCombatGame.Services.Interfaces;
 using ApiCombatGame.Services.Modifiers;
 using Microsoft.EntityFrameworkCore;
@@ -9,11 +10,13 @@ namespace ApiCombatGame.Services;
 public class ModifierService : IModifierService
 {
     private readonly GameDbContext _context;
+    private readonly INotificationService _notifications;
     private readonly Dictionary<string, IModifierEffect> _modifiers;
 
-    public ModifierService(GameDbContext context)
+    public ModifierService(GameDbContext context, INotificationService notifications)
     {
         _context = context;
+        _notifications = notifications;
 
         // Register available modifiers (Extension Point: add new modifiers here)
         _modifiers = new Dictionary<string, IModifierEffect>
@@ -64,10 +67,20 @@ public class ModifierService : IModifierService
         if (nextModifier != null)
         {
             nextModifier.IsActive = true;
-        }
 
-        // TODO: Generate new modifier for the week after next if none exists
-        // This would pick a random modifier type and create a new EnvironmentalModifier entity
+            // Notify all active players about the new modifier
+            var activePlayers = await _context.Players
+                .Where(p => !p.IsDeleted)
+                .Select(p => p.Id)
+                .Take(500)
+                .ToListAsync();
+
+            foreach (var pid in activePlayers)
+            {
+                await _notifications.SendAsync(pid, NotificationType.NewModifierActive,
+                    "New Modifier Active!", $"{nextModifier.Name} is now active — {nextModifier.Description}");
+            }
+        }
 
         await _context.SaveChangesAsync();
     }

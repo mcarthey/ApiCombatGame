@@ -15,7 +15,7 @@ public class GuildTreasuryServiceTests
     private static (GameDbContext context, GuildTreasuryService service) CreateService()
     {
         var context = TestDbContextFactory.Create();
-        var service = new GuildTreasuryService(context, new Mock<IActivityLedger>().Object, NullLogger<GuildTreasuryService>.Instance);
+        var service = new GuildTreasuryService(context, new Mock<IActivityLedger>().Object, new Mock<INotificationService>().Object, NullLogger<GuildTreasuryService>.Instance);
         return (context, service);
     }
 

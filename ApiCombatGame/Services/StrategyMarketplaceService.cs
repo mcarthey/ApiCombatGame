@@ -1,5 +1,6 @@
 using ApiCombatGame.Data;
 using ApiCombatGame.Models.Domain;
+using ApiCombatGame.Models.Enums;
 using ApiCombatGame.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
@@ -9,12 +10,14 @@ public class StrategyMarketplaceService : IStrategyMarketplaceService
 {
     private readonly GameDbContext _context;
     private readonly IActivityLedger _ledger;
+    private readonly INotificationService _notifications;
     private readonly ILogger<StrategyMarketplaceService> _logger;
 
-    public StrategyMarketplaceService(GameDbContext context, IActivityLedger ledger, ILogger<StrategyMarketplaceService> logger)
+    public StrategyMarketplaceService(GameDbContext context, IActivityLedger ledger, INotificationService notifications, ILogger<StrategyMarketplaceService> logger)
     {
         _context = context;
         _ledger = ledger;
+        _notifications = notifications;
         _logger = logger;
     }
 
@@ -103,6 +106,15 @@ public class StrategyMarketplaceService : IStrategyMarketplaceService
         }
 
         strategy.DownloadCount++;
+
+        // Download milestone notifications
+        int[] milestones = [10, 50, 100, 250, 500, 1000];
+        if (milestones.Contains(strategy.DownloadCount))
+        {
+            await _notifications.SendAsync(strategy.CreatorId, NotificationType.StrategyDownloadMilestone,
+                $"{strategy.DownloadCount} Downloads!", $"Your strategy \"{strategy.Name}\" hit {strategy.DownloadCount} downloads!");
+        }
+
         await _context.SaveChangesAsync();
 
         return strategy;
@@ -144,6 +156,13 @@ public class StrategyMarketplaceService : IStrategyMarketplaceService
         strategy.UpdatedAt = DateTime.UtcNow;
 
         await _context.SaveChangesAsync();
+
+        // Notify strategy creator about the rating
+        if (strategy.CreatorId != playerId)
+        {
+            await _notifications.SendAsync(strategy.CreatorId, NotificationType.StrategyRated,
+                "Strategy Rated!", $"Someone rated your strategy \"{strategy.Name}\" {rating}/5 stars.");
+        }
     }
 
     public async Task ApplyStrategyDecay()

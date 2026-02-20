@@ -417,6 +417,18 @@ public class BattleService : IBattleService
 
             _ledger.LogPlayer(winnerId, "Rating", winnerOldRating, winner.Rating, "Battle", "BattleWon", battle.Id);
             _ledger.LogPlayer(loserId, "Rating", loserOldRating, loser.Rating, "Battle", "BattleLost", battle.Id);
+
+            // Rating milestone notifications (crossing 500/1000/1500/2000/2500/3000)
+            int[] milestones = [500, 1000, 1500, 2000, 2500, 3000];
+            foreach (var m in milestones)
+            {
+                if (winner.Rating >= m && winnerOldRating < m)
+                    await _notifications.SendAsync(winnerId, NotificationType.RatingMilestone,
+                        $"Rating Milestone: {m}!", $"You've reached {m} API rating! Keep climbing.");
+                if (loser.Rating < m && loserOldRating >= m)
+                    await _notifications.SendAsync(loserId, NotificationType.RatingMilestone,
+                        $"Dropped Below {m}", $"Your rating fell below {m}. Time for a comeback!");
+            }
         }
 
         battle.Player1RatingChange = winnerId == battle.Player1Id ? winnerChange : loserChange;

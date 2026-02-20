@@ -102,6 +102,13 @@ public class ChallengeService : IChallengeService
         }
 
         await _context.SaveChangesAsync();
+
+        if (newChallenges.Count > 0)
+        {
+            await _notifications.SendAsync(playerId, NotificationType.DailyChallengesAvailable,
+                "Daily Challenges Ready!", $"{newChallenges.Count} new challenges await you today!");
+        }
+
         _logger.LogInformation("Generated {Count} daily challenges for player {PlayerId}",
             newChallenges.Count, playerId);
     }

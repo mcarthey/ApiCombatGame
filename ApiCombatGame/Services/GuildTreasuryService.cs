@@ -10,6 +10,7 @@ public class GuildTreasuryService : IGuildTreasuryService
 {
     private readonly GameDbContext _context;
     private readonly IActivityLedger _ledger;
+    private readonly INotificationService _notifications;
     private readonly ILogger<GuildTreasuryService> _logger;
 
     private static readonly List<UpgradeDefinition> Upgrades = new()
@@ -22,10 +23,11 @@ public class GuildTreasuryService : IGuildTreasuryService
         new("raid_attempts_5", "Raid Stamina II", "Increase daily raid attempts from 4 to 5", 80_000, g => g.MaxRaidAttempts >= 4 && g.MaxRaidAttempts < 5, g => g.MaxRaidAttempts = 5),
     };
 
-    public GuildTreasuryService(GameDbContext context, IActivityLedger ledger, ILogger<GuildTreasuryService> logger)
+    public GuildTreasuryService(GameDbContext context, IActivityLedger ledger, INotificationService notifications, ILogger<GuildTreasuryService> logger)
     {
         _context = context;
         _ledger = ledger;
+        _notifications = notifications;
         _logger = logger;
     }
 
@@ -68,6 +70,17 @@ public class GuildTreasuryService : IGuildTreasuryService
         guild.UpdatedAt = DateTime.UtcNow;
 
         await _context.SaveChangesAsync();
+
+        // Notify all guild members about the upgrade
+        var memberIds = await _context.GuildMemberships
+            .Where(m => m.GuildId == guildId)
+            .Select(m => m.PlayerId)
+            .ToListAsync();
+        foreach (var mid in memberIds)
+        {
+            await _notifications.SendAsync(mid, NotificationType.GuildTreasuryUpgrade,
+                "Guild Upgrade!", $"Your guild purchased: {upgrade.Name}");
+        }
 
         _logger.LogInformation("Guild {GuildId} purchased upgrade {UpgradeId} for {Cost}g",
             guildId, upgradeId, upgrade.Cost);

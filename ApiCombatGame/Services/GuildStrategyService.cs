@@ -10,11 +10,13 @@ public class GuildStrategyService : IGuildStrategyService
 {
     private readonly GameDbContext _context;
     private readonly IGuildService _guildService;
+    private readonly INotificationService _notifications;
 
-    public GuildStrategyService(GameDbContext context, IGuildService guildService)
+    public GuildStrategyService(GameDbContext context, IGuildService guildService, INotificationService notifications)
     {
         _context = context;
         _guildService = guildService;
+        _notifications = notifications;
     }
 
     public async Task<List<GuildStrategy>> GetStrategiesAsync(Guid guildId)
@@ -50,6 +52,17 @@ public class GuildStrategyService : IGuildStrategyService
 
         _context.GuildStrategies.Add(strategy);
         await _context.SaveChangesAsync();
+
+        // Notify guild members about new strategy
+        var memberIds = await _context.GuildMemberships
+            .Where(m => m.GuildId == guildId && m.PlayerId != creatorId)
+            .Select(m => m.PlayerId)
+            .ToListAsync();
+        foreach (var mid in memberIds)
+        {
+            await _notifications.SendAsync(mid, NotificationType.GuildStrategyPublished,
+                "New Guild Strategy!", $"A new strategy \"{name}\" was published to your guild library.");
+        }
 
         await _context.Entry(strategy).Reference(s => s.Creator).LoadAsync();
         return strategy;
