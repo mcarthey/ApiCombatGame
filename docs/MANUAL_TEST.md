@@ -784,6 +784,59 @@ Sections below are marked with coverage status:
 
 ---
 
+## 42. Production Hardening — Race Conditions & Input Validation — PARTIAL
+
+> **Coverage**: Transaction wrapping and input bounds are validated at unit level; concurrent access patterns need manual/load testing.
+
+### 42.1 Currency Race Conditions (Strategy Marketplace)
+- [ ] Buy a paid strategy — verify currency deducted from buyer and 80% credited to creator
+- [ ] Verify insufficient currency returns clear error message
+- [ ] (Load test) Send 2 concurrent download requests for the same strategy — verify only one succeeds if balance is borderline
+
+### 42.2 Tournament Entry Fee
+- [ ] Enter a tournament with sufficient currency — verify entry fee deducted
+- [ ] Enter tournament with insufficient currency — verify clear error and no partial deduction
+- [ ] Verify tournament full condition returns clear error message
+
+### 42.3 Guild Treasury Operations
+- [ ] Deposit gold to guild treasury — verify player currency decreases and treasury increases
+- [ ] Deposit with insufficient currency — verify error, no partial transfer
+- [ ] Purchase guild upgrade — verify treasury balance decreases and upgrade applies
+- [ ] Verify non-leader cannot purchase upgrades
+
+### 42.4 Guild Creation Validation
+- [ ] Create guild with name > 50 chars — verify error
+- [ ] Create guild with tag > 5 chars — verify error
+- [ ] Create guild with empty name — verify error
+- [ ] Create guild with duplicate name — verify error
+
+### 42.5 Chat Message Validation
+- [ ] Send chat message > 500 chars — verify error
+- [ ] Send empty/whitespace-only message — verify error
+- [ ] Send message with @mention — verify mentioned player notified
+- [ ] Verify leading/trailing whitespace is trimmed
+
+### 42.6 Stripe Webhook Error Handling
+- [ ] Verify failed webhook processing returns 500 (not 200) so Stripe retries
+- [ ] Verify successful webhook processing returns 200
+
+### 42.7 Auth Hardening
+- [ ] Verify deleted account cannot refresh JWT token
+- [ ] Verify changing email resets EmailConfirmed flag
+- [ ] Verify email format validation on settings page (requires @ and .)
+
+### 42.8 Daily Battle Limit
+- [ ] Free tier player: verify 10 battles allowed per day
+- [ ] Verify counter resets at UTC midnight
+- [ ] Premium tier: verify unlimited battles
+
+### 42.9 Leaderboard & Pagination Bounds
+- [ ] `GET /api/v1/leaderboard?limit=200` — verify capped at 100
+- [ ] `GET /api/v1/activity-feed?page=-1` — verify coerced to page 1
+- [ ] `GET /api/v1/guild-war/history?limit=999` — verify capped at 50
+
+---
+
 ## Quick Smoke Test Sequence — AUTOMATED
 > **This entire sequence is now automated** by the Robot Player E2E test. Run manually only if you suspect a specific integration issue.
 
@@ -834,3 +887,4 @@ The areas with the highest manual testing priority are:
 | **Low** | 39: Notification Hooks | Event-driven, check delivery + content |
 | **Low** | 40: Response Caching | Verify Cache-Control headers in browser devtools |
 | **Low** | 41: Security Headers | Verify headers present on all responses |
+| **Low** | 42: Production Hardening | Race conditions need load testing, input bounds verified by unit tests |

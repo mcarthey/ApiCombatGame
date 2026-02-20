@@ -991,10 +991,60 @@ After each battle resolves, the following hooks execute (in order):
 
 ---
 
+## Production Hardening Audit ✅ COMPLETE
+
+Comprehensive codebase audit and fixes applied across all services, controllers, and Razor Pages.
+
+### Auth & Security
+- [x] Hardened `GetPlayerId()` across 9+ files (null-safe TryParse instead of null-forgiving operators)
+- [x] Hardened `GetAdminId()` in admin pages (same pattern)
+- [x] AuthService: `IsDeleted` check on JWT token refresh
+- [x] Settings: email format validation + EmailConfirmed reset on email change
+- [x] Settings: `OnGetAsync` returns proper `IActionResult` (redirects when player null)
+
+### Stripe Webhook Reliability
+- [x] Webhook error handling: returns 500 (not 200) on processing failures so Stripe retries
+- [x] Updated tests to match new behavior
+
+### Race Condition Prevention
+- [x] StrategyMarketplaceService: transaction wrapping on currency operations (buy/sell)
+- [x] TournamentService: transaction on entry fee deduction + DB-level count check for capacity
+- [x] GuildTreasuryService: transactions on deposit and upgrade purchase
+- [x] GuildService: DB-level member count check in InvitePlayer and AcceptInvite
+
+### Input Validation
+- [x] StrategyMarketplaceService: name (1-100 chars), description (1000 chars), strategyJson (50KB)
+- [x] GuildService: name (1-50 chars), tag (1-5 chars), description (500 chars)
+- [x] GuildChatService: trim before length check, compiled regex for @mentions
+- [x] NotificationService: pagination bounds validation (page >= 1, pageSize 1-100)
+- [x] LeaderboardController: limit capped at 100 (was 500)
+- [x] ActivityFeedController: page coerced to >= 1
+- [x] GuildWarController: limit clamped 1-50
+- [x] ReplayController: shareUrl null/length validation
+- [x] DiscordController: Discord user ID format validation (ulong)
+
+### Error Handling & Logging
+- [x] NotificationService: deserialization failures logged (not silently swallowed)
+- [x] NotificationService: guild member exclusion via DB-level filter (efficient)
+- [x] GuildTreasuryService: fixed confusing `alreadyPurchased` logic
+- [x] GuildController: safe JSON deserialization helper (no crash on corrupt data)
+- [x] TeamController: strategy deserialization errors logged (not silently swallowed)
+- [x] Admin: password reset validates length before showing false success
+
+### UI Fixes
+- [x] Dashboard: null guard with meta redirect when Model.Dashboard is null
+- [x] Notifications: fetch N+1 items for accurate "next page" detection
+
+### Test Infrastructure
+- [x] All InMemory DB contexts configured to suppress TransactionIgnoredWarning
+- [x] Stripe webhook tests updated for 500 status code behavior
+
+---
+
 ## Build Status
 
 - **Build**: 0 errors, 0 warnings
-- **Tests**: 619 passing (607 unit/integration + 12 Playwright), 0 failing, 0 skipped
+- **Tests**: 607 unit/integration + 12 Playwright, 0 failing, 0 skipped
 - **API Endpoints**: 100+ across 28 tagged controllers
 - **Background Jobs**: 10 hosted services
 - **OpenAPI Tags**: 28 (Auth, Player, Team, Battle, Leaderboard, Strategy Marketplace, Guild, Guild Boss, Challenges, Mastery, Modifiers, Replays, AI Practice, Ranked Seasons, Loot, Referral, Unit Customization, Rival, Battle Pass, Guild Wars, Tournament, Cosmetics, Premium Plus, Activity Feed, Education, SDK, Discord, Creators)
