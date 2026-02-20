@@ -94,7 +94,7 @@ public class StripeSandboxTests : IDisposable
     {
         if (!_stripeConfigured) return;
 
-        var player = TestDbContextFactory.CreatePlayer(_context, "checkout_premium");
+        var player = TestDbContextFactory.CreatePlayer(_context, "checkout_premium", emailConfirmed: true);
         var baseUrl = "https://apicombat.com";
 
         var url = await _service.CreateCheckoutSessionAsync(player.Id, "premium", baseUrl);
@@ -108,7 +108,7 @@ public class StripeSandboxTests : IDisposable
     {
         if (!_stripeConfigured) return;
 
-        var player = TestDbContextFactory.CreatePlayer(_context, "checkout_plus");
+        var player = TestDbContextFactory.CreatePlayer(_context, "checkout_plus", emailConfirmed: true);
         var baseUrl = "https://apicombat.com";
 
         var url = await _service.CreateCheckoutSessionAsync(player.Id, "premium_plus", baseUrl);
@@ -143,7 +143,7 @@ public class StripeSandboxTests : IDisposable
     {
         if (!_stripeConfigured) return;
 
-        var player = TestDbContextFactory.CreatePlayer(_context, "checkout_reuse");
+        var player = TestDbContextFactory.CreatePlayer(_context, "checkout_reuse", emailConfirmed: true);
         var customerId = await CreateStripeCustomer(player.Email);
 
         // Create existing subscription record with Stripe customer ID

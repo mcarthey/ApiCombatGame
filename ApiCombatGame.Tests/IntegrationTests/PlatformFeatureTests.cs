@@ -151,7 +151,7 @@ public class PlatformFeatureTests : IntegrationTestBase
     [Fact]
     public async Task Education_CreateModule_ReturnsCreated()
     {
-        var (client, _) = await CreateAuthenticatedClient();
+        var (client, _) = await CreateEducatorClient();
 
         var request = new
         {
@@ -220,7 +220,7 @@ public class PlatformFeatureTests : IntegrationTestBase
     [Fact]
     public async Task Education_InstructorDashboard_ReturnsOk()
     {
-        var (client, _) = await CreateAuthenticatedClient();
+        var (client, _) = await CreateEducatorClient();
 
         var response = await client.GetAsync("/api/v1/education/instructor/dashboard");
 
@@ -230,8 +230,8 @@ public class PlatformFeatureTests : IntegrationTestBase
     [Fact]
     public async Task Education_FullFlow_CreatePublishEnrollComplete()
     {
-        // Instructor creates module
-        var (instructor, _) = await CreateAuthenticatedClient();
+        // Instructor creates module (requires educator privileges)
+        var (instructor, _) = await CreateEducatorClient();
         var createRequest = new
         {
             title = "Flow Test Module",
@@ -274,6 +274,60 @@ public class PlatformFeatureTests : IntegrationTestBase
         var response = await client.GetAsync("/api/v1/education/modules");
 
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+    }
+
+    // ── Educator Gating ──
+
+    [Fact]
+    public async Task Education_CreateModule_NonEducator_Returns403()
+    {
+        var (client, _) = await CreateAuthenticatedClient();
+
+        var request = new
+        {
+            title = "Blocked Module",
+            description = "Should not be created",
+            difficulty = "beginner",
+            lessons = new[]
+            {
+                new { title = "L1", objective = "Obj", endpoint = "GET /api/v1/player/profile", hint = "Hint" }
+            }
+        };
+
+        var response = await client.PostAsJsonAsync("/api/v1/education/modules", request);
+
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Education_CreateModule_EducatorFlag_Succeeds()
+    {
+        var (client, _) = await CreateEducatorClient();
+
+        var request = new
+        {
+            title = "Educator Module",
+            description = "Created by an educator",
+            difficulty = "beginner",
+            lessons = new[]
+            {
+                new { title = "L1", objective = "Obj", endpoint = "GET /api/v1/player/profile", hint = "Hint" }
+            }
+        };
+
+        var response = await client.PostAsJsonAsync("/api/v1/education/modules", request);
+
+        Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Education_InstructorDashboard_NonEducator_Returns403()
+    {
+        var (client, _) = await CreateAuthenticatedClient();
+
+        var response = await client.GetAsync("/api/v1/education/instructor/dashboard");
+
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
     }
 
     // ── Discord ──

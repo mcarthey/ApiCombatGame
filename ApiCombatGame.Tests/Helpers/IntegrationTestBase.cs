@@ -70,4 +70,17 @@ public abstract class IntegrationTestBase : IClassFixture<WebApplicationFactory<
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", auth.Token);
         return (client, auth);
     }
+
+    /// <summary>Creates an authenticated client with educator privileges (IsEducator + EmailConfirmed).</summary>
+    protected async Task<(HttpClient Client, AuthResponse Auth)> CreateEducatorClient(string? username = null)
+    {
+        var (client, auth) = await CreateAuthenticatedClient(username);
+        using var scope = Factory.Services.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<GameDbContext>();
+        var player = await context.Players.FindAsync(auth.PlayerId);
+        player!.IsEducator = true;
+        player.EmailConfirmed = true;
+        await context.SaveChangesAsync();
+        return (client, auth);
+    }
 }

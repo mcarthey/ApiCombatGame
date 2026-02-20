@@ -265,7 +265,87 @@ public class SubscriptionServiceTests
         Assert.Equal(SubscriptionTier.PremiumPlus, sub.Tier);
     }
 
+    // ── Purchase gating: email verification ──
+
+    [Fact]
+    public async Task CreateCheckoutSession_UnverifiedEmail_Throws()
+    {
+        var player = TestDbContextFactory.CreatePlayer(_context, "unverified_checkout", emailConfirmed: false);
+
+        var ex = await Assert.ThrowsAsync<InvalidOperationException>(
+            () => _service.CreateCheckoutSessionAsync(player.Id, "premium", "https://test.com"));
+
+        Assert.Contains("Email must be verified", ex.Message);
+    }
+
+    [Fact]
+    public async Task ChangeTier_UnverifiedEmail_Throws()
+    {
+        var player = TestDbContextFactory.CreatePlayer(_context, "unverified_tier", SubscriptionTier.Premium, emailConfirmed: false);
+        CreateSubscription(player.Id, "sub_unverified_tier", SubscriptionTier.Premium);
+
+        var ex = await Assert.ThrowsAsync<InvalidOperationException>(
+            () => _service.ChangeTierAsync(player.Id, "premium_plus"));
+
+        Assert.Contains("Email must be verified", ex.Message);
+    }
+
+    // ── Purchase gating: enrolled student block ──
+
+    [Fact]
+    public async Task CreateCheckoutSession_EnrolledStudent_Throws()
+    {
+        var player = TestDbContextFactory.CreatePlayer(_context, "enrolled_checkout", emailConfirmed: true);
+        CreateStudentEnrollment(player.Id);
+
+        var ex = await Assert.ThrowsAsync<InvalidOperationException>(
+            () => _service.CreateCheckoutSessionAsync(player.Id, "premium", "https://test.com"));
+
+        Assert.Contains("Students enrolled in education modules cannot purchase", ex.Message);
+    }
+
+    [Fact]
+    public async Task ChangeTier_EnrolledStudent_Throws()
+    {
+        var player = TestDbContextFactory.CreatePlayer(_context, "enrolled_tier", SubscriptionTier.Premium, emailConfirmed: true);
+        CreateSubscription(player.Id, "sub_enrolled_tier", SubscriptionTier.Premium);
+        CreateStudentEnrollment(player.Id);
+
+        var ex = await Assert.ThrowsAsync<InvalidOperationException>(
+            () => _service.ChangeTierAsync(player.Id, "premium_plus"));
+
+        Assert.Contains("Students enrolled in education modules cannot purchase", ex.Message);
+    }
+
     // ── Helper ──
+
+    private void CreateStudentEnrollment(Guid playerId, bool isCompleted = false)
+    {
+        var module = new CurriculumModule
+        {
+            Id = Guid.NewGuid(),
+            InstructorId = Guid.NewGuid(),
+            Title = "Test Module",
+            Description = "Test",
+            Difficulty = "beginner",
+            LessonsJson = "[]",
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
+        };
+        _context.Set<CurriculumModule>().Add(module);
+
+        var enrollment = new StudentEnrollment
+        {
+            Id = Guid.NewGuid(),
+            PlayerId = playerId,
+            ModuleId = module.Id,
+            IsCompleted = isCompleted,
+            CompletedLessonsJson = "[]",
+            EnrolledAt = DateTime.UtcNow
+        };
+        _context.StudentEnrollments.Add(enrollment);
+        _context.SaveChanges();
+    }
 
     private Subscription CreateSubscription(Guid playerId, string stripeSubId,
         SubscriptionTier tier, string priceId = "price_premium_test")

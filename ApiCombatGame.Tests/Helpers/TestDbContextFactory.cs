@@ -29,18 +29,21 @@ public static class TestDbContextFactory
         string username = "testplayer",
         SubscriptionTier tier = SubscriptionTier.Free,
         int currency = 1000,
-        int level = 1)
+        int level = 1,
+        bool emailConfirmed = false,
+        string? email = null)
     {
         var player = new Player
         {
             Id = Guid.NewGuid(),
             Username = username,
-            Email = $"{username}@test.com",
+            Email = email ?? $"{username}@test.com",
             PasswordHash = BCrypt.Net.BCrypt.HashPassword("TestPass123!"),
             CurrentTier = tier,
             Currency = currency,
             Level = level,
             Rating = 1000,
+            EmailConfirmed = emailConfirmed,
             CreatedAt = DateTime.UtcNow,
             LastLoginAt = DateTime.UtcNow,
             LastBattleResetDate = DateTime.UtcNow.Date

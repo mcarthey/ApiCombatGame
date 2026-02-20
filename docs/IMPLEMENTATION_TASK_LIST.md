@@ -849,7 +849,56 @@ After each battle resolves, the following hooks execute (in order):
 
 ---
 
-## Phase 6: Launch Preparation ⏳ DEFERRED
+## Phase 6: Education Mode Enhancements ⏳ PLANNED
+
+> Gaps identified by mapping the [Wisconsin CS Standards curriculum](https://learnedgeek.com/Blog/Post/rest-api-lesson-plan-wisconsin-standards) to existing features.
+> See `docs/EDUCATION_STANDARDS_ALIGNMENT.md` for full standards mapping.
+>
+> **Current state:** All 15 standards are met and all 5 weekly deliverables are achievable today.
+> These enhancements reduce friction for classroom adoption.
+
+### 6.1 Class-Scoped Leaderboard (Priority 1 — Low Effort)
+
+- [ ] `GET /api/v1/education/modules/{moduleId}/leaderboard` — enrolled students ranked by rating/wins
+- [ ] Query enrolled students via `StudentEnrollment`, join with `Player` stats, sort by rating desc
+- [ ] Response: `[{ rank, username, rating, wins, losses, winRate, lessonsCompleted }]`
+- [ ] Only accessible to enrolled students and module instructor
+
+### 6.2 Batch Practice Endpoint (Priority 2 — Medium Effort)
+
+- [ ] `POST /api/v1/ai/batch-practice` — run N practice battles server-side
+- [ ] Request: `{ teamId, opponentId?, count (max 200) }`
+- [ ] Response: `{ totalBattles, wins, losses, avgTurns, avgDamageDealt, avgDamageTaken, winRate }`
+- [ ] Reuse `AiOpponentService` in a loop, aggregate results
+- [ ] Rate limit: 1 batch request per minute (prevent abuse)
+- [ ] Does not award gold/XP (simulation only, no economy impact)
+
+### 6.3 Class-Scoped Tournament (Priority 3 — Medium Effort)
+
+- [ ] `POST /api/v1/education/modules/{moduleId}/tournament` — instructor creates class tournament
+- [ ] Only enrolled students can register
+- [ ] Extend `Tournament` model with optional `ModuleId` FK
+- [ ] `TournamentService.RegisterAsync` checks enrollment if `ModuleId` is set
+- [ ] Class tournament bracket visible at `GET /api/v1/tournament/bracket/{tournamentId}`
+- [ ] Reduced/zero entry fee for class tournaments
+
+### 6.4 Endpoint-Linked Challenge Assignments (Priority 4 — Medium Effort)
+
+- [ ] Extend `CurriculumModule` lesson schema with optional `verificationEndpoint` and `verificationMethod`
+- [ ] When student calls the specified endpoint successfully, lesson auto-completes
+- [ ] Example: lesson says "Register via API" → `verificationEndpoint: POST /api/v1/auth/register`
+- [ ] Verification logged in `StudentEnrollment` progress
+- [ ] Instructor dashboard shows which students have verified each lesson
+
+### 6.5 Classroom Isolation (Priority 5 — High Effort, Future)
+
+- [ ] Option A: `ClassroomId` tag on enrolled students; matchmaking prefers same-classroom opponents
+- [ ] Option B: Full multi-tenant isolation per classroom (separate leaderboards, battle pools)
+- [ ] Decision deferred — need instructor feedback on whether global pool is acceptable
+
+---
+
+## Phase 7: Launch Preparation ⏳ DEFERRED
 
 - [ ] Performance optimization
 - [ ] Security audit
@@ -946,10 +995,11 @@ After each battle resolves, the following hooks execute (in order):
 ## Build Status
 
 - **Build**: 0 errors, 0 warnings
-- **Tests**: 457+ passing, 0 failing, 0 skipped
+- **Tests**: 606+ passing (595 integration/unit + 11 Playwright), 0 failing, 0 skipped
 - **API Endpoints**: 100+ across 28 tagged controllers
 - **Background Jobs**: 10 hosted services
 - **OpenAPI Tags**: 28 (Auth, Player, Team, Battle, Leaderboard, Strategy Marketplace, Guild, Guild Boss, Challenges, Mastery, Modifiers, Replays, AI Practice, Ranked Seasons, Loot, Referral, Unit Customization, Rival, Battle Pass, Guild Wars, Tournament, Cosmetics, Premium Plus, Activity Feed, Education, SDK, Discord, Creators)
+- **Wisconsin CS Standards**: 15/15 covered (see `docs/EDUCATION_STANDARDS_ALIGNMENT.md`)
 
 ---
 

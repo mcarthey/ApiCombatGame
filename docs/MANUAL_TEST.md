@@ -16,7 +16,7 @@ The following test suites reduce the manual testing burden significantly:
 |-------|-------|----------------|
 | **Unit + Integration Tests** | ~595 tests | Individual endpoint validation, error cases, auth, DB operations |
 | **Robot Player E2E** | 10 tests | Full player journey via raw HTTP — register → login → profile → roster → unlock → team → battle → results → history → leaderboard → challenges → mastery → modifiers → replays → strategies → cosmetics → referral → season. Reads OpenAPI spec, follows every HATEOAS `_links` entry, validates responses against spec schemas. |
-| **Playwright Smoke Tests** | 11 tests | Browser rendering of Homepage, API Docs, Leaderboard, Login, Register, About, Privacy, Terms, Contact, Dashboard redirect, 404 handling |
+| **Playwright Smoke Tests** | 12 tests | Browser rendering of Homepage, API Docs, Leaderboard, Login, Register, About, Privacy, Terms, Contact, Education, Dashboard redirect, 404 handling |
 
 Sections below are marked with coverage status:
 - **AUTOMATED** — fully covered by automated tests, manual verification optional
@@ -496,13 +496,14 @@ Sections below are marked with coverage status:
 ## 21. Web UI (Razor Pages)
 
 ### 21.1 Public Pages — AUTOMATED
-> **Automated:** Playwright verifies homepage, login, register, API docs, leaderboard, about, privacy, terms, and contact pages all load successfully with expected content.
+> **Automated:** Playwright verifies homepage, login, register, API docs, leaderboard, about, privacy, terms, contact, and education pages all load successfully with expected content.
 
 - [x] `GET /` renders homepage with CTA buttons
 - [x] `GET /Privacy` renders privacy page
 - [x] `GET /Auth/Login` renders login form with email/password inputs
 - [x] `GET /Auth/Register` renders registration form with username/email/password inputs
 - [x] `GET /api-docs/v1` renders API documentation with endpoint groups
+- [x] `GET /Education` renders education page with pricing, features, and CTAs
 
 ### 21.2 Account Pages (requires authentication) — MANUAL
 > **Not covered.** Requires authenticated browser session.
@@ -600,7 +601,85 @@ Sections below are marked with coverage status:
 
 ---
 
-## 28. Landing Page (Advertising) — MANUAL
+## 28. Education Page — PARTIAL
+> **Automated:** Playwright verifies `/Education` returns 200.
+> **Manual:** Visual verification of content, nav links, and Contact pre-selection.
+
+- [x] `GET /Education` renders education page with all sections
+- [ ] "For Educators" link visible in desktop top nav
+- [ ] "For Educators" link visible in mobile nav (with school icon)
+- [ ] "For Educators" link visible in footer under Resources
+- [ ] Homepage "Education Mode" bento card links to `/Education`
+- [ ] "Contact Us for Education Pricing" CTA goes to `/Contact?subject=Licensing`
+- [ ] Contact page subject dropdown pre-selects "Licensing" when linked from Education page
+- [ ] "View the 5-Week Lesson Plan" links to learnedgeek.com blog post
+- [ ] Pricing section shows Free / $500 semester / Enterprise tiers
+- [ ] `/sitemap.xml` includes `/Education`
+
+---
+
+## 29. Educator Gating — PARTIAL
+> **Automated:** Integration tests verify non-educator gets 403 on module creation and instructor dashboard. Educator-flagged player can create modules.
+> **Manual:** Verify .edu email path, admin toggle, and error message wording.
+
+### 29.1 .edu Email Educator Path
+- [ ] Register with a `.edu` email → cannot create modules until email verified
+- [ ] Confirm `.edu` email → can now create modules and access instructor dashboard
+- [ ] Register with a non-`.edu` email + confirm → still cannot create modules (gets 403)
+
+### 29.2 Admin-Granted Educator Path
+- [ ] Admin toggles "Grant Educator" on PlayerDetail page → player badge updates
+- [ ] Player with `IsEducator = true` can create modules and access instructor dashboard
+- [ ] Admin toggles "Remove Educator" → player loses module creation access
+- [x] Non-educator `POST /api/v1/education/modules` returns 403 with clear error message
+- [x] Non-educator `GET /api/v1/education/instructor/dashboard` returns 403
+
+### 29.3 Student-Facing Endpoints (No Gate)
+- [ ] Any authenticated player can browse published modules (`GET /api/v1/education/modules`)
+- [ ] Any authenticated player can enroll via code (`POST /api/v1/education/enroll/code/{code}`)
+- [ ] Any authenticated player can view own progress (`GET /api/v1/education/my-progress`)
+
+---
+
+## 30. Purchase Gating — PARTIAL
+> **Automated:** Unit tests verify unverified-email and enrolled-student blocks on `CreateCheckoutSession` and `ChangeTier`.
+> **Manual:** Verify Subscription page UI banners, button disabling, and resend flow.
+
+### 30.1 Email Verification Gate
+- [x] `CreateCheckoutSessionAsync` throws if `EmailConfirmed = false`
+- [x] `ChangeTierAsync` throws if `EmailConfirmed = false`
+- [ ] Subscription page shows "Verify your email to upgrade" banner when unverified
+- [ ] "Resend Verification Email" button on Subscription page sends email
+- [ ] After resend, success message "Verification email sent!" appears
+- [ ] Upgrade buttons are disabled (grayed out) when email unverified
+- [ ] After verifying email, banner disappears and buttons become active
+
+### 30.2 Student Enrollment Gate
+- [x] `CreateCheckoutSessionAsync` throws if player is enrolled in active module
+- [x] `ChangeTierAsync` throws if player is enrolled in active module
+- [ ] Subscription page shows "Students cannot purchase subscriptions while enrolled" banner
+- [ ] Upgrade buttons are disabled when player is an enrolled student
+- [ ] After completing all enrolled modules, banner disappears and buttons become active
+
+### 30.3 Error Handling
+- [ ] POST to upgrade with unverified email → page re-renders with error message
+- [ ] POST to upgrade while enrolled → page re-renders with error message
+- [ ] Verified + non-enrolled player upgrades → normal Stripe checkout flow works
+
+---
+
+## 31. Admin Educator Management — MANUAL
+> **Not covered by automation.** Requires admin browser session.
+
+- [ ] PlayerDetail page shows "Educator" badge next to username (when `IsEducator = true`)
+- [ ] PlayerDetail page has "Grant Educator" / "Remove Educator" toggle button with school icon
+- [ ] Clicking toggle updates the flag and refreshes page with "updated" message
+- [ ] Players list shows "Edu" badge next to educator players
+- [ ] Granting educator status does not require email verification (admin override)
+
+---
+
+## 32. Landing Page (Advertising) — MANUAL
 > **Not covered by automation.**
 
 - [ ] `GET /Landing` renders with minimal layout (logo only, no nav/footer)
@@ -611,7 +690,7 @@ Sections below are marked with coverage status:
 
 ---
 
-## 29. Favicon — MANUAL
+## 33. Favicon — MANUAL
 > **Not covered by automation.**
 
 - [ ] Favicon visible in browser tab (blue circle with crossed swords)
@@ -651,9 +730,13 @@ The areas with the highest manual testing priority are:
 | **Medium** | 18: Rate Limiting | Disabled in tests, needs live verification |
 | **Medium** | 19: Tier Gating | Premium/Premium+ behavior |
 | **Medium** | 23: Account Deletion | Destructive + email |
+| **Medium** | 29: Educator Gating | .edu email path, admin toggle |
+| **Medium** | 30: Purchase Gating | Subscription page banners, button states |
+| **Medium** | 31: Admin Educator Mgmt | Admin browser session required |
 | **Low** | 1.3: Token Refresh | Narrow scope |
 | **Low** | 3.3-3.4: Team Update/Delete | Narrow scope, integration tests likely cover |
 | **Low** | 6.2-6.3: Challenge Progress/Claim | Narrow scope |
 | **Low** | 24: Cookie Consent | Simple banner |
-| **Low** | 28: Landing Page | Marketing page |
-| **Low** | 29: Favicon | Visual only |
+| **Low** | 28: Education Page | Nav links, Contact pre-selection, visual |
+| **Low** | 32: Landing Page | Marketing page |
+| **Low** | 33: Favicon | Visual only |
