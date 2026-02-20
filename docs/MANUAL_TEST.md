@@ -835,6 +835,20 @@ Sections below are marked with coverage status:
 - [ ] `GET /api/v1/activity-feed?page=-1` — verify coerced to page 1
 - [ ] `GET /api/v1/guild-war/history?limit=999` — verify capped at 50
 
+### 42.10 Subscription Service Hardening
+- [ ] Stripe checkout session with valid data returns redirect URL (not null)
+- [ ] Stripe portal session returns redirect URL (not null)
+- [ ] Corrupted playerId in Stripe metadata logs warning (not crash)
+- [ ] Unknown Stripe priceId in webhook logs warning and defaults to Free tier
+
+### 42.11 Loot Service Hardening
+- [ ] Claim all unclaimed loot — verify gold/XP awarded atomically (all or nothing)
+- [ ] RollLoot for non-existent player returns empty array (not crash)
+
+### 42.12 Challenge Service Hardening
+- [ ] GenerateDailyChallenges for non-existent player logs warning and returns gracefully
+- [ ] Challenge progress check with unknown challenge type logs warning and skips
+
 ---
 
 ## Quick Smoke Test Sequence — AUTOMATED

@@ -1011,6 +1011,7 @@ Comprehensive codebase audit and fixes applied across all services, controllers,
 - [x] TournamentService: transaction on entry fee deduction + DB-level count check for capacity
 - [x] GuildTreasuryService: transactions on deposit and upgrade purchase
 - [x] GuildService: DB-level member count check in InvitePlayer and AcceptInvite
+- [x] LootService: ClaimAllLoot wrapped in DB transaction for atomicity
 
 ### Input Validation
 - [x] StrategyMarketplaceService: name (1-100 chars), description (1000 chars), strategyJson (50KB)
@@ -1030,6 +1031,10 @@ Comprehensive codebase audit and fixes applied across all services, controllers,
 - [x] GuildController: safe JSON deserialization helper (no crash on corrupt data)
 - [x] TeamController: strategy deserialization errors logged (not silently swallowed)
 - [x] Admin: password reset validates length before showing false success
+- [x] SubscriptionService: validate Stripe session URLs (checkout + portal), TryParse for metadata playerId, log unknown priceId
+- [x] LootService: log player-not-found in RollLoot instead of silent empty return
+- [x] ChallengeService: log player-not-found and unmatched challenge generators
+- [x] StrategyMarketplaceService: defensive check on empty Ratings before Average()
 
 ### UI Fixes
 - [x] Dashboard: null guard with meta redirect when Model.Dashboard is null
