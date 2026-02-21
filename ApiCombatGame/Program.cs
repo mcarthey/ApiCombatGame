@@ -165,12 +165,14 @@ builder.Services.AddScoped<IGuildStrategyService, GuildStrategyService>();
 builder.Services.Configure<RecaptchaSettings>(builder.Configuration.GetSection("Recaptcha"));
 builder.Services.AddHttpClient<IRecaptchaService, RecaptchaService>();
 builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("Email"));
+builder.Services.Configure<DatabaseBackupSettings>(builder.Configuration.GetSection("DatabaseBackup"));
 builder.Services.AddSingleton<IEmailTemplateService, EmailTemplateService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 
 // Admin
 builder.Services.AddScoped<IAdminAnalyticsService, AdminAnalyticsService>();
 builder.Services.AddScoped<IAppLogService, AppLogService>();
+builder.Services.AddScoped<IDatabaseBackupService, DatabaseBackupService>();
 
 // Phase 4: Notifications & Logging
 builder.Services.AddScoped<INotificationService, NotificationService>();
@@ -192,6 +194,7 @@ builder.Services.AddHostedService<TournamentProcessingJob>();
 // Phase 4: Background Jobs
 builder.Services.AddHostedService<NotificationCleanupJob>();
 builder.Services.AddHostedService<AdminAlertJob>();
+builder.Services.AddHostedService<DatabaseBackupJob>();
 
 // Filters
 builder.Services.AddScoped<TierGatingActionFilter>();
