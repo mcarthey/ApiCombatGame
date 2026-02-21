@@ -331,6 +331,7 @@ public class PlayerController : ControllerBase
     /// <summary>Get your unread notification count.</summary>
     /// <response code="200">Unread count.</response>
     [HttpGet("notifications/count")]
+    [Authorize(AuthenticationSchemes = "Cookies,Bearer")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> GetNotificationCount()
     {
