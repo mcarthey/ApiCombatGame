@@ -76,7 +76,7 @@ public class ApiKeyService : IApiKeyService
         _logger.LogInformation("API key revoked for player {PlayerId}: {KeyPrefix}...", playerId, apiKey.KeyPrefix);
     }
 
-    public async Task<Guid?> ValidateApiKeyAsync(string plainTextKey)
+    public async Task<ApiKeyValidationResult?> ValidateApiKeyAsync(string plainTextKey)
     {
         if (string.IsNullOrEmpty(plainTextKey) || !plainTextKey.StartsWith("acg_"))
             return null;
@@ -93,7 +93,11 @@ public class ApiKeyService : IApiKeyService
             {
                 candidate.LastUsedAt = DateTime.UtcNow;
                 await _context.SaveChangesAsync();
-                return candidate.PlayerId;
+                return new ApiKeyValidationResult
+                {
+                    PlayerId = candidate.PlayerId,
+                    ApiKeyId = candidate.Id
+                };
             }
         }
 

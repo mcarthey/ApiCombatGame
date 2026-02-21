@@ -1,5 +1,6 @@
 using System.Reflection;
 using System.Text;
+using ApiCombatGame.Authentication;
 using ApiCombatGame.BackgroundJobs;
 using ApiCombatGame.Data;
 using ApiCombatGame.Filters;
@@ -54,10 +55,16 @@ builder.Services.AddAuthentication(options =>
         ClockSkew = TimeSpan.Zero
     };
 })
+.AddScheme<AuthenticationSchemeOptions, ApiKeyAuthenticationHandler>(
+    ApiKeyAuthenticationHandler.SchemeName, null)
 .AddPolicyScheme("JWT_OR_COOKIE", "JWT_OR_COOKIE", options =>
 {
     options.ForwardDefaultSelector = context =>
     {
+        // API key takes priority when header is present
+        if (context.Request.Headers.ContainsKey("X-Api-Key"))
+            return ApiKeyAuthenticationHandler.SchemeName;
+
         // Use JWT for API requests or when Bearer token is present
         string? authorization = context.Request.Headers.Authorization;
         if (!string.IsNullOrEmpty(authorization) && authorization.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
