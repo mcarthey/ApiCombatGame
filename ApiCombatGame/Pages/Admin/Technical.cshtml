@@ -71,6 +71,44 @@
     </div>
 </div>
 
+<!-- Notifications & Alerts -->
+<div class="md3-card p-6 mb-6">
+    <h3 class="text-lg font-semibold mb-4" style="color: var(--md-sys-color-on-surface);">Notifications & Alerts</h3>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="p-4" style="background: var(--md-sys-color-surface-container-high); border-radius: var(--md-sys-shape-corner-medium);">
+            <div class="text-2xl font-bold" style="color: var(--md-sys-color-on-surface);">@Model.Data.TotalNotifications.ToString("N0")</div>
+            <div class="text-sm mt-1" style="color: var(--md-sys-color-on-surface-variant);">Total Notifications</div>
+        </div>
+        <div class="p-4" style="background: var(--md-sys-color-surface-container-high); border-radius: var(--md-sys-shape-corner-medium);">
+            <div class="text-2xl font-bold" style="color: @(Model.Data.UnreadNotifications > 0 ? "var(--md-sys-color-tertiary)" : "var(--md-sys-color-on-surface)");">@Model.Data.UnreadNotifications.ToString("N0")</div>
+            <div class="text-sm mt-1" style="color: var(--md-sys-color-on-surface-variant);">Unread</div>
+        </div>
+        <div class="p-4" style="background: var(--md-sys-color-surface-container-high); border-radius: var(--md-sys-shape-corner-medium);">
+            <div class="text-2xl font-bold" style="color: var(--md-sys-color-on-surface);">@Model.Data.NotificationsSentToday.ToString("N0")</div>
+            <div class="text-sm mt-1" style="color: var(--md-sys-color-on-surface-variant);">Sent Today</div>
+        </div>
+        <div class="p-4" style="background: var(--md-sys-color-surface-container-high); border-radius: var(--md-sys-shape-corner-medium);">
+            <div class="text-2xl font-bold" style="color: @(Model.Data.PendingAlerts > 0 ? "var(--md-sys-color-error)" : "var(--md-sys-color-on-surface)");">@Model.Data.PendingAlerts</div>
+            <div class="text-sm mt-1" style="color: var(--md-sys-color-on-surface-variant);">Pending Alerts</div>
+        </div>
+    </div>
+</div>
+
+<!-- Error Monitoring -->
+<div class="md3-card p-6 mb-6">
+    <h3 class="text-lg font-semibold mb-4" style="color: var(--md-sys-color-on-surface);">Error Monitoring</h3>
+    <div class="grid grid-cols-2 md:grid-cols-2 gap-4">
+        <div class="p-4" style="background: @(Model.Data.ErrorsToday > 0 ? "var(--md-sys-color-error-container)" : "var(--md-sys-color-surface-container-high)"); border-radius: var(--md-sys-shape-corner-medium);">
+            <div class="text-2xl font-bold" style="color: @(Model.Data.ErrorsToday > 0 ? "var(--md-sys-color-on-error-container)" : "var(--md-sys-color-on-surface)");">@Model.Data.ErrorsToday</div>
+            <div class="text-sm mt-1" style="color: @(Model.Data.ErrorsToday > 0 ? "var(--md-sys-color-on-error-container)" : "var(--md-sys-color-on-surface-variant)");">Errors Today</div>
+        </div>
+        <div class="p-4" style="background: @(Model.Data.ErrorsThisHour > 0 ? "var(--md-sys-color-error-container)" : "var(--md-sys-color-surface-container-high)"); border-radius: var(--md-sys-shape-corner-medium);">
+            <div class="text-2xl font-bold" style="color: @(Model.Data.ErrorsThisHour > 0 ? "var(--md-sys-color-on-error-container)" : "var(--md-sys-color-on-surface)");">@Model.Data.ErrorsThisHour</div>
+            <div class="text-sm mt-1" style="color: @(Model.Data.ErrorsThisHour > 0 ? "var(--md-sys-color-on-error-container)" : "var(--md-sys-color-on-surface-variant)");">Errors This Hour</div>
+        </div>
+    </div>
+</div>
+
 <!-- Background Jobs Status -->
 <div class="md3-card p-6">
     <h3 class="text-lg font-semibold mb-2" style="color: var(--md-sys-color-on-surface);">Background Jobs</h3>

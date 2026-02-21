@@ -1,0 +1,142 @@
+@page
+@model ApiCombatGame.Pages.Admin.AuditLogModel
+@{
+    ViewData["Title"] = "Audit Log";
+    Layout = "_AdminLayout";
+}
+
+<!-- Filters -->
+<div class="md3-card p-6 mb-6">
+    <form method="get" class="flex flex-wrap gap-4 items-end">
+        <div class="min-w-[200px]">
+            <div class="md3-input-wrapper" style="width: 100%;">
+                <label for="ActionFilter">Action</label>
+                <select class="md3-select" id="ActionFilter" name="ActionFilter" onchange="this.form.submit()">
+                    <option value="" selected="@(string.IsNullOrEmpty(Model.ActionFilter))">All Actions</option>
+                    <option value="ToggleAdmin" selected="@(Model.ActionFilter == "ToggleAdmin")">ToggleAdmin</option>
+                    <option value="ToggleEducator" selected="@(Model.ActionFilter == "ToggleEducator")">ToggleEducator</option>
+                    <option value="AdjustCurrency" selected="@(Model.ActionFilter == "AdjustCurrency")">AdjustCurrency</option>
+                    <option value="AdjustRating" selected="@(Model.ActionFilter == "AdjustRating")">AdjustRating</option>
+                    <option value="SetTier" selected="@(Model.ActionFilter == "SetTier")">SetTier</option>
+                    <option value="ResetPassword" selected="@(Model.ActionFilter == "ResetPassword")">ResetPassword</option>
+                    <option value="AcknowledgeAlert" selected="@(Model.ActionFilter == "AcknowledgeAlert")">AcknowledgeAlert</option>
+                    <option value="ReconcileRating" selected="@(Model.ActionFilter == "ReconcileRating")">ReconcileRating</option>
+                    <option value="ReconcileAll" selected="@(Model.ActionFilter == "ReconcileAll")">ReconcileAll</option>
+                </select>
+            </div>
+        </div>
+        @if (!string.IsNullOrEmpty(Model.ActionFilter))
+        {
+            <a href="/Admin/AuditLog" class="md3-btn-outlined" style="text-decoration: none;">Clear</a>
+        }
+    </form>
+</div>
+
+<!-- Results Count -->
+<div class="flex justify-between items-center mb-4">
+    <span class="text-sm" style="color: var(--md-sys-color-on-surface-variant);">
+        @Model.Data.TotalCount.ToString("N0") audit log entries
+    </span>
+</div>
+
+<!-- Audit Log Table -->
+<div class="md3-card overflow-hidden">
+    <div class="overflow-x-auto">
+        <table class="md3-table min-w-full">
+            <thead>
+                <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style="width: 160px;">Timestamp</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style="width: 130px;">Admin</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style="width: 150px;">Action</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style="width: 130px;">Target</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Details</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Data.Entries.Any())
+                {
+                    @foreach (var entry in Model.Data.Entries)
+                    {
+                        <tr style="border-bottom: 1px solid var(--md-sys-color-outline-variant);">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm" style="color: var(--md-sys-color-on-surface-variant);">
+                                @entry.CreatedAt.ToString("MM/dd HH:mm:ss")
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium" style="color: var(--md-sys-color-on-surface);">
+                                @entry.AdminUsername
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="text-xs font-medium px-2 py-1 rounded" style="background: var(--md-sys-color-primary-container); color: var(--md-sys-color-on-primary-container);">
+                                    @entry.Action
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                @if (entry.TargetPlayerId.HasValue)
+                                {
+                                    <a href="/Admin/PlayerDetail?id=@entry.TargetPlayerId" style="color: var(--md-sys-color-primary);">@(entry.TargetUsername ?? "Unknown")</a>
+                                }
+                                else
+                                {
+                                    <span style="color: var(--md-sys-color-on-surface-variant);">—</span>
+                                }
+                            </td>
+                            <td class="px-6 py-4 text-sm" style="color: var(--md-sys-color-on-surface); max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                @if (!string.IsNullOrEmpty(entry.DetailsJson))
+                                {
+                                    <span title="@entry.DetailsJson" class="font-mono text-xs" style="cursor: help;">
+                                        @(entry.DetailsJson.Length > 80 ? entry.DetailsJson[..80] + "..." : entry.DetailsJson)
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span style="color: var(--md-sys-color-on-surface-variant);">—</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="5" class="px-6 py-8 text-center" style="color: var(--md-sys-color-on-surface-variant);">
+                            No audit log entries found.
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    @if (Model.Data.TotalPages > 1)
+    {
+        <div class="px-6 py-3 flex items-center justify-between" style="border-top: 1px solid var(--md-sys-color-outline-variant); background: var(--md-sys-color-surface-container);">
+            <div class="text-sm" style="color: var(--md-sys-color-on-surface-variant);">
+                Page @Model.Data.Page of @Model.Data.TotalPages
+            </div>
+            <div class="flex space-x-2">
+                @if (Model.Data.Page > 1)
+                {
+                    <a href="/Admin/AuditLog?CurrentPage=@(Model.Data.Page - 1)&ActionFilter=@Model.ActionFilter"
+                       class="md3-btn-outlined" style="text-decoration: none;">Previous</a>
+                }
+                @for (var i = Math.Max(1, Model.Data.Page - 2); i <= Math.Min(Model.Data.TotalPages, Model.Data.Page + 2); i++)
+                {
+                    @if (i == Model.Data.Page)
+                    {
+                        <button class="md3-btn-filled" disabled>@i</button>
+                    }
+                    else
+                    {
+                        <a href="/Admin/AuditLog?CurrentPage=@i&ActionFilter=@Model.ActionFilter"
+                           class="md3-btn-outlined" style="text-decoration: none;">@i</a>
+                    }
+                }
+                @if (Model.Data.Page < Model.Data.TotalPages)
+                {
+                    <a href="/Admin/AuditLog?CurrentPage=@(Model.Data.Page + 1)&ActionFilter=@Model.ActionFilter"
+                       class="md3-btn-outlined" style="text-decoration: none;">Next</a>
+                }
+            </div>
+        </div>
+    }
+</div>

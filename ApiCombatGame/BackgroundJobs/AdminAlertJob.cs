@@ -28,6 +28,7 @@ public class AdminAlertJob : BackgroundService
                 await CheckBattleQueueHealth(context, stoppingToken);
                 await CheckPlayerGrowth(context, stoppingToken);
                 await CheckExpiredBosses(context, stoppingToken);
+                await CheckErrorRate(context, stoppingToken);
 
                 await context.SaveChangesAsync(stoppingToken);
             }
@@ -108,6 +109,33 @@ public class AdminAlertJob : BackgroundService
                     Severity = AlertSeverity.Info,
                     Category = "BossExpiry",
                     Message = $"{expiredCount} guild boss(es) expired without being defeated.",
+                    CreatedAt = DateTime.UtcNow
+                });
+            }
+        }
+    }
+
+    private async Task CheckErrorRate(GameDbContext context, CancellationToken ct)
+    {
+        var hourAgo = DateTime.UtcNow.AddHours(-1);
+        var errorCount = await context.AppLogs
+            .CountAsync(l => l.Level == AppLogLevel.Error && l.CreatedAt >= hourAgo, ct);
+
+        if (errorCount >= 10)
+        {
+            var existing = await context.AdminAlerts.AnyAsync(a =>
+                a.Category == "ErrorSpike" && !a.IsAcknowledged && a.CreatedAt > DateTime.UtcNow.AddHours(-6), ct);
+
+            if (!existing)
+            {
+                var severity = errorCount >= 50 ? AlertSeverity.Critical : AlertSeverity.Warning;
+                context.AdminAlerts.Add(new AdminAlert
+                {
+                    Id = Guid.NewGuid(),
+                    Severity = severity,
+                    Category = "ErrorSpike",
+                    Message = $"{errorCount} errors logged in the past hour.",
+                    ActionRequired = "Check the Logs page for error details and investigate root cause.",
                     CreatedAt = DateTime.UtcNow
                 });
             }

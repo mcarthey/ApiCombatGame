@@ -49,6 +49,47 @@
     }
 </style>
 
+@if (Model.ActiveAlerts.Any())
+{
+    <div class="mb-6 space-y-2">
+        <div class="flex items-center gap-2 mb-2">
+            <span class="material-symbols-outlined" style="color: var(--md-sys-color-error);">notifications_active</span>
+            <h2 class="text-lg font-semibold" style="color: var(--md-sys-color-on-surface);">Active Alerts (@Model.ActiveAlerts.Count)</h2>
+        </div>
+        @foreach (var alert in Model.ActiveAlerts)
+        {
+            var borderColor = alert.Severity switch {
+                ApiCombatGame.Models.Enums.AlertSeverity.Critical => "var(--md-sys-color-error)",
+                ApiCombatGame.Models.Enums.AlertSeverity.Warning => "var(--md-sys-color-tertiary)",
+                _ => "var(--md-sys-color-primary)"
+            };
+            var severityBadge = alert.Severity switch {
+                ApiCombatGame.Models.Enums.AlertSeverity.Critical => "md3-badge-error",
+                ApiCombatGame.Models.Enums.AlertSeverity.Warning => "md3-badge-tertiary",
+                _ => "md3-badge-primary"
+            };
+            <div class="md3-card p-4 flex items-center justify-between" style="border-left: 3px solid @borderColor;">
+                <div class="flex-1">
+                    <div class="flex items-center gap-2 mb-1">
+                        <span class="@severityBadge text-xs">@alert.Severity</span>
+                        <span class="text-xs" style="color: var(--md-sys-color-outline);">@alert.Category</span>
+                        <span class="text-xs" style="color: var(--md-sys-color-outline);">@alert.CreatedAt.ToString("MMM dd, HH:mm") UTC</span>
+                    </div>
+                    <p class="text-sm" style="color: var(--md-sys-color-on-surface);">@alert.Message</p>
+                    @if (!string.IsNullOrEmpty(alert.ActionRequired))
+                    {
+                        <p class="text-xs mt-1" style="color: var(--md-sys-color-on-surface-variant);">Action: @alert.ActionRequired</p>
+                    }
+                </div>
+                <form method="post" asp-page-handler="AcknowledgeAlert" class="ml-3">
+                    <input type="hidden" name="alertId" value="@alert.Id" />
+                    <button type="submit" class="md3-btn-text text-xs">Acknowledge</button>
+                </form>
+            </div>
+        }
+    </div>
+}
+
 <!-- KPI Cards -->
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
     <div class="md3-card stat-card p-6">

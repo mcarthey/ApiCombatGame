@@ -1,3 +1,4 @@
+using ApiCombatGame.Models.Domain;
 using ApiCombatGame.Models.Enums;
 using ApiCombatGame.Models.ViewModels;
 
@@ -7,6 +8,10 @@ public interface IAdminAnalyticsService
 {
     // Overview
     Task<AdminOverviewData> GetOverviewAsync();
+
+    // Alerts
+    Task<List<AdminAlert>> GetActiveAlertsAsync();
+    Task AcknowledgeAlertAsync(Guid adminPlayerId, Guid alertId);
 
     // Player analytics
     Task<AdminPlayerAnalyticsData> GetPlayerAnalyticsAsync(string? search = null, string? tierFilter = null, int page = 1, int pageSize = 25, bool hideBots = false, string? sortBy = null, bool sortDesc = true);
@@ -28,6 +33,9 @@ public interface IAdminAnalyticsService
     Task<bool> AdjustRatingAsync(Guid adminPlayerId, Guid playerId, int amount);
     Task<bool> SetTierAsync(Guid adminPlayerId, Guid playerId, SubscriptionTier tier);
     Task<bool> ResetPasswordAsync(Guid adminPlayerId, Guid playerId, string newPassword);
+
+    // Audit log
+    Task<AdminAuditLogData> GetAuditLogsAsync(string? actionFilter, int page, int pageSize = 25);
 
     // Rating reconciliation (replays battle history to recalculate ELO)
     Task<ReconciliationPreview> PreviewReconciliationAsync(DateTime? since = null);

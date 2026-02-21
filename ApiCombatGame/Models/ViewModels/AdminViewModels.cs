@@ -80,6 +80,8 @@ public class AdminPlayerDetailData
     public string? GuildRole { get; set; }
     public string? SubscriptionStatus { get; set; }
     public List<AdminBattleInfo> RecentBattles { get; set; } = new();
+    public List<AdminSubscriptionEventEntry> SubscriptionHistory { get; set; } = new();
+    public List<AdminApiKeyEntry> ApiKeys { get; set; } = new();
 }
 
 public class AdminBattleInfo
@@ -208,6 +210,12 @@ public class AdminTechnicalData
     public int TotalChallenges { get; set; }
     public int TotalAchievementUnlocks { get; set; }
     public List<QueuedBattleInfo> QueuedBattleDetails { get; set; } = new();
+    public int TotalNotifications { get; set; }
+    public int UnreadNotifications { get; set; }
+    public int NotificationsSentToday { get; set; }
+    public int PendingAlerts { get; set; }
+    public int ErrorsToday { get; set; }
+    public int ErrorsThisHour { get; set; }
 }
 
 public class QueuedBattleInfo
@@ -219,6 +227,51 @@ public class QueuedBattleInfo
     public DateTime QueuedAt { get; set; }
     public double WaitSeconds { get; set; }
     public string Mode { get; set; } = "";
+}
+
+// Audit Log
+public class AdminAuditLogData
+{
+    public List<AdminAuditLogEntry> Entries { get; set; } = new();
+    public int TotalCount { get; set; }
+    public int Page { get; set; }
+    public int PageSize { get; set; }
+    public int TotalPages { get; set; }
+}
+
+public class AdminAuditLogEntry
+{
+    public Guid Id { get; set; }
+    public string AdminUsername { get; set; } = string.Empty;
+    public string Action { get; set; } = string.Empty;
+    public string? TargetUsername { get; set; }
+    public Guid? TargetPlayerId { get; set; }
+    public string? DetailsJson { get; set; }
+    public DateTime CreatedAt { get; set; }
+}
+
+// Subscription Events (for PlayerDetail)
+public class AdminSubscriptionEventEntry
+{
+    public string EventType { get; set; } = string.Empty;
+    public string? OldTier { get; set; }
+    public string? NewTier { get; set; }
+    public decimal? AmountUsd { get; set; }
+    public DateTime CreatedAt { get; set; }
+}
+
+// API Keys (for PlayerDetail)
+public class AdminApiKeyEntry
+{
+    public Guid Id { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public string KeyPrefix { get; set; } = string.Empty;
+    public bool IsActive { get; set; }
+    public DateTime CreatedAt { get; set; }
+    public DateTime? LastUsedAt { get; set; }
+    public DateTime? RevokedAt { get; set; }
+    public int TotalRequests { get; set; }
+    public int UniqueIps { get; set; }
 }
 
 // Rating Reconciliation

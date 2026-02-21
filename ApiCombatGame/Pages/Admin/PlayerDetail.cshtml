@@ -325,6 +325,111 @@
     </div>
 </div>
 
+<!-- API Keys -->
+<div class="md3-card overflow-hidden mt-6">
+    <div class="px-6 py-4 flex items-center gap-2" style="border-bottom: 1px solid var(--md-sys-color-outline-variant);">
+        <span class="material-symbols-outlined" style="color: var(--md-sys-color-primary);">key</span>
+        <h3 class="text-lg font-semibold" style="color: var(--md-sys-color-on-surface);">API Keys (@p.ApiKeys.Count)</h3>
+    </div>
+    <div>
+        @if (p.ApiKeys.Any())
+        {
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead>
+                        <tr style="background: var(--md-sys-color-surface-container); border-bottom: 1px solid var(--md-sys-color-outline-variant);">
+                            <th class="px-4 py-2 text-left font-medium" style="color: var(--md-sys-color-on-surface-variant);">Name</th>
+                            <th class="px-4 py-2 text-left font-medium" style="color: var(--md-sys-color-on-surface-variant);">Prefix</th>
+                            <th class="px-4 py-2 text-center font-medium" style="color: var(--md-sys-color-on-surface-variant);">Status</th>
+                            <th class="px-4 py-2 text-left font-medium" style="color: var(--md-sys-color-on-surface-variant);">Created</th>
+                            <th class="px-4 py-2 text-left font-medium" style="color: var(--md-sys-color-on-surface-variant);">Last Used</th>
+                            <th class="px-4 py-2 text-right font-medium" style="color: var(--md-sys-color-on-surface-variant);">Requests</th>
+                            <th class="px-4 py-2 text-right font-medium" style="color: var(--md-sys-color-on-surface-variant);">Unique IPs</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var key in p.ApiKeys)
+                        {
+                            <tr style="border-bottom: 1px solid var(--md-sys-color-outline-variant);">
+                                <td class="px-4 py-2 font-medium" style="color: var(--md-sys-color-on-surface);">@key.Name</td>
+                                <td class="px-4 py-2 font-mono text-xs" style="color: var(--md-sys-color-on-surface-variant);">@key.KeyPrefix...</td>
+                                <td class="px-4 py-2 text-center">
+                                    @if (key.IsActive)
+                                    {
+                                        <span class="md3-badge-primary">Active</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="md3-badge-error">Revoked</span>
+                                    }
+                                </td>
+                                <td class="px-4 py-2" style="color: var(--md-sys-color-on-surface-variant); white-space: nowrap;">@key.CreatedAt.ToString("MMM dd, yyyy")</td>
+                                <td class="px-4 py-2" style="color: var(--md-sys-color-on-surface-variant); white-space: nowrap;">@(key.LastUsedAt?.ToString("MMM dd, HH:mm") ?? "Never")</td>
+                                <td class="px-4 py-2 text-right font-mono" style="color: var(--md-sys-color-on-surface);">@key.TotalRequests.ToString("N0")</td>
+                                <td class="px-4 py-2 text-right font-mono" style="color: var(--md-sys-color-on-surface);">@key.UniqueIps</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="px-6 py-8 text-center" style="color: var(--md-sys-color-on-surface-variant);">No API keys created.</div>
+        }
+    </div>
+</div>
+
+<!-- Subscription History -->
+<div class="md3-card overflow-hidden mt-6">
+    <div class="px-6 py-4 flex items-center gap-2" style="border-bottom: 1px solid var(--md-sys-color-outline-variant);">
+        <span class="material-symbols-outlined" style="color: var(--md-sys-color-primary);">receipt_long</span>
+        <h3 class="text-lg font-semibold" style="color: var(--md-sys-color-on-surface);">Subscription History</h3>
+    </div>
+    <div>
+        @if (p.SubscriptionHistory.Any())
+        {
+            @foreach (var evt in p.SubscriptionHistory)
+            {
+                <div class="px-6 py-3 flex items-center justify-between" style="border-bottom: 1px solid var(--md-sys-color-outline-variant);">
+                    <div class="flex items-center gap-3">
+                        @{
+                            var evtBadge = evt.EventType switch
+                            {
+                                "upgraded" => "md3-badge-primary",
+                                "downgraded" => "md3-badge-error",
+                                "cancelled" => "md3-badge-error",
+                                "renewed" => "md3-badge-primary",
+                                _ => "md3-badge-secondary"
+                            };
+                        }
+                        <span class="@evtBadge text-xs">@evt.EventType</span>
+                        <span style="color: var(--md-sys-color-on-surface);">
+                            @if (evt.OldTier != null && evt.NewTier != null)
+                            {
+                                @evt.OldTier <span style="color: var(--md-sys-color-outline);">→</span> @evt.NewTier
+                            }
+                            else if (evt.NewTier != null)
+                            {
+                                @evt.NewTier
+                            }
+                        </span>
+                        @if (evt.AmountUsd.HasValue)
+                        {
+                            <span class="text-sm" style="color: var(--md-sys-color-on-surface-variant);">$@evt.AmountUsd.Value.ToString("F2")</span>
+                        }
+                    </div>
+                    <span class="text-sm" style="color: var(--md-sys-color-on-surface-variant); white-space: nowrap;">@evt.CreatedAt.ToString("MMM dd, yyyy HH:mm")</span>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="px-6 py-8 text-center" style="color: var(--md-sys-color-on-surface-variant);">No subscription events recorded.</div>
+        }
+    </div>
+</div>
+
 <!-- Support Timeline -->
 <div class="md3-card overflow-hidden mt-6">
     <div class="px-6 py-4 flex items-center justify-between" style="border-bottom: 1px solid var(--md-sys-color-outline-variant);">

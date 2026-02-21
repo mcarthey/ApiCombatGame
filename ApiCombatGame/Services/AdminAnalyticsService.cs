@@ -1,3 +1,4 @@
+using System.Text.Json;
 using ApiCombatGame.Data;
 using ApiCombatGame.Models.Domain;
 using ApiCombatGame.Models.Enums;
@@ -229,6 +230,39 @@ public class AdminAnalyticsService : IAdminAnalyticsService
 
         var achievementCount = await _context.PlayerAchievements.CountAsync(a => a.PlayerId == playerId && a.IsUnlocked);
 
+        // Subscription history (last 20 events)
+        var subscriptionHistory = await _context.SubscriptionEvents
+            .Where(e => e.PlayerId == playerId)
+            .OrderByDescending(e => e.CreatedAt)
+            .Take(20)
+            .Select(e => new AdminSubscriptionEventEntry
+            {
+                EventType = e.EventType,
+                OldTier = e.OldTier.HasValue ? e.OldTier.Value.ToString() : null,
+                NewTier = e.NewTier.HasValue ? e.NewTier.Value.ToString() : null,
+                AmountUsd = e.AmountUsd,
+                CreatedAt = e.CreatedAt
+            })
+            .ToListAsync();
+
+        // API keys with usage stats
+        var apiKeys = await _context.ApiKeys
+            .Where(k => k.PlayerId == playerId)
+            .OrderByDescending(k => k.CreatedAt)
+            .Select(k => new AdminApiKeyEntry
+            {
+                Id = k.Id,
+                Name = k.Name,
+                KeyPrefix = k.KeyPrefix,
+                IsActive = k.IsActive,
+                CreatedAt = k.CreatedAt,
+                LastUsedAt = k.LastUsedAt,
+                RevokedAt = k.RevokedAt,
+                TotalRequests = _context.ApiKeyUsageLogs.Count(l => l.ApiKeyId == k.Id),
+                UniqueIps = _context.ApiKeyUsageLogs.Where(l => l.ApiKeyId == k.Id).Select(l => l.IpAddress).Distinct().Count()
+            })
+            .ToListAsync();
+
         return new AdminPlayerDetailData
         {
             Id = player.Id,
@@ -254,7 +288,9 @@ public class AdminAnalyticsService : IAdminAnalyticsService
             GuildName = player.GuildMembership?.Guild?.Name,
             GuildRole = player.GuildMembership?.Role.ToString(),
             SubscriptionStatus = player.Subscription?.Status.ToString(),
-            RecentBattles = recentBattles
+            RecentBattles = recentBattles,
+            SubscriptionHistory = subscriptionHistory,
+            ApiKeys = apiKeys
         };
     }
 
@@ -426,6 +462,17 @@ public class AdminAnalyticsService : IAdminAnalyticsService
             .Select(b => { b.WaitSeconds = (now - b.QueuedAt).TotalSeconds; return b; })
             .ToList();
 
+        // Notifications & Alerts
+        var totalNotifications = await _context.Notifications.CountAsync();
+        var unreadNotifications = await _context.Notifications.CountAsync(n => !n.IsRead);
+        var notificationsSentToday = await _context.Notifications.CountAsync(n => n.CreatedAt >= today);
+        var pendingAlerts = await _context.AdminAlerts.CountAsync(a => !a.IsAcknowledged);
+
+        // Error monitoring
+        var hourAgo = DateTime.UtcNow.AddHours(-1);
+        var errorsToday = await _context.AppLogs.CountAsync(l => l.Level == AppLogLevel.Error && l.CreatedAt >= today);
+        var errorsThisHour = await _context.AppLogs.CountAsync(l => l.Level == AppLogLevel.Error && l.CreatedAt >= hourAgo);
+
         return new AdminTechnicalData
         {
             QueuedBattles = queuedBattles,
@@ -440,7 +487,13 @@ public class AdminAnalyticsService : IAdminAnalyticsService
             TotalStrategies = strategyCount,
             TotalChallenges = challengeCount,
             TotalAchievementUnlocks = achievementUnlocks,
-            QueuedBattleDetails = queueDetails
+            QueuedBattleDetails = queueDetails,
+            TotalNotifications = totalNotifications,
+            UnreadNotifications = unreadNotifications,
+            NotificationsSentToday = notificationsSentToday,
+            PendingAlerts = pendingAlerts,
+            ErrorsToday = errorsToday,
+            ErrorsThisHour = errorsThisHour
         };
     }
 
@@ -555,6 +608,68 @@ public class AdminAnalyticsService : IAdminAnalyticsService
 
         _logger.LogInformation("Password reset for {Username}", player.Username);
         return true;
+    }
+
+    // ==================== Alerts ====================
+
+    public async Task<List<AdminAlert>> GetActiveAlertsAsync()
+    {
+        return await _context.AdminAlerts
+            .Where(a => !a.IsAcknowledged)
+            .OrderByDescending(a => a.Severity)
+            .ThenByDescending(a => a.CreatedAt)
+            .Take(25)
+            .ToListAsync();
+    }
+
+    public async Task AcknowledgeAlertAsync(Guid adminPlayerId, Guid alertId)
+    {
+        var alert = await _context.AdminAlerts.FindAsync(alertId);
+        if (alert == null) return;
+
+        alert.IsAcknowledged = true;
+        await _context.SaveChangesAsync();
+
+        var json = JsonSerializer.Serialize(new { alertId, category = alert.Category, message = alert.Message });
+        await AuditLogAsync(adminPlayerId, "AcknowledgeAlert", null, json);
+    }
+
+    // ==================== Audit Log ====================
+
+    public async Task<AdminAuditLogData> GetAuditLogsAsync(string? actionFilter, int page, int pageSize = 25)
+    {
+        var query = _context.AdminAuditLogs.AsQueryable();
+        if (!string.IsNullOrEmpty(actionFilter))
+            query = query.Where(l => l.Action == actionFilter);
+
+        var totalCount = await query.CountAsync();
+
+        var entries = await query
+            .OrderByDescending(l => l.CreatedAt)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .Select(l => new AdminAuditLogEntry
+            {
+                Id = l.Id,
+                AdminUsername = _context.Players.Where(p => p.Id == l.AdminPlayerId).Select(p => p.Username).FirstOrDefault() ?? "Unknown",
+                Action = l.Action,
+                TargetUsername = l.TargetPlayerId.HasValue
+                    ? _context.Players.Where(p => p.Id == l.TargetPlayerId).Select(p => p.Username).FirstOrDefault()
+                    : null,
+                TargetPlayerId = l.TargetPlayerId,
+                DetailsJson = l.DetailsJson,
+                CreatedAt = l.CreatedAt
+            })
+            .ToListAsync();
+
+        return new AdminAuditLogData
+        {
+            Entries = entries,
+            TotalCount = totalCount,
+            Page = page,
+            PageSize = pageSize,
+            TotalPages = (int)Math.Ceiling((double)totalCount / pageSize)
+        };
     }
 
     // ==================== Rating Reconciliation ====================
