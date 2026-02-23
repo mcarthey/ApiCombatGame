@@ -11,10 +11,12 @@ namespace ApiCombatGame.Services;
 public class PlayerAnalyticsService : IPlayerAnalyticsService
 {
     private readonly GameDbContext _context;
+    private readonly ILogger<PlayerAnalyticsService> _logger;
 
-    public PlayerAnalyticsService(GameDbContext context)
+    public PlayerAnalyticsService(GameDbContext context, ILogger<PlayerAnalyticsService> logger)
     {
         _context = context;
+        _logger = logger;
     }
 
     public async Task<PlayerAnalyticsViewModel> GetPlayerAnalyticsAsync(Guid playerId)
@@ -116,9 +118,9 @@ public class PlayerAnalyticsService : IPlayerAnalyticsService
                     }
                 }
             }
-            catch
+            catch (JsonException ex)
             {
-                // Skip invalid JSON
+                _logger.LogWarning(ex, "Failed to deserialize team classes JSON for battle analytics");
             }
         }
 
@@ -178,9 +180,9 @@ public class PlayerAnalyticsService : IPlayerAnalyticsService
                     }
                 }
             }
-            catch
+            catch (JsonException ex)
             {
-                // Skip invalid JSON
+                _logger.LogWarning(ex, "Failed to deserialize team classes JSON for win rate analytics");
             }
         }
 

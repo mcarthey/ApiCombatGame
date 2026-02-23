@@ -18,7 +18,7 @@ public class AnalyticsPageTests
         // Arrange
         var context = TestDbContextFactory.Create();
         var player = TestDbContextFactory.CreatePlayer(context, "freeuser", SubscriptionTier.Free);
-        var analyticsService = new PlayerAnalyticsService(context);
+        var analyticsService = new PlayerAnalyticsService(context, Microsoft.Extensions.Logging.Abstractions.NullLogger<PlayerAnalyticsService>.Instance);
         var pageModel = new AnalyticsModel(analyticsService, context);
 
         SetupPageContext(pageModel, player.Id);
@@ -39,7 +39,7 @@ public class AnalyticsPageTests
         // Arrange
         var context = TestDbContextFactory.Create();
         var player = TestDbContextFactory.CreatePlayer(context, "premiumuser", SubscriptionTier.Premium);
-        var analyticsService = new PlayerAnalyticsService(context);
+        var analyticsService = new PlayerAnalyticsService(context, Microsoft.Extensions.Logging.Abstractions.NullLogger<PlayerAnalyticsService>.Instance);
         var pageModel = new AnalyticsModel(analyticsService, context);
 
         SetupPageContext(pageModel, player.Id);
@@ -60,7 +60,7 @@ public class AnalyticsPageTests
         // Arrange
         var context = TestDbContextFactory.Create();
         var player = TestDbContextFactory.CreatePlayer(context, "premiumplus", SubscriptionTier.PremiumPlus);
-        var analyticsService = new PlayerAnalyticsService(context);
+        var analyticsService = new PlayerAnalyticsService(context, Microsoft.Extensions.Logging.Abstractions.NullLogger<PlayerAnalyticsService>.Instance);
         var pageModel = new AnalyticsModel(analyticsService, context);
 
         SetupPageContext(pageModel, player.Id);
@@ -80,7 +80,7 @@ public class AnalyticsPageTests
     {
         // Arrange
         var context = TestDbContextFactory.Create();
-        var analyticsService = new PlayerAnalyticsService(context);
+        var analyticsService = new PlayerAnalyticsService(context, Microsoft.Extensions.Logging.Abstractions.NullLogger<PlayerAnalyticsService>.Instance);
         var pageModel = new AnalyticsModel(analyticsService, context);
 
         SetupPageContext(pageModel, null); // No player ID claim
@@ -98,7 +98,7 @@ public class AnalyticsPageTests
     {
         // Arrange
         var context = TestDbContextFactory.Create();
-        var analyticsService = new PlayerAnalyticsService(context);
+        var analyticsService = new PlayerAnalyticsService(context, Microsoft.Extensions.Logging.Abstractions.NullLogger<PlayerAnalyticsService>.Instance);
         var pageModel = new AnalyticsModel(analyticsService, context);
 
         var nonExistentPlayerId = Guid.NewGuid();
@@ -140,7 +140,7 @@ public class AnalyticsPageTests
         context.Battles.Add(battle);
         context.SaveChanges();
 
-        var analyticsService = new PlayerAnalyticsService(context);
+        var analyticsService = new PlayerAnalyticsService(context, Microsoft.Extensions.Logging.Abstractions.NullLogger<PlayerAnalyticsService>.Instance);
         var pageModel = new AnalyticsModel(analyticsService, context);
 
         SetupPageContext(pageModel, player.Id);
@@ -168,7 +168,7 @@ public class AnalyticsPageTests
         // Arrange
         var context = TestDbContextFactory.Create();
         var player = TestDbContextFactory.CreatePlayer(context, $"user_{tier}", tier);
-        var analyticsService = new PlayerAnalyticsService(context);
+        var analyticsService = new PlayerAnalyticsService(context, Microsoft.Extensions.Logging.Abstractions.NullLogger<PlayerAnalyticsService>.Instance);
         var pageModel = new AnalyticsModel(analyticsService, context);
 
         SetupPageContext(pageModel, player.Id);

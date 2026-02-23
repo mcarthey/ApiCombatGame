@@ -62,7 +62,7 @@ public class FlawlessVictoryChallenge : BaseChallengeGenerator
 
             return true; // All units survived
         }
-        catch
+        catch (JsonException)
         {
             return false;
         }

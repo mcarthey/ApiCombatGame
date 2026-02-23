@@ -7,10 +7,12 @@ namespace ApiCombatGame.Middleware;
 public class PlayerActivityMiddleware
 {
     private readonly RequestDelegate _next;
+    private readonly ILogger<PlayerActivityMiddleware> _logger;
 
-    public PlayerActivityMiddleware(RequestDelegate next)
+    public PlayerActivityMiddleware(RequestDelegate next, ILogger<PlayerActivityMiddleware> logger)
     {
         _next = next;
+        _logger = logger;
     }
 
     public async Task InvokeAsync(HttpContext context, GameDbContext dbContext)
@@ -48,9 +50,9 @@ public class PlayerActivityMiddleware
 
             await dbContext.SaveChangesAsync();
         }
-        catch
+        catch (Exception ex)
         {
-            // Activity tracking should never break the request pipeline
+            _logger.LogWarning(ex, "Activity tracking failed for player {PlayerId}", playerId);
         }
     }
 }

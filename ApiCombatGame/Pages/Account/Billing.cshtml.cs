@@ -15,12 +15,14 @@ public class BillingModel : PageModel
     private readonly GameDbContext _context;
     private readonly ISubscriptionService _subscriptionService;
     private readonly IConfiguration _config;
+    private readonly ILogger<BillingModel> _logger;
 
-    public BillingModel(GameDbContext context, ISubscriptionService subscriptionService, IConfiguration config)
+    public BillingModel(GameDbContext context, ISubscriptionService subscriptionService, IConfiguration config, ILogger<BillingModel> logger)
     {
         _context = context;
         _subscriptionService = subscriptionService;
         _config = config;
+        _logger = logger;
     }
 
     public BillingViewModel Billing { get; set; } = new();
@@ -50,8 +52,9 @@ public class BillingModel : PageModel
             var portalUrl = await _subscriptionService.CreateCustomerPortalSessionAsync(playerId, returnUrl);
             return Redirect(portalUrl);
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            _logger.LogError(ex, "Failed to create billing portal session for player {PlayerId}", playerId);
             return Page();
         }
     }

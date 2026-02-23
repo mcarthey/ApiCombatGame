@@ -25,7 +25,7 @@ public class PlayerAnalyticsServiceTests
     {
         // Arrange
         using var context = GetInMemoryDbContext();
-        var service = new PlayerAnalyticsService(context);
+        var service = new PlayerAnalyticsService(context, Microsoft.Extensions.Logging.Abstractions.NullLogger<PlayerAnalyticsService>.Instance);
         var nonExistentPlayerId = Guid.NewGuid();
 
         // Act & Assert
@@ -50,7 +50,7 @@ public class PlayerAnalyticsServiceTests
         context.Players.Add(player);
         await context.SaveChangesAsync();
 
-        var service = new PlayerAnalyticsService(context);
+        var service = new PlayerAnalyticsService(context, Microsoft.Extensions.Logging.Abstractions.NullLogger<PlayerAnalyticsService>.Instance);
 
         // Act
         var result = await service.GetPlayerAnalyticsAsync(player.Id);
@@ -182,7 +182,7 @@ public class PlayerAnalyticsServiceTests
         context.Battles.AddRange(battles);
         await context.SaveChangesAsync();
 
-        var service = new PlayerAnalyticsService(context);
+        var service = new PlayerAnalyticsService(context, Microsoft.Extensions.Logging.Abstractions.NullLogger<PlayerAnalyticsService>.Instance);
 
         // Act
         var result = await service.GetPlayerAnalyticsAsync(player.Id);
@@ -236,7 +236,7 @@ public class PlayerAnalyticsServiceTests
         context.Battles.AddRange(battles);
         await context.SaveChangesAsync();
 
-        var service = new PlayerAnalyticsService(context);
+        var service = new PlayerAnalyticsService(context, Microsoft.Extensions.Logging.Abstractions.NullLogger<PlayerAnalyticsService>.Instance);
 
         // Act
         var result = await service.GetPlayerAnalyticsAsync(player.Id);
@@ -323,7 +323,7 @@ public class PlayerAnalyticsServiceTests
         context.Battles.AddRange(battles);
         await context.SaveChangesAsync();
 
-        var service = new PlayerAnalyticsService(context);
+        var service = new PlayerAnalyticsService(context, Microsoft.Extensions.Logging.Abstractions.NullLogger<PlayerAnalyticsService>.Instance);
 
         // Act
         var result = await service.GetPlayerAnalyticsAsync(player.Id);
@@ -393,7 +393,7 @@ public class PlayerAnalyticsServiceTests
         context.Battles.AddRange(battles);
         await context.SaveChangesAsync();
 
-        var service = new PlayerAnalyticsService(context);
+        var service = new PlayerAnalyticsService(context, Microsoft.Extensions.Logging.Abstractions.NullLogger<PlayerAnalyticsService>.Instance);
 
         // Act
         var result = await service.GetPlayerAnalyticsAsync(player.Id);
@@ -476,7 +476,7 @@ public class PlayerAnalyticsServiceTests
         context.Battles.AddRange(battles);
         await context.SaveChangesAsync();
 
-        var service = new PlayerAnalyticsService(context);
+        var service = new PlayerAnalyticsService(context, Microsoft.Extensions.Logging.Abstractions.NullLogger<PlayerAnalyticsService>.Instance);
 
         // Act
         var result = await service.GetPlayerAnalyticsAsync(player.Id);
@@ -559,7 +559,7 @@ public class PlayerAnalyticsServiceTests
         context.Battles.AddRange(battles);
         await context.SaveChangesAsync();
 
-        var service = new PlayerAnalyticsService(context);
+        var service = new PlayerAnalyticsService(context, Microsoft.Extensions.Logging.Abstractions.NullLogger<PlayerAnalyticsService>.Instance);
 
         // Act
         var result = await service.GetPlayerAnalyticsAsync(player.Id);
@@ -615,7 +615,7 @@ public class PlayerAnalyticsServiceTests
         context.Battles.AddRange(battles);
         await context.SaveChangesAsync();
 
-        var service = new PlayerAnalyticsService(context);
+        var service = new PlayerAnalyticsService(context, Microsoft.Extensions.Logging.Abstractions.NullLogger<PlayerAnalyticsService>.Instance);
 
         // Act
         var result = await service.GetPlayerAnalyticsAsync(player.Id);
@@ -680,7 +680,7 @@ public class PlayerAnalyticsServiceTests
         context.Battles.AddRange(battles);
         await context.SaveChangesAsync();
 
-        var service = new PlayerAnalyticsService(context);
+        var service = new PlayerAnalyticsService(context, Microsoft.Extensions.Logging.Abstractions.NullLogger<PlayerAnalyticsService>.Instance);
 
         // Act
         var result = await service.GetPlayerAnalyticsAsync(player.Id);

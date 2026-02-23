@@ -821,6 +821,6 @@ public class GuildController : ControllerBase
     {
         if (string.IsNullOrEmpty(json)) return null;
         try { return System.Text.Json.JsonSerializer.Deserialize<object>(json); }
-        catch { return null; }
+        catch (System.Text.Json.JsonException) { return null; }
     }
 }

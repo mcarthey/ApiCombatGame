@@ -398,19 +398,27 @@ public class EducationService : IEducationService
     private static int CountLessons(string json)
     {
         try { return JsonSerializer.Deserialize<List<CreateLessonRequest>>(json, JsonOptions)?.Count ?? 0; }
-        catch { return 0; }
+        catch (JsonException) { return 0; }
     }
 
-    private static List<LessonData> DeserializeLessons(string json)
+    private List<LessonData> DeserializeLessons(string json)
     {
         try { return JsonSerializer.Deserialize<List<LessonData>>(json, JsonOptions) ?? new(); }
-        catch { return new(); }
+        catch (JsonException ex)
+        {
+            _logger.LogWarning(ex, "Failed to deserialize lessons JSON");
+            return new();
+        }
     }
 
-    private static List<int> DeserializeCompletedLessons(string json)
+    private List<int> DeserializeCompletedLessons(string json)
     {
         try { return JsonSerializer.Deserialize<List<int>>(json) ?? new(); }
-        catch { return new(); }
+        catch (JsonException ex)
+        {
+            _logger.LogWarning(ex, "Failed to deserialize completed lessons JSON");
+            return new();
+        }
     }
 
     private static string GenerateJoinCode()
