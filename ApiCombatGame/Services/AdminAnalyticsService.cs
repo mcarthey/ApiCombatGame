@@ -220,6 +220,7 @@ public class AdminAnalyticsService : IAdminAnalyticsService
         // Get opponent names
         var opponentIds = recentBattles.Where(b => b.OpponentId.HasValue).Select(b => b.OpponentId!.Value).Distinct().ToList();
         var opponentNames = await _context.Players
+            .AsNoTracking()
             .Where(p => opponentIds.Contains(p.Id))
             .ToDictionaryAsync(p => p.Id, p => p.Username);
 
@@ -401,6 +402,7 @@ public class AdminAnalyticsService : IAdminAnalyticsService
         var totalGuilds = await _context.Guilds.CountAsync();
 
         var guilds = await _context.Guilds
+            .AsNoTracking()
             .Include(g => g.Members)
                 .ThenInclude(m => m.Player)
             .OrderByDescending(g => g.Level)
@@ -634,6 +636,7 @@ public class AdminAnalyticsService : IAdminAnalyticsService
     public async Task<List<AdminAlert>> GetActiveAlertsAsync()
     {
         return await _context.AdminAlerts
+            .AsNoTracking()
             .Where(a => !a.IsAcknowledged)
             .OrderByDescending(a => a.Severity)
             .ThenByDescending(a => a.CreatedAt)

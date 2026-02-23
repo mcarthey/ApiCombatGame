@@ -121,10 +121,12 @@ public class ContentCreatorService : IContentCreatorService
             ?? throw new KeyNotFoundException("No creator profile found.");
 
         var strategies = await _context.Strategies
+            .AsNoTracking()
             .Where(s => s.CreatorId == playerId)
             .ToListAsync();
 
         var modules = await _context.CurriculumModules
+            .AsNoTracking()
             .Where(m => m.InstructorId == playerId)
             .ToListAsync();
 

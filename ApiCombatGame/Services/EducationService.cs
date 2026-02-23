@@ -52,6 +52,7 @@ public class EducationService : IEducationService
     public async Task<List<CurriculumModuleResponse>> GetPublicModulesAsync()
     {
         return await _context.Set<CurriculumModule>()
+            .AsNoTracking()
             .Where(m => m.IsPublished)
             .Include(m => m.Instructor)
             .OrderByDescending(m => m.EnrolledCount)
@@ -294,6 +295,7 @@ public class EducationService : IEducationService
         }
 
         var enrollments = await _context.Set<StudentEnrollment>()
+            .AsNoTracking()
             .Where(e => e.ModuleId == moduleId)
             .Include(e => e.Player)
             .ToListAsync();

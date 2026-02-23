@@ -42,6 +42,7 @@ public class ActivityFeedService : IActivityFeedService
             ?? throw new KeyNotFoundException("Player not found.");
 
         var query = _context.Set<ActivityFeedEntry>()
+            .AsNoTracking()
             .Where(a => a.PlayerId == playerId)
             .OrderByDescending(a => a.CreatedAt);
 
@@ -77,6 +78,7 @@ public class ActivityFeedService : IActivityFeedService
             ?? throw new KeyNotFoundException($"Player '{username}' not found.");
 
         var query = _context.Set<ActivityFeedEntry>()
+            .AsNoTracking()
             .Where(a => a.PlayerId == player.Id && a.IsPublic)
             .OrderByDescending(a => a.CreatedAt);
 

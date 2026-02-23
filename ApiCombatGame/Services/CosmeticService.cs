@@ -28,6 +28,7 @@ public class CosmeticService : ICosmeticService
         await EnsureShopItemsExistAsync();
 
         var items = await _context.Set<CosmeticItem>()
+            .AsNoTracking()
             .Where(c => c.IsAvailable)
             .OrderBy(c => c.Category)
             .ThenBy(c => c.GemPrice)

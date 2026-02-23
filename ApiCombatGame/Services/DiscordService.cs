@@ -91,6 +91,7 @@ public class DiscordService : IDiscordService
     public async Task<DiscordLinkResponse?> GetLinkAsync(Guid playerId)
     {
         var link = await _context.Set<DiscordLink>()
+            .AsNoTracking()
             .FirstOrDefaultAsync(d => d.PlayerId == playerId);
 
         if (link == null) return null;
@@ -183,12 +184,14 @@ public class DiscordService : IDiscordService
     public async Task<DiscordProfileResponse?> GetProfileByDiscordIdAsync(string discordUserId)
     {
         var link = await _context.Set<DiscordLink>()
+            .AsNoTracking()
             .Include(d => d.Player)
             .FirstOrDefaultAsync(d => d.DiscordUserId == discordUserId && d.IsVerified);
 
         if (link == null) return null;
 
         var guild = await _context.GuildMemberships
+            .AsNoTracking()
             .Include(m => m.Guild)
             .FirstOrDefaultAsync(m => m.PlayerId == link.PlayerId);
 

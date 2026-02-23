@@ -50,6 +50,7 @@ public class NotificationService : INotificationService
     public async Task SendToGuildAsync(Guid guildId, NotificationType type, string title, string message, string? actionUrl = null, Guid? excludePlayerId = null)
     {
         var memberIds = await _context.GuildMemberships
+            .AsNoTracking()
             .Where(m => m.GuildId == guildId && (!excludePlayerId.HasValue || m.PlayerId != excludePlayerId.Value))
             .Select(m => m.PlayerId)
             .ToListAsync();
@@ -58,6 +59,7 @@ public class NotificationService : INotificationService
 
         // Load all member preferences at once
         var players = await _context.Players
+            .AsNoTracking()
             .Where(p => memberIds.Contains(p.Id))
             .Select(p => new { p.Id, p.NotificationPreferencesJson })
             .ToListAsync();
@@ -103,6 +105,7 @@ public class NotificationService : INotificationService
         pageSize = Math.Clamp(pageSize, 1, 100);
 
         var query = _context.Notifications
+            .AsNoTracking()
             .Where(n => n.PlayerId == playerId && (n.ExpiresAt == null || n.ExpiresAt > DateTime.UtcNow));
 
         if (unreadOnly)
@@ -237,6 +240,7 @@ public class NotificationService : INotificationService
     public async Task<NotificationDigestResponse> GetDigestAsync(Guid playerId)
     {
         var unreadNotifications = await _context.Notifications
+            .AsNoTracking()
             .Where(n => n.PlayerId == playerId && !n.IsRead && (n.ExpiresAt == null || n.ExpiresAt > DateTime.UtcNow))
             .OrderByDescending(n => n.CreatedAt)
             .ToListAsync();
