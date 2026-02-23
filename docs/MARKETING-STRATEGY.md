@@ -109,16 +109,16 @@ Build your own dashboard, automate your strategies, and compete on the leaderboa
 
 ```bash
 # Register account
-curl -X POST https://api.combatgame.dev/v1/auth/register \
+curl -X POST https://apicombat.com/api/v1/auth/register \
   -H "Content-Type: application/json" \
   -d '{"email":"you@example.com","password":"YourPass123!"}'
 
 # Get your roster
-curl -X GET https://api.combatgame.dev/v1/player/roster \
+curl -X GET https://apicombat.com/api/v1/player/roster \
   -H "Authorization: Bearer YOUR_TOKEN"
 
 # Queue a battle
-curl -X POST https://api.combatgame.dev/v1/battle/queue \
+curl -X POST https://apicombat.com/api/v1/battle/queue \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -d '{"teamId":"your-team-id","mode":"ranked"}'
 ```
@@ -158,6 +158,15 @@ MIT
 #### 2. Product Hunt
 
 **Perfect Fit:** Developer tools and indie projects dominate PH
+
+> **Timing Advice:** Don't launch on PH too early. Wait until you have:
+> - 100+ registered users (social proof)
+> - 10+ custom clients built (proves the concept)
+> - 1-2 university partnerships (credibility)
+> - Active Discord (50+ members)
+> - Real battle data and leaderboard activity
+>
+> PH rewards momentum — comments from real users on launch day matter enormously.
 
 **Launch Checklist:**
 
@@ -228,7 +237,7 @@ Q: "Is there a demo?"
 A: "Yes! Try it in Postman: [link to collection]. Or use our CLI client: [link]"
 
 Q: "What tech stack?"
-A: ".NET 8 API, PostgreSQL, hosted on Railway. Open source: [GitHub link]"
+A: ".NET 8 API, MSSQL, hosted on SmarterASP.NET. Open source: [GitHub link]"
 
 Q: "Can I build a mobile app?"
 A: "Absolutely! The API is just REST, so any platform works. We'd love to see it!"
@@ -284,10 +293,10 @@ Battles resolve server-side using the strategies you upload (JSON-based
 rules for now, scripting coming later). You can queue a battle, go to 
 lunch, come back to results.
 
-Tech stack: .NET 8, PostgreSQL, hosted on Railway. Fully open source.
+Tech stack: .NET 8, MSSQL, hosted on SmarterASP.NET. Fully open source.
 
 Live demo:
-curl https://api.combatgame.dev/v1/leaderboard
+curl https://apicombat.com/api/v1/leaderboard
 
 Try it: [link]
 GitHub: [link]
@@ -340,12 +349,38 @@ A: "Email verification + rate limits. If it becomes a problem, I'll
 **If You Hit Front Page:**
 
 - [ ] Prepare for 10,000-50,000 visitors in 24 hours
-- [ ] Monitor server health (Railway auto-scales, but watch it)
+- [ ] Monitor server health (SmarterASP.NET dedicated pool — watch memory/CPU)
 - [ ] Screenshot your ranking (#1 is badge of honor)
 - [ ] Engage in comments for at least 6-8 hours
 - [ ] Post follow-up update after 24 hours with stats
 
 **Expected Impact:** Front page = 10,000-50,000 visitors, 200-1000 signups
+
+---
+
+#### 3a. HN Post-Mortem & Recovery Strategy
+
+> **Added February 2026:** HN is brutal and unpredictable. If your Show HN doesn't gain traction, don't take it personally. Timing, luck, and the algorithm are fickle.
+
+**Common Reasons Show HN Posts Fail:**
+1. **Wrong time** — Posted during low-traffic hours or when big news dominated
+2. **Title didn't grab** — First 5 words matter most on HN
+3. **No immediate "wow"** — People couldn't try it in 30 seconds
+4. **URL went to marketing page** — Should go straight to docs/demo or a working curl command
+5. **Got unlucky** — Sometimes great posts just don't catch fire
+
+**Key Insight:** HN is **not** make-or-break. Many wildly successful dev tools never hit HN front page (Postman bootstrapped to $2B without one). Focus on platforms with more predictable traction first.
+
+**Recovery Strategy If HN Flops:**
+- Don't resubmit the same post (HN penalizes reposts)
+- Wait 3-6 months, then submit a different angle (e.g., "What I learned from 1000 developer-players")
+- Focus energy on r/dotnet, r/csharp, Dev.to — more welcoming communities with predictable engagement
+- Build traction on other platforms first, then HN will come naturally through someone else sharing it
+
+**Alternative HN Angles (For Future Attempts):**
+- "Show HN: I teach API design at a college using a game with no GUI" (education angle)
+- "Show HN: What happened when I let devs build their own game clients" (results angle)
+- "Show HN: I accidentally built a teaching tool while making a combat game" (story angle)
 
 ---
 
@@ -387,7 +422,7 @@ your own client (web, CLI, mobile, whatever) and use the API to:
 It's async-first so you're not glued to your computer. Queue a 
 battle, grab coffee, check results.
 
-Tech: .NET 8, PostgreSQL, open source on GitHub.
+Tech: .NET 8, MSSQL, open source on GitHub.
 
 Try it: [link]
 GitHub: [link]
@@ -431,11 +466,11 @@ Title: My side project: API-only game for developers
 **The twist:** You interact entirely via REST API. Build your own 
 client, configure battle strategies, compete on leaderboards.
 
-**Why?** I wanted to learn Railway deployment and showcase API 
+**Why?** I wanted to showcase API 
 design skills for my consulting business. Also using it to teach 
 API concepts at the local tech college.
 
-**Tech stack:** .NET 8, PostgreSQL, Railway
+**Tech stack:** .NET 8, MSSQL, SmarterASP.NET
 
 **Status:** Live and free to play
 
@@ -640,7 +675,7 @@ API-only combat game for developers
 
 **The Journey:**
 
-Month 1: Built MVP in .NET, deployed to Railway
+Month 1: Built MVP in .NET, deployed to SmarterASP.NET
 Month 2: Soft launch (HN, Reddit) - 100 users
 Month 3: Product Hunt launch - 500 users
 Month 4: University partnerships - 800 users
@@ -692,7 +727,7 @@ Would love feedback from folks who've done B2D (business-to-developer) SaaS!
 
 1. **Development updates** (30%)
    - "Just shipped scripting engine! Now you can write Lua code for your battle AI."
-   - "Scaled to 10,000 concurrent battles. Railway's auto-scaling is impressive."
+   - "Scaled to 10,000 concurrent battles. Dedicated app pool on SmarterASP.NET holding strong."
 
 2. **Interesting discoveries** (30%)
    - "A player discovered you can predict opponent strategies by analyzing leaderboard movement patterns. This is some next-level meta."
@@ -719,6 +754,106 @@ Would love feedback from folks who've done B2D (business-to-developer) SaaS!
 - #API
 - #dotnet
 
+**Ready-to-Post Thread (8 tweets):**
+
+> Threads outperform single tweets — each tweet is a retweet opportunity, more surface area for engagement, and Twitter's algorithm favors them.
+
+```
+Tweet 1/8:
+I built a combat game where the API *is* the game.
+
+No graphics. No UI. Just REST endpoints.
+
+Here's what happened when I let developers build their own clients...
+
+#buildinpublic #indiehacker #gamedev #API #dotnet
+
+---
+
+Tweet 2/8:
+The concept: You get an API key. That's it.
+
+Want to play? Build your own client.
+- curl scripts
+- Python bots
+- React dashboards
+- Mobile apps
+
+Your creativity = your controller.
+
+---
+
+Tweet 3/8:
+Here's a simple example:
+
+curl -X POST https://apicombat.com/api/v1/battle/queue \
+  -H "Authorization: Bearer $TOKEN" \
+  -d '{"mode":"ranked"}'
+
+Queue a battle. Grab coffee. Check results.
+
+---
+
+Tweet 4/8:
+The wild part? Players started optimizing the *API calls themselves*.
+
+- Gzipping responses (70% payload reduction)
+- Parallel battle queuing
+- Caching strategies
+- Rate limit optimization
+
+The meta-game is code golf.
+
+---
+
+Tweet 5/8:
+Tech stack:
+- .NET 8 API
+- MSSQL
+- SmarterASP.NET hosting
+- 100% open source
+
+Built it as a portfolio piece. Turned into a teaching tool.
+
+Now used at universities for teaching API consumption.
+
+---
+
+Tweet 6/8:
+Some community-built clients:
+
+Web dashboard with real-time updates
+React Native mobile app
+CLI tool with rich terminal UI
+ML bot that predicts opponent strategies
+
+See the creativity? That's the game.
+
+---
+
+Tweet 7/8:
+Try it yourself:
+
+Play: https://apicombat.com
+Docs: https://apicombat.com/api-docs/v1
+Discord: [invite link]
+
+Free tier: 10 battles/day
+Premium: $5/mo unlimited
+
+---
+
+Tweet 8/8:
+Questions I'll answer:
+
+How do you prevent API abuse?
+What's the battle resolution algorithm?
+How do you handle rate limiting?
+Can I really build ANY client?
+
+Drop them below. I'm here all day.
+```
+
 **Influencer Engagement:**
 
 Find developers with 10K-100K followers who might care:
@@ -730,6 +865,50 @@ Find developers with 10K-100K followers who might care:
 @swyx (learning in public advocate)
 @levelsio (digital nomad, indie products)
 ```
+
+**.NET Content Creators (High-Value Targets):**
+
+These creators have loyal .NET audiences. Even one mention = hundreds of targeted signups:
+
+```
+@nickchapsas - Nick Chapsas (300K+ YouTube, .NET specialist)
+@mjovanovictech - Milan Jovanovic (newsletter + YouTube)
+@andrewlocknet - Andrew Lock (.NET blog author)
+@ardalis - Steve Smith (Clean Architecture, .NET)
+@hassanrezkhabib - Hassan Habib (YouTube, .NET)
+@davidaborow - David Fowler (ASP.NET team member)
+@IAmTimCorey - Tim Corey (300K+ YouTube, C# tutorials)
+```
+
+**Outreach template for .NET creators:**
+```
+Subject: Unusual .NET project you might find interesting
+
+Hey [Name],
+
+I've been following your .NET content for a while - especially
+loved your recent post on [specific thing].
+
+I built something unusual in .NET 8 that I thought you might
+find interesting: a game where there's no UI.
+
+It's a strategic combat API where developers build their own
+clients. Kind of a weird experiment, but it's being used at
+universities now to teach API design.
+
+Quick demo: https://apicombat.com
+Code: [GitHub]
+
+Would it make sense for your blog/newsletter? Happy to write
+a guest post or provide assets if you're interested.
+
+Either way, keep up the great content!
+
+Best,
+Mark
+```
+
+**Send 3 emails per day.** Track who responds in a simple spreadsheet.
 
 **Engagement tactics:**
 - Reply to their tweets (add value, don't self-promote)
@@ -811,7 +990,7 @@ Timestamps:
 10:45 - Battle strategies
 15:20 - Advanced optimizations
 
-Tech stack: .NET 8, PostgreSQL, Railway
+Tech stack: .NET 8, MSSQL, SmarterASP.NET
 ```
 
 **Tags:**
@@ -872,6 +1051,30 @@ Tech stack: .NET 8, PostgreSQL, Railway
 - [ ] Create welcome message with quick start guide
 - [ ] Pin important resources (#getting-started)
 - [ ] React with ✅ to answered questions
+
+**Seeding Strategy (Critical — Empty Discord Kills Momentum):**
+
+> An empty Discord is worse than no Discord. Seed it BEFORE promoting.
+
+**Day 1 Actions:**
+- [ ] Create welcome channel with quick start guide
+- [ ] Pin message: "Share your client in #client-showcase"
+- [ ] Set up roles: Developer, Premium, University Student, Beta Tester
+- [ ] Add MEE6 or similar bot for auto-moderation
+- [ ] Post your own example clients and interesting battle logs
+
+**Manually Invite 10+ People First:**
+- Friends who code
+- Former/current WCTC students
+- Twitter followers who engage
+- Reddit commenters from your posts
+- Other indie hackers from communities you frequent
+
+**Seed Activity Before Going Public:**
+- Post weekly strategy tips yourself
+- Share interesting battle logs
+- Highlight cool API usage patterns
+- Ask questions to spark discussion
 
 **Community Events:**
 
@@ -978,7 +1181,7 @@ P.S. If you're enjoying the game, I'd love a GitHub star ⭐
 
 2. Architecture
    - .NET 8 Web API
-   - PostgreSQL data model
+   - MSSQL data model
    - Battle resolution engine
 
 3. Key Design Decisions
@@ -992,7 +1195,7 @@ P.S. If you're enjoying the game, I'd love a GitHub star ⭐
    - Background service for async battles
 
 5. Deployment
-   - Railway setup
+   - SmarterASP.NET deployment
    - CI/CD with GitHub Actions
 
 6. Lessons Learned
@@ -1350,7 +1553,7 @@ Mark
    - Target: CodeProject, Dev.to
    - Length: 2000 words
 
-3. **"Deploying a .NET API to Railway: A Complete Guide"**
+3. **"Deploying a .NET API to SmarterASP.NET: A Complete Guide"**
    - Step-by-step tutorial
    - Target: Dev.to, r/dotnet
    - Length: 2500 words
@@ -1545,7 +1748,7 @@ Mark
 
 7. **DevOps Toolkit** (50K+ subs)
    - Style: Cloud, DevOps
-   - Pitch: "Deploying a game API to Railway"
+   - Pitch: "Deploying a game API to production with MSDeploy"
    - Contact: Email
 
 8. **IAmTimCorey** (300K+ subs)
@@ -1663,23 +1866,43 @@ These users have high karma and influence on HN:
 
 **Target Schools:**
 
-**Tier 1 (Local - Start Here):**
+**Tier 1 (Wisconsin — Start Here, Local Credibility):**
 - Waukesha County Technical College (you teach here!)
 - University of Wisconsin - Milwaukee
 - Milwaukee School of Engineering
 - Marquette University
+- UW-Madison
+- UW-Whitewater
+- UW-La Crosse
+- UW-Oshkosh
+- UW-Eau Claire
+- UW-Green Bay
+- UW-Stevens Point
+- UW-Stout
+- UW-Platteville
+- UW-River Falls
+- UW-Superior
+- UW-Parkside
+- Carroll University
+- Beloit College
+- Lawrence University
+- Edgewood College
 
-**Tier 2 (Regional):**
-- University of Wisconsin - Madison
+> **Strategy:** Blanket Wisconsin first. "Being used at WCTC and [X] other Wisconsin schools" is powerful social proof for the next state.
+
+**Tier 2 (Regional — After 3+ Wisconsin Adoptions):**
 - Northwestern University
 - University of Illinois
 - University of Minnesota
+- University of Iowa
+- Purdue University
 
-**Tier 3 (National):**
+**Tier 3 (National — After 5+ Total Adoptions):**
 - Stanford (CS department)
 - MIT (software engineering)
 - Carnegie Mellon (game development program)
 - UC Berkeley (web development)
+- Georgia Tech
 
 **Outreach Process:**
 
@@ -2220,7 +2443,7 @@ Senior .NET Consultant | Learned Geek Consulting
 Creator of API Combat Game (10K+ developers)
 
 Website: learnedgeek.com
-Game: combatgame.dev
+Game: apicombat.com
 ```
 
 ---
@@ -2276,7 +2499,7 @@ tools like API Combat Game, a strategic game for programmers.
 
 Connect:
 • Blog: learnedgeek.com
-• Game: combatgame.dev
+• Game: apicombat.com
 ```
 
 **Shared Themes:**
@@ -2347,7 +2570,7 @@ Try it free: [link]
 Build a client: [GitHub]
 Join Discord: [link]
 
-Built with .NET 8 on Railway. Fully open source.
+Built with .NET 8 on SmarterASP.NET. Fully open source.
 ```
 
 **Gallery Images:**
@@ -2375,7 +2598,7 @@ Since soft launching 3 months ago:
 • Being used in CS courses at 3 universities
 • 100+ community-built clients
 
-Tech stack: .NET 8, PostgreSQL, hosted on Railway
+Tech stack: .NET 8, MSSQL, hosted on SmarterASP.NET
 
 The game is fully open source (MIT license): [GitHub link]
 
@@ -2383,7 +2606,7 @@ I'm here all day to answer questions! Ask me anything about:
 • API design decisions
 • Building in public
 • Teaching with games
-• .NET on Railway
+• .NET on SmarterASP.NET
 
 Thanks for checking it out! 🚀
 ```
@@ -2396,7 +2619,7 @@ Thanks for checking it out! 🚀
 "Show HN: API Combat Game – Strategic PvP with no GUI"
 
 **URL:**
-https://combatgame.dev
+https://apicombat.com
 
 **Text:**
 ```
@@ -2410,14 +2633,14 @@ Battles resolve server-side using the strategies you upload (JSON-based
 rules for now, scripting engine coming soon). You can queue a battle, 
 go to lunch, come back to results.
 
-Tech stack: .NET 8, PostgreSQL, Railway. Fully open source.
+Tech stack: .NET 8, MSSQL, SmarterASP.NET. Fully open source.
 
 Live demo:
-curl https://api.combatgame.dev/v1/leaderboard
+curl https://apicombat.com/api/v1/leaderboard
 
-Try it: https://combatgame.dev
+Try it: https://apicombat.com
 GitHub: https://github.com/api-combat-game/game-engine
-Docs: https://docs.combatgame.dev
+Docs: https://apicombat.com/api-docs/v1
 
 This started as a thought experiment ("what if the API *was* the game?") 
 and turned into a decent portfolio piece. Also using it to teach API 
@@ -2474,7 +2697,7 @@ MATERIALS INCLUDED:
 • API documentation and examples
 
 QUICK DEMO:
-• Live API: https://api.combatgame.dev
+• Live API: https://apicombat.com/api
 • GitHub: https://github.com/api-combat-game/game-engine
 • Sample assignment: [link to PDF]
 
@@ -2525,7 +2748,7 @@ WHAT I CAN PROVIDE:
 • Access to top players for interviews
 • Whatever assets you need
 
-Demo: https://combatgame.dev
+Demo: https://apicombat.com
 GitHub: https://github.com/api-combat-game/game-engine
 Top client showcase: [link]
 
@@ -2625,8 +2848,8 @@ battle, grab coffee, check results.
 
 **TECH STACK:**
 • Backend: .NET 8 Web API
-• Database: PostgreSQL
-• Hosting: Railway
+• Database: MSSQL
+• Hosting: SmarterASP.NET
 • Open source: MIT license
 
 **WHY I BUILT IT:**
@@ -2638,22 +2861,22 @@ battle, grab coffee, check results.
 
 Register:
 ```bash
-curl -X POST https://api.combatgame.dev/v1/auth/register \
+curl -X POST https://apicombat.com/api/v1/auth/register \
   -H "Content-Type: application/json" \
   -d '{"email":"test@example.com","password":"Test123!"}'
 ```
 
 Queue battle:
 ```bash
-curl -X POST https://api.combatgame.dev/v1/battle/queue \
+curl -X POST https://apicombat.com/api/v1/battle/queue \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -d '{"teamId":"team-1","mode":"ranked"}'
 ```
 
 **LINKS:**
-• Play: https://combatgame.dev
+• Play: https://apicombat.com
 • GitHub: https://github.com/api-combat-game/game-engine
-• Docs: https://docs.combatgame.dev
+• Docs: https://apicombat.com/api-docs/v1
 • Sample Python client: [link]
 
 **QUESTIONS I'LL ANSWER:**
@@ -2760,8 +2983,8 @@ Now it's being used in CS courses at 3 universities.
 
 **Stack:**
 • .NET 8 Web API
-• PostgreSQL
-• Railway (hosting)
+• MSSQL
+• SmarterASP.NET (hosting)
 • Open source (MIT)
 
 **Cool technical bits:**
@@ -2775,10 +2998,10 @@ GitHub: https://github.com/api-combat-game/game-engine
 
 **Live API:**
 ```bash
-curl https://api.combatgame.dev/v1/leaderboard
+curl https://apicombat.com/api/v1/leaderboard
 ```
 
-**Play:** https://combatgame.dev
+**Play:** https://apicombat.com
 
 **Sample clients:**
 • Python: [link]
@@ -2802,12 +3025,46 @@ Connect: [Twitter] [GitHub] [Website]*
 
 ---
 
+## 30-Day Action Plan (Concrete Weekly Breakdown)
+
+> Focus on **consistent, quality** content rather than chasing one viral hit.
+
+### Week 1:
+- [ ] Post Twitter thread (use 8-tweet template above)
+- [ ] Post to r/dotnet (your home turf — use code-heavy template)
+- [ ] Write and publish Dev.to article #1: "Why I Built a Game With No Graphics"
+- [ ] Record 5-minute Loom demo video
+- [ ] Seed Discord with 10 real people (friends, students, colleagues)
+
+### Week 2:
+- [ ] Post to r/csharp (different angle — battle resolution algorithm)
+- [ ] Email 10 .NET content creators (use template above, 3/day)
+- [ ] Publish Dev.to article #2: "Designing an API for Gameplay"
+- [ ] Record YouTube tutorial: "Build a Game Client in 30 Minutes"
+- [ ] Email 5 Wisconsin universities
+
+### Week 3:
+- [ ] Post to r/incremental_games (automation angle)
+- [ ] Publish Dev.to article #3: "How Players Optimize My API-Only Game"
+- [ ] Create WCTC case study for credibility
+- [ ] Email 10 more universities
+- [ ] Engage in relevant Discord servers (don't self-promote — add value)
+
+### Week 4:
+- [ ] Review all metrics (signups, DAU, battles, Discord members)
+- [ ] Prepare Product Hunt launch assets (if traction milestones hit)
+- [ ] Pitch guest post to one .NET blog
+- [ ] Plan next month's content
+- [ ] Launch premium tier (if not already live)
+
+---
+
 ## Summary & Action Items
 
 ### Immediate Actions (This Week)
 
 - [ ] Set up GitHub organization: `api-combat-game`
-- [ ] Create placeholder website: combatgame.dev
+- [ ] Create placeholder website: apicombat.com
 - [ ] Write initial README.md
 - [ ] Draft Product Hunt description
 - [ ] Draft Show HN post
@@ -2888,7 +3145,31 @@ The game markets itself through:
 
 ---
 
-**Now go build it and spam the market methodically using this doc as your checklist! 🚀**
+**Now go build it and spam the market methodically using this doc as your checklist!**
+
+---
+
+## Resilience & Mindset
+
+**HN flopped? Reddit got 3 upvotes? Product Hunt didn't take off?**
+
+This is normal. Some wildly successful dev tools never hit the front page of anything:
+- Postman (bootstrapped to $2B without viral launch)
+- Many indie SaaS products grow entirely through word-of-mouth
+
+**Your real advantages:**
+- You already teach at WCTC (instant credibility with educators)
+- You already consult (credibility with enterprises)
+- You already blog at learnedgeek.com (distribution channel)
+- You understand the audience because you ARE the audience
+
+**What matters long-term:**
+1. Unique concept = natural virality (people share weird things)
+2. Open source = GitHub discovery (compounds over time)
+3. Educational use = universities amplify (professors share with each other)
+4. Developer UX quality speaks for itself
+
+**If a platform doesn't work, don't post the same thing again.** Wait 3-6 months, build more traction on other platforms, then come back with a results-based angle ("What happened when 1000 developers played my API-only game").
 
 ---
 
@@ -2922,7 +3203,7 @@ Steam users want executables and graphics. Our audience wants APIs and automatio
 ### Immediate Action Plan (Next 7 Days)
 
 #### Day 1-2: Foundation
-- [ ] Register combatgame.dev domain
+- [ ] Register apicombat.com domain
 - [ ] Set up GitHub org: api-combat-game
 - [ ] Create Discord server (10 channels max to start)
 - [ ] Write killer README.md (use PH description)
@@ -2945,6 +3226,66 @@ Steam users want executables and graphics. Our audience wants APIs and automatio
 ---
 
 ### Quick Wins
+
+#### Quick Start UX — Reduce Friction to First "Wow"
+
+> **Problem:** Current quick start requires 6 steps before first success. Developers expect instant gratification.
+
+**Current flow (too much friction):**
+```
+Register -> Browse -> Unlock -> Build -> Queue -> Results
+(5 minutes of work before seeing anything interesting)
+```
+
+**Better flow (instant gratification):**
+```
+See something cool -> Try it -> Get hooked -> Register
+(30 seconds to "wow")
+```
+
+**Action 1: Add "Try Without Registering" section ABOVE the Quick Start:**
+
+```markdown
+## Try It Right Now (No Account Needed)
+
+Copy this into your terminal:
+
+# Get current leaderboard (proves the game is alive)
+curl https://apicombat.com/api/v1/leaderboard
+
+# See the API structure
+curl https://apicombat.com/api/v1/sdk/endpoints
+```
+
+**Action 2: Shorten Quick Start from 6 steps to 3:**
+
+1. **Get Started** (Register — new accounts auto-get 3 free units + default team)
+2. **First Battle** (Queue with default team — one curl command)
+3. **See Results** (Check battle log — one curl command)
+
+**Action 3: Add troubleshooting at the end:**
+
+```markdown
+## Troubleshooting
+
+"401 Unauthorized" -> Token expired (60 min). Run login again.
+"Battle not found" -> Wait 10-15 seconds. Battles aren't instant.
+"Team not found" -> New accounts get a default team automatically.
+
+Still stuck? -> Discord or support@apicombat.com
+```
+
+**Action 4: Add live leaderboard widget to homepage**
+Show real data on the landing page to prove the game is alive and active.
+
+**Action 5: Change CTA progression on landing page**
+```
+Current:  [Get Started Free] [View API Docs]
+Better:   [Try Without Signing Up] [See a Live Battle] [Get Started Free]
+```
+Ladder of commitment: zero risk -> low risk -> full commit.
+
+---
 
 #### SSL & URLs
 - All URLs must use `https://apicombat.com`
@@ -3103,6 +3444,7 @@ I can architect your API to the same standard."
 
 ---
 
-*Document Version: 2.0*
-*Last Updated: February 17, 2026*
+*Document Version: 3.0*
+*Last Updated: February 22, 2026*
 *Maintained by: Mark @ Learned Geek Consulting*
+*v3.0 Changes: Fixed tech stack references (MSSQL/SmarterASP.NET/apicombat.com), added HN post-mortem, Twitter thread template, .NET influencer targets, Quick Start UX improvements, Discord seeding strategy, expanded Wisconsin university list (20 schools), 30-Day Action Plan, PH timing advice, resilience section*
