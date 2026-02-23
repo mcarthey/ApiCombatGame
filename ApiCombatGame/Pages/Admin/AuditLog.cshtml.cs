@@ -9,11 +9,11 @@ namespace ApiCombatGame.Pages.Admin;
 [Authorize(Policy = "Admin")]
 public class AuditLogModel : PageModel
 {
-    private readonly IAdminAnalyticsService _analytics;
+    private readonly IAdminPlayerManagementService _management;
 
-    public AuditLogModel(IAdminAnalyticsService analytics)
+    public AuditLogModel(IAdminPlayerManagementService management)
     {
-        _analytics = analytics;
+        _management = management;
     }
 
     public AdminAuditLogData Data { get; set; } = new();
@@ -27,6 +27,6 @@ public class AuditLogModel : PageModel
     public async Task OnGetAsync()
     {
         if (CurrentPage < 1) CurrentPage = 1;
-        Data = await _analytics.GetAuditLogsAsync(ActionFilter, CurrentPage);
+        Data = await _management.GetAuditLogsAsync(ActionFilter, CurrentPage);
     }
 }

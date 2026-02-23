@@ -11,11 +11,15 @@ namespace ApiCombatGame.Pages.Admin;
 public class PlayerDetailModel : PageModel
 {
     private readonly IAdminAnalyticsService _analytics;
+    private readonly IAdminPlayerManagementService _management;
+    private readonly IAdminReconciliationService _reconciliation;
     private readonly IActivityLedger _ledger;
 
-    public PlayerDetailModel(IAdminAnalyticsService analytics, IActivityLedger ledger)
+    public PlayerDetailModel(IAdminAnalyticsService analytics, IAdminPlayerManagementService management, IAdminReconciliationService reconciliation, IActivityLedger ledger)
     {
         _analytics = analytics;
+        _management = management;
+        _reconciliation = reconciliation;
         _ledger = ledger;
     }
 
@@ -68,13 +72,13 @@ public class PlayerDetailModel : PageModel
 
     public async Task<IActionResult> OnPostAdjustCurrencyAsync(Guid playerId, int amount)
     {
-        await _analytics.AdjustCurrencyAsync(GetAdminId(), playerId, amount);
+        await _management.AdjustCurrencyAsync(GetAdminId(), playerId, amount);
         return RedirectToPage("PlayerDetail", new { id = playerId, message = "updated" });
     }
 
     public async Task<IActionResult> OnPostAdjustRatingAsync(Guid playerId, int amount)
     {
-        await _analytics.AdjustRatingAsync(GetAdminId(), playerId, amount);
+        await _management.AdjustRatingAsync(GetAdminId(), playerId, amount);
         return RedirectToPage("PlayerDetail", new { id = playerId, message = "updated" });
     }
 
@@ -82,20 +86,20 @@ public class PlayerDetailModel : PageModel
     {
         if (Enum.TryParse<ApiCombatGame.Models.Enums.SubscriptionTier>(tier, out var subscriptionTier))
         {
-            await _analytics.SetTierAsync(GetAdminId(), playerId, subscriptionTier);
+            await _management.SetTierAsync(GetAdminId(), playerId, subscriptionTier);
         }
         return RedirectToPage("PlayerDetail", new { id = playerId, message = "updated" });
     }
 
     public async Task<IActionResult> OnPostToggleAdminAsync(Guid playerId, bool makeAdmin)
     {
-        await _analytics.ToggleAdminAsync(GetAdminId(), playerId, makeAdmin);
+        await _management.ToggleAdminAsync(GetAdminId(), playerId, makeAdmin);
         return RedirectToPage("PlayerDetail", new { id = playerId, message = "updated" });
     }
 
     public async Task<IActionResult> OnPostToggleEducatorAsync(Guid playerId, bool makeEducator)
     {
-        await _analytics.ToggleEducatorAsync(GetAdminId(), playerId, makeEducator);
+        await _management.ToggleEducatorAsync(GetAdminId(), playerId, makeEducator);
         return RedirectToPage("PlayerDetail", new { id = playerId, message = "updated" });
     }
 
@@ -106,7 +110,7 @@ public class PlayerDetailModel : PageModel
             return RedirectToPage("PlayerDetail", new { id = playerId, message = "error_password_too_short" });
         }
 
-        await _analytics.ResetPasswordAsync(GetAdminId(), playerId, newPassword);
+        await _management.ResetPasswordAsync(GetAdminId(), playerId, newPassword);
         return RedirectToPage("PlayerDetail", new { id = playerId, message = "updated" });
     }
 
@@ -116,7 +120,7 @@ public class PlayerDetailModel : PageModel
         PlayerData = await _analytics.GetPlayerDetailAsync(playerId);
         if (PlayerData == null) return RedirectToPage("Players");
 
-        var preview = await _analytics.PreviewPlayerReconciliationAsync(playerId);
+        var preview = await _reconciliation.PreviewPlayerReconciliationAsync(playerId);
         ReconciliationPreview = preview.PlayerDeltas.FirstOrDefault();
 
         if (ReconciliationPreview == null || ReconciliationPreview.Delta == 0)

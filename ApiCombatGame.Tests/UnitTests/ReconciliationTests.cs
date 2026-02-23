@@ -14,15 +14,15 @@ public class ReconciliationTests : IDisposable
 {
     private readonly GameDbContext _context;
     private readonly Mock<INotificationService> _notifications;
-    private readonly Mock<ILogger<AdminAnalyticsService>> _logger;
-    private readonly AdminAnalyticsService _service;
+    private readonly Mock<ILogger<AdminReconciliationService>> _logger;
+    private readonly AdminReconciliationService _service;
 
     public ReconciliationTests()
     {
         _context = TestDbContextFactory.Create();
         _notifications = new Mock<INotificationService>();
-        _logger = new Mock<ILogger<AdminAnalyticsService>>();
-        _service = new AdminAnalyticsService(_context, _notifications.Object, new Mock<IActivityLedger>().Object, _logger.Object);
+        _logger = new Mock<ILogger<AdminReconciliationService>>();
+        _service = new AdminReconciliationService(_context, _notifications.Object, _logger.Object);
     }
 
     public void Dispose() => _context.Dispose();

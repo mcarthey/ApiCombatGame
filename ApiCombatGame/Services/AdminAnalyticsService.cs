@@ -1,6 +1,4 @@
-using System.Text.Json;
 using ApiCombatGame.Data;
-using ApiCombatGame.Models.Domain;
 using ApiCombatGame.Models.Enums;
 using ApiCombatGame.Models.ViewModels;
 using ApiCombatGame.Services.Interfaces;
@@ -11,30 +9,12 @@ namespace ApiCombatGame.Services;
 public class AdminAnalyticsService : IAdminAnalyticsService
 {
     private readonly GameDbContext _context;
-    private readonly INotificationService _notifications;
-    private readonly IActivityLedger _ledger;
     private readonly ILogger<AdminAnalyticsService> _logger;
 
-    public AdminAnalyticsService(GameDbContext context, INotificationService notifications, IActivityLedger ledger, ILogger<AdminAnalyticsService> logger)
+    public AdminAnalyticsService(GameDbContext context, ILogger<AdminAnalyticsService> logger)
     {
         _context = context;
-        _notifications = notifications;
-        _ledger = ledger;
         _logger = logger;
-    }
-
-    private async Task AuditLogAsync(Guid adminPlayerId, string action, Guid? targetPlayerId = null, string? detailsJson = null)
-    {
-        _context.AdminAuditLogs.Add(new AdminAuditLog
-        {
-            Id = Guid.NewGuid(),
-            AdminPlayerId = adminPlayerId,
-            Action = action,
-            TargetPlayerId = targetPlayerId,
-            DetailsJson = detailsJson,
-            CreatedAt = DateTime.UtcNow
-        });
-        await _context.SaveChangesAsync();
     }
 
     public async Task<AdminOverviewData> GetOverviewAsync()
@@ -128,7 +108,6 @@ public class AdminAnalyticsService : IAdminAnalyticsService
 
         var totalCount = await query.CountAsync();
 
-        // Apply sorting
         query = sortBy?.ToLowerInvariant() switch
         {
             "username" => sortDesc ? query.OrderByDescending(p => p.Username) : query.OrderBy(p => p.Username),
@@ -137,7 +116,7 @@ public class AdminAnalyticsService : IAdminAnalyticsService
             "joined" => sortDesc ? query.OrderByDescending(p => p.CreatedAt) : query.OrderBy(p => p.CreatedAt),
             "lastactive" => sortDesc ? query.OrderByDescending(p => p.LastLoginAt) : query.OrderBy(p => p.LastLoginAt),
             "level" => sortDesc ? query.OrderByDescending(p => p.Level) : query.OrderBy(p => p.Level),
-            _ => query.OrderByDescending(p => p.Rating) // default sort
+            _ => query.OrderByDescending(p => p.Rating)
         };
 
         var players = await query
@@ -318,7 +297,6 @@ public class AdminAnalyticsService : IAdminAnalyticsService
     {
         var cutoff = DateTime.UtcNow.AddDays(-days);
 
-        // Get completed battles in the time window
         var battles = await _context.Battles
             .Where(b => b.Status == BattleStatus.Completed && b.CompletedAt >= cutoff)
             .Select(b => new { b.Id, b.WinnerId, b.Player1Id, b.Player2Id, b.Team1ClassesJson, b.Team2ClassesJson })
@@ -326,7 +304,6 @@ public class AdminAnalyticsService : IAdminAnalyticsService
 
         var totalBattles = battles.Count;
 
-        // Unit class win rates from Team1ClassesJson/Team2ClassesJson
         var classStats = new Dictionary<string, (int used, int wins)>();
 
         foreach (var battle in battles)
@@ -337,15 +314,15 @@ public class AdminAnalyticsService : IAdminAnalyticsService
             foreach (var cls in team1Classes)
             {
                 if (!classStats.ContainsKey(cls)) classStats[cls] = (0, 0);
-                var (used, wins) = classStats[cls];
-                classStats[cls] = (used + 1, battle.WinnerId == battle.Player1Id ? wins + 1 : wins);
+                var (used, wins2) = classStats[cls];
+                classStats[cls] = (used + 1, battle.WinnerId == battle.Player1Id ? wins2 + 1 : wins2);
             }
 
             foreach (var cls in team2Classes)
             {
                 if (!classStats.ContainsKey(cls)) classStats[cls] = (0, 0);
-                var (used, wins) = classStats[cls];
-                classStats[cls] = (used + 1, battle.WinnerId == battle.Player2Id ? wins + 1 : wins);
+                var (used, wins2) = classStats[cls];
+                classStats[cls] = (used + 1, battle.WinnerId == battle.Player2Id ? wins2 + 1 : wins2);
             }
         }
 
@@ -366,7 +343,6 @@ public class AdminAnalyticsService : IAdminAnalyticsService
                 : "NoData"
         }).OrderByDescending(s => s.WinRate).ToList();
 
-        // Strategy marketplace stats
         var topStrategies = await _context.Strategies
             .Where(s => s.IsPublic)
             .OrderByDescending(s => s.DownloadCount)
@@ -381,7 +357,6 @@ public class AdminAnalyticsService : IAdminAnalyticsService
             })
             .ToListAsync();
 
-        // Current modifier
         var currentModifier = await _context.EnvironmentalModifiers
             .Where(m => m.IsActive)
             .Select(m => new ModifierInfo { Name = m.Name, Description = m.Description, StartDate = m.StartDate, EndDate = m.EndDate })
@@ -427,7 +402,6 @@ public class AdminAnalyticsService : IAdminAnalyticsService
         var totalMembers = await _context.GuildMemberships.CountAsync();
         var avgMembers = totalGuilds > 0 ? Math.Round((double)totalMembers / totalGuilds, 1) : 0;
 
-        // Raid stats
         var totalBosses = await _context.GuildBosses.CountAsync();
         var defeatedBosses = await _context.GuildBosses.CountAsync(b => b.IsDefeated);
 
@@ -448,14 +422,12 @@ public class AdminAnalyticsService : IAdminAnalyticsService
         var now = DateTime.UtcNow;
         var today = now.Date;
 
-        // Battle processing stats
         var queuedBattles = await _context.Battles.CountAsync(b => b.Status == BattleStatus.Queued);
         var matchedBattles = await _context.Battles.CountAsync(b => b.Status == BattleStatus.InProgress);
         var completedToday = await _context.Battles.CountAsync(b => b.Status == BattleStatus.Completed && b.CompletedAt >= today);
         var totalBattles = await _context.Battles.CountAsync();
         var completedBattles = await _context.Battles.CountAsync(b => b.Status == BattleStatus.Completed);
 
-        // Database stats
         var playerCount = await _context.Players.CountAsync();
         var unitCount = await _context.Units.CountAsync(u => !u.IsTemplate);
         var teamCount = await _context.Teams.CountAsync();
@@ -464,7 +436,6 @@ public class AdminAnalyticsService : IAdminAnalyticsService
         var challengeCount = await _context.DailyChallenges.CountAsync();
         var achievementUnlocks = await _context.PlayerAchievements.CountAsync(a => a.IsUnlocked);
 
-        // Queue details for admin visibility
         var queueDetails = (await _context.Battles
             .Where(b => b.Status == BattleStatus.Queued)
             .Include(b => b.Player1)
@@ -483,13 +454,11 @@ public class AdminAnalyticsService : IAdminAnalyticsService
             .Select(b => { b.WaitSeconds = (now - b.QueuedAt).TotalSeconds; return b; })
             .ToList();
 
-        // Notifications & Alerts
         var totalNotifications = await _context.Notifications.CountAsync();
         var unreadNotifications = await _context.Notifications.CountAsync(n => !n.IsRead);
         var notificationsSentToday = await _context.Notifications.CountAsync(n => n.CreatedAt >= today);
         var pendingAlerts = await _context.AdminAlerts.CountAsync(a => !a.IsAcknowledged);
 
-        // Error monitoring
         var hourAgo = DateTime.UtcNow.AddHours(-1);
         var errorsToday = await _context.AppLogs.CountAsync(l => l.Level == AppLogLevel.Error && l.CreatedAt >= today);
         var errorsThisHour = await _context.AppLogs.CountAsync(l => l.Level == AppLogLevel.Error && l.CreatedAt >= hourAgo);
@@ -515,419 +484,6 @@ public class AdminAnalyticsService : IAdminAnalyticsService
             PendingAlerts = pendingAlerts,
             ErrorsToday = errorsToday,
             ErrorsThisHour = errorsThisHour
-        };
-    }
-
-    public async Task<bool> ToggleAdminAsync(Guid adminPlayerId, Guid playerId, bool isAdmin, AdminRole role)
-    {
-        var player = await _context.Players.FindAsync(playerId);
-        if (player == null) return false;
-
-        var oldState = $"IsAdmin={player.IsAdmin}, Role={player.AdminRole}";
-        player.IsAdmin = isAdmin;
-        player.AdminRole = isAdmin ? role : AdminRole.None;
-        await _context.SaveChangesAsync();
-
-        await AuditLogAsync(adminPlayerId, "ToggleAdmin", playerId, $"{{\"old\":\"{oldState}\",\"new\":\"IsAdmin={isAdmin}, Role={role}\"}}");
-        await _notifications.SendAsync(playerId, NotificationType.AdminActionOnAccount, "Admin Status Changed",
-            isAdmin ? $"You have been granted admin role: {role}" : "Your admin access has been removed.");
-
-        _logger.LogInformation("Admin status changed for {Username}: IsAdmin={IsAdmin}, Role={Role}", player.Username, isAdmin, role);
-        return true;
-    }
-
-    public async Task<bool> ToggleEducatorAsync(Guid adminPlayerId, Guid playerId, bool isEducator)
-    {
-        var player = await _context.Players.FindAsync(playerId);
-        if (player == null) return false;
-
-        player.IsEducator = isEducator;
-        await _context.SaveChangesAsync();
-
-        await AuditLogAsync(adminPlayerId, "ToggleEducator", playerId, $"{{\"isEducator\":{isEducator.ToString().ToLower()}}}");
-        _logger.LogInformation("Educator status changed for {Username}: IsEducator={IsEducator}", player.Username, isEducator);
-        return true;
-    }
-
-    public async Task<bool> AdjustCurrencyAsync(Guid adminPlayerId, Guid playerId, int amount)
-    {
-        var player = await _context.Players.FindAsync(playerId);
-        if (player == null) return false;
-
-        var oldBalance = player.Currency;
-        player.Currency += amount;
-        if (player.Currency < 0) player.Currency = 0;
-        _ledger.LogPlayer(playerId, "Currency", oldBalance, player.Currency, "AdminAction", "AdminAdjust");
-        await _context.SaveChangesAsync();
-
-        await AuditLogAsync(adminPlayerId, "AdjustCurrency", playerId, $"{{\"amount\":{amount},\"oldBalance\":{oldBalance},\"newBalance\":{player.Currency}}}");
-        await _notifications.SendAsync(playerId, NotificationType.AdminActionOnAccount, "Currency Adjusted",
-            $"An administrator adjusted your gold by {(amount >= 0 ? "+" : "")}{amount}. New balance: {player.Currency}g.");
-
-        _logger.LogInformation("Currency adjusted for {Username}: {Amount} (new balance: {Balance})", player.Username, amount, player.Currency);
-        return true;
-    }
-
-    public async Task<bool> AdjustRatingAsync(Guid adminPlayerId, Guid playerId, int amount)
-    {
-        var player = await _context.Players.FindAsync(playerId);
-        if (player == null) return false;
-
-        var oldRating = player.Rating;
-        player.Rating = Math.Max(100, player.Rating + amount); // Floor at 100
-        _ledger.LogPlayer(playerId, "Rating", oldRating, player.Rating, "AdminAction", "AdminAdjust");
-        await _context.SaveChangesAsync();
-
-        await AuditLogAsync(adminPlayerId, "AdjustRating", playerId, $"{{\"amount\":{amount},\"oldRating\":{oldRating},\"newRating\":{player.Rating}}}");
-        await _notifications.SendAsync(playerId, NotificationType.AdminActionOnAccount, "Rating Adjusted",
-            $"An administrator adjusted your rating by {(amount >= 0 ? "+" : "")}{amount}. New rating: {player.Rating}.");
-
-        _logger.LogInformation("Rating adjusted for {Username}: {Amount} (new rating: {Rating})", player.Username, amount, player.Rating);
-        return true;
-    }
-
-    public async Task<bool> SetTierAsync(Guid adminPlayerId, Guid playerId, SubscriptionTier tier)
-    {
-        var player = await _context.Players.FindAsync(playerId);
-        if (player == null) return false;
-
-        var oldTier = player.CurrentTier;
-        player.CurrentTier = tier;
-        await _context.SaveChangesAsync();
-
-        await AuditLogAsync(adminPlayerId, "SetTier", playerId, $"{{\"oldTier\":\"{oldTier}\",\"newTier\":\"{tier}\"}}");
-        await _notifications.SendAsync(playerId, NotificationType.TierChanged, "Subscription Tier Changed",
-            $"Your subscription tier has been changed from {oldTier} to {tier} by an administrator.");
-
-        // Log subscription event
-        _context.SubscriptionEvents.Add(new SubscriptionEvent
-        {
-            Id = Guid.NewGuid(),
-            PlayerId = playerId,
-            EventType = oldTier < tier ? "upgraded" : "downgraded",
-            OldTier = oldTier,
-            NewTier = tier,
-            CreatedAt = DateTime.UtcNow
-        });
-        await _context.SaveChangesAsync();
-
-        _logger.LogInformation("Tier changed for {Username}: {Tier}", player.Username, tier);
-        return true;
-    }
-
-    public async Task<bool> ResetPasswordAsync(Guid adminPlayerId, Guid playerId, string newPassword)
-    {
-        var player = await _context.Players.FindAsync(playerId);
-        if (player == null) return false;
-
-        player.PasswordHash = BCrypt.Net.BCrypt.HashPassword(newPassword);
-        await _context.SaveChangesAsync();
-
-        await AuditLogAsync(adminPlayerId, "ResetPassword", playerId);
-        await _notifications.SendAsync(playerId, NotificationType.PasswordChanged, "Password Reset",
-            "Your password was reset by an administrator. If you did not request this, please contact support.");
-
-        _logger.LogInformation("Password reset for {Username}", player.Username);
-        return true;
-    }
-
-    // ==================== Alerts ====================
-
-    public async Task<List<AdminAlert>> GetActiveAlertsAsync()
-    {
-        return await _context.AdminAlerts
-            .AsNoTracking()
-            .Where(a => !a.IsAcknowledged)
-            .OrderByDescending(a => a.Severity)
-            .ThenByDescending(a => a.CreatedAt)
-            .Take(25)
-            .ToListAsync();
-    }
-
-    public async Task AcknowledgeAlertAsync(Guid adminPlayerId, Guid alertId)
-    {
-        var alert = await _context.AdminAlerts.FindAsync(alertId);
-        if (alert == null) return;
-
-        alert.IsAcknowledged = true;
-        await _context.SaveChangesAsync();
-
-        var json = JsonSerializer.Serialize(new { alertId, category = alert.Category, message = alert.Message });
-        await AuditLogAsync(adminPlayerId, "AcknowledgeAlert", null, json);
-    }
-
-    // ==================== Audit Log ====================
-
-    public async Task<AdminAuditLogData> GetAuditLogsAsync(string? actionFilter, int page, int pageSize = 25)
-    {
-        var query = _context.AdminAuditLogs.AsQueryable();
-        if (!string.IsNullOrEmpty(actionFilter))
-            query = query.Where(l => l.Action == actionFilter);
-
-        var totalCount = await query.CountAsync();
-
-        var entries = await query
-            .OrderByDescending(l => l.CreatedAt)
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize)
-            .Select(l => new AdminAuditLogEntry
-            {
-                Id = l.Id,
-                AdminUsername = _context.Players.Where(p => p.Id == l.AdminPlayerId).Select(p => p.Username).FirstOrDefault() ?? "Unknown",
-                Action = l.Action,
-                TargetUsername = l.TargetPlayerId.HasValue
-                    ? _context.Players.Where(p => p.Id == l.TargetPlayerId).Select(p => p.Username).FirstOrDefault()
-                    : null,
-                TargetPlayerId = l.TargetPlayerId,
-                DetailsJson = l.DetailsJson,
-                CreatedAt = l.CreatedAt
-            })
-            .ToListAsync();
-
-        return new AdminAuditLogData
-        {
-            Entries = entries,
-            TotalCount = totalCount,
-            Page = page,
-            PageSize = pageSize,
-            TotalPages = (int)Math.Ceiling((double)totalCount / pageSize)
-        };
-    }
-
-    // ==================== Rating Reconciliation ====================
-
-    public Task<ReconciliationPreview> PreviewReconciliationAsync(DateTime? since = null)
-        => RunReconciliationAsync(applyChanges: false, since: since);
-
-    public Task<ReconciliationPreview> PreviewPlayerReconciliationAsync(Guid playerId, DateTime? since = null)
-        => RunReconciliationAsync(applyChanges: false, filterPlayerId: playerId, since: since);
-
-    public Task<ReconciliationPreview> ExecuteReconciliationAsync(Guid adminPlayerId, DateTime? since = null)
-        => RunReconciliationAsync(applyChanges: true, adminPlayerId: adminPlayerId, since: since);
-
-    private async Task<ReconciliationPreview> RunReconciliationAsync(
-        bool applyChanges,
-        Guid? adminPlayerId = null,
-        Guid? filterPlayerId = null,
-        DateTime? since = null)
-    {
-        const int startingRating = 1000;
-        const int kFactor = 32;
-        const int ratingFloor = 100;
-
-        // Load all completed battles with both players, ordered chronologically
-        var allBattles = await _context.Battles
-            .Where(b => b.Status == BattleStatus.Completed && b.Player2Id != null)
-            .OrderBy(b => b.CompletedAt)
-            .ToListAsync();
-
-        // Load all players
-        var allPlayers = await _context.Players.ToListAsync();
-
-        // Build simulated ratings and per-player tracking
-        var simulatedRatings = new Dictionary<Guid, int>();
-        var rankedReplayed = new Dictionary<Guid, int>();
-        var casualFixed = new Dictionary<Guid, int>();
-
-        foreach (var p in allPlayers)
-        {
-            simulatedRatings[p.Id] = startingRating;
-            rankedReplayed[p.Id] = 0;
-            casualFixed[p.Id] = 0;
-        }
-
-        // Split battles into trusted (before since) and replay scope (after since)
-        List<Models.Domain.Battle> trustedBattles;
-        List<Models.Domain.Battle> replayBattles;
-
-        if (since.HasValue)
-        {
-            trustedBattles = allBattles.Where(b => b.CompletedAt < since.Value).ToList();
-            replayBattles = allBattles.Where(b => b.CompletedAt >= since.Value).ToList();
-
-            // Build snapshot ratings from trusted battles by summing stored rating changes
-            foreach (var battle in trustedBattles)
-            {
-                var p1Id = battle.Player1Id;
-                var p2Id = battle.Player2Id!.Value;
-
-                if (!simulatedRatings.ContainsKey(p1Id) || !simulatedRatings.ContainsKey(p2Id))
-                    continue;
-
-                if (battle.Mode == "ranked")
-                {
-                    simulatedRatings[p1Id] += battle.Player1RatingChange ?? 0;
-                    simulatedRatings[p2Id] += battle.Player2RatingChange ?? 0;
-
-                    // Enforce floor on snapshot
-                    if (simulatedRatings[p1Id] < ratingFloor) simulatedRatings[p1Id] = ratingFloor;
-                    if (simulatedRatings[p2Id] < ratingFloor) simulatedRatings[p2Id] = ratingFloor;
-                }
-                // Casual battles before since: no rating change (trusted)
-            }
-        }
-        else
-        {
-            trustedBattles = new List<Models.Domain.Battle>();
-            replayBattles = allBattles;
-        }
-
-        int totalCasualFixed = 0;
-        var involvedPlayerIds = new HashSet<Guid>();
-
-        // Replay each in-scope battle
-        foreach (var battle in replayBattles)
-        {
-            var p1Id = battle.Player1Id;
-            var p2Id = battle.Player2Id!.Value;
-
-            if (!simulatedRatings.ContainsKey(p1Id) || !simulatedRatings.ContainsKey(p2Id))
-                continue;
-
-            involvedPlayerIds.Add(p1Id);
-            involvedPlayerIds.Add(p2Id);
-
-            if (battle.Mode == "casual")
-            {
-                bool needsFix = (battle.Player1RatingChange ?? 0) != 0
-                             || (battle.Player2RatingChange ?? 0) != 0;
-
-                if (needsFix)
-                {
-                    totalCasualFixed++;
-                    casualFixed[p1Id]++;
-                    casualFixed[p2Id]++;
-
-                    if (applyChanges)
-                    {
-                        battle.Player1RatingChange = 0;
-                        battle.Player2RatingChange = 0;
-                    }
-                }
-                // No rating change for casual — simulated ratings stay the same
-            }
-            else if (battle.Mode == "ranked")
-            {
-                if (battle.WinnerId == null)
-                {
-                    // Draw — 0 change
-                    if (applyChanges)
-                    {
-                        battle.Player1RatingChange = 0;
-                        battle.Player2RatingChange = 0;
-                    }
-                }
-                else
-                {
-                    var winnerId = battle.WinnerId.Value;
-                    var loserId = winnerId == p1Id ? p2Id : p1Id;
-
-                    // ELO calculation — same formula as BattleService.UpdateRatingsAndRewards
-                    double expectedWinner = 1.0 / (1.0 + Math.Pow(10,
-                        (simulatedRatings[loserId] - simulatedRatings[winnerId]) / 400.0));
-                    int winnerChange = (int)(kFactor * (1 - expectedWinner));
-                    int loserChange = -(int)(kFactor * expectedWinner);
-
-                    simulatedRatings[winnerId] += winnerChange;
-                    simulatedRatings[loserId] += loserChange;
-
-                    if (simulatedRatings[loserId] < ratingFloor)
-                        simulatedRatings[loserId] = ratingFloor;
-
-                    rankedReplayed[p1Id]++;
-                    rankedReplayed[p2Id]++;
-
-                    if (applyChanges)
-                    {
-                        battle.Player1RatingChange = winnerId == p1Id ? winnerChange : loserChange;
-                        battle.Player2RatingChange = winnerId == p2Id ? winnerChange : loserChange;
-                    }
-                }
-            }
-        }
-
-        // Build preview deltas
-        var deltas = new List<PlayerReconciliationDelta>();
-        int affectedCount = 0;
-
-        foreach (var player in allPlayers)
-        {
-            // Skip players who weren't in any replayed battle — their ratings
-            // may come from seed data or admin adjustments, not battle history
-            if (!involvedPlayerIds.Contains(player.Id) && player.Id != filterPlayerId)
-                continue;
-
-            var recalculated = simulatedRatings.GetValueOrDefault(player.Id, startingRating);
-            var current = player.Rating;
-            var delta = recalculated - current;
-
-            if (delta != 0 || player.Id == filterPlayerId)
-            {
-                if (delta != 0) affectedCount++;
-
-                if (filterPlayerId == null || player.Id == filterPlayerId)
-                {
-                    deltas.Add(new PlayerReconciliationDelta
-                    {
-                        PlayerId = player.Id,
-                        Username = player.Username,
-                        CurrentRating = current,
-                        RecalculatedRating = recalculated,
-                        RankedBattlesReplayed = rankedReplayed.GetValueOrDefault(player.Id),
-                        CasualBattlesFixed = casualFixed.GetValueOrDefault(player.Id)
-                    });
-                }
-            }
-        }
-
-        // Apply changes if requested
-        if (applyChanges && adminPlayerId.HasValue)
-        {
-            foreach (var d in deltas.Where(d => d.Delta != 0))
-            {
-                var player = allPlayers.First(p => p.Id == d.PlayerId);
-                player.Rating = d.RecalculatedRating;
-
-                if (player.Rating > player.HighestRating)
-                    player.HighestRating = player.Rating;
-            }
-
-            await _context.SaveChangesAsync();
-
-            // Audit log per affected player + notify
-            foreach (var d in deltas.Where(d => d.Delta != 0))
-            {
-                var direction = d.Delta > 0 ? "increased" : "decreased";
-                await AuditLogAsync(adminPlayerId.Value, "ReconcileRating", d.PlayerId,
-                    $"{{\"oldRating\":{d.CurrentRating},\"newRating\":{d.RecalculatedRating},\"delta\":{d.Delta}}}");
-
-                if (!allPlayers.First(p => p.Id == d.PlayerId).IsDeleted)
-                {
-                    await _notifications.SendAsync(d.PlayerId,
-                        NotificationType.AdminActionOnAccount,
-                        "Rating Corrected",
-                        $"Your rating has been {direction} by {Math.Abs(d.Delta)} (from {d.CurrentRating} to {d.RecalculatedRating}) as part of a data reconciliation.");
-                }
-            }
-
-            // Master audit log entry
-            await AuditLogAsync(adminPlayerId.Value, "ReconcileAll", null,
-                $"{{\"playersAffected\":{affectedCount},\"battlesReprocessed\":{replayBattles.Count},\"casualBattlesFixed\":{totalCasualFixed},\"since\":\"{since?.ToString("o") ?? "full"}\"}}");
-
-            _logger.LogInformation(
-                "Rating reconciliation completed: {Affected} players affected, {Battles} battles reprocessed, {Casual} casual fixed, since={Since}",
-                affectedCount, replayBattles.Count, totalCasualFixed, since?.ToString("o") ?? "full");
-        }
-
-        deltas = deltas.OrderByDescending(d => Math.Abs(d.Delta)).ToList();
-
-        return new ReconciliationPreview
-        {
-            TotalPlayersAffected = affectedCount,
-            TotalBattlesReprocessed = replayBattles.Count,
-            CasualBattlesFixed = totalCasualFixed,
-            Since = since,
-            PlayerDeltas = deltas
         };
     }
 }

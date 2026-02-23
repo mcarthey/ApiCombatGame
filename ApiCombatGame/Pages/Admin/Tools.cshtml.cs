@@ -14,12 +14,12 @@ namespace ApiCombatGame.Pages.Admin;
 public class ToolsModel : PageModel
 {
     private readonly GameDbContext _context;
-    private readonly IAdminAnalyticsService _analytics;
+    private readonly IAdminReconciliationService _reconciliation;
 
-    public ToolsModel(GameDbContext context, IAdminAnalyticsService analytics)
+    public ToolsModel(GameDbContext context, IAdminReconciliationService reconciliation)
     {
         _context = context;
-        _analytics = analytics;
+        _reconciliation = reconciliation;
     }
 
     public string? SuccessMessage { get; set; }
@@ -79,7 +79,7 @@ public class ToolsModel : PageModel
 
     public async Task OnPostPreviewGlobalReconcileAsync()
     {
-        Reconciliation = await _analytics.PreviewReconciliationAsync(Since);
+        Reconciliation = await _reconciliation.PreviewReconciliationAsync(Since);
         ShowReconciliationPreview = true;
         AdminCount = await _context.Players.CountAsync(p => p.IsAdmin);
         TotalPlayers = await _context.Players.CountAsync();
@@ -87,7 +87,7 @@ public class ToolsModel : PageModel
 
     public async Task OnPostExecuteGlobalReconcileAsync()
     {
-        var result = await _analytics.ExecuteReconciliationAsync(GetAdminId(), Since);
+        var result = await _reconciliation.ExecuteReconciliationAsync(GetAdminId(), Since);
         SuccessMessage = $"Reconciliation complete: {result.TotalPlayersAffected} players corrected, " +
                          $"{result.TotalBattlesReprocessed} battles reprocessed, " +
                          $"{result.CasualBattlesFixed} casual battles fixed.";

@@ -12,10 +12,12 @@ namespace ApiCombatGame.Pages.Admin;
 public class IndexModel : PageModel
 {
     private readonly IAdminAnalyticsService _analytics;
+    private readonly IAdminPlayerManagementService _management;
 
-    public IndexModel(IAdminAnalyticsService analytics)
+    public IndexModel(IAdminAnalyticsService analytics, IAdminPlayerManagementService management)
     {
         _analytics = analytics;
+        _management = management;
     }
 
     public AdminOverviewData Data { get; set; } = new();
@@ -24,14 +26,14 @@ public class IndexModel : PageModel
     public async Task OnGetAsync()
     {
         Data = await _analytics.GetOverviewAsync();
-        ActiveAlerts = await _analytics.GetActiveAlertsAsync();
+        ActiveAlerts = await _management.GetActiveAlertsAsync();
     }
 
     public async Task<IActionResult> OnPostAcknowledgeAlertAsync(Guid alertId)
     {
         var claim = User.FindFirst(ClaimTypes.NameIdentifier);
         if (claim?.Value != null && Guid.TryParse(claim.Value, out var adminId))
-            await _analytics.AcknowledgeAlertAsync(adminId, alertId);
+            await _management.AcknowledgeAlertAsync(adminId, alertId);
         return RedirectToPage();
     }
 }

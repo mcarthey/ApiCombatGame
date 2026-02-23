@@ -171,6 +171,8 @@ builder.Services.AddScoped<IEmailService, EmailService>();
 
 // Admin
 builder.Services.AddScoped<IAdminAnalyticsService, AdminAnalyticsService>();
+builder.Services.AddScoped<IAdminPlayerManagementService, AdminPlayerManagementService>();
+builder.Services.AddScoped<IAdminReconciliationService, AdminReconciliationService>();
 builder.Services.AddScoped<IAppLogService, AppLogService>();
 builder.Services.AddScoped<IDatabaseBackupService, DatabaseBackupService>();
 
