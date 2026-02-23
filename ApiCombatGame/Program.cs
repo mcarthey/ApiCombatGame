@@ -378,6 +378,9 @@ var app = builder.Build();
 
 // Configure the HTTP request pipeline
 
+// Correlation ID (must be first — ensures every request/response has a trace ID)
+app.UseMiddleware<CorrelationIdMiddleware>();
+
 // Error handling (must be early in pipeline)
 app.UseStatusCodePagesWithReExecute("/Error", "?code={0}");
 app.UseMiddleware<GlobalExceptionMiddleware>();

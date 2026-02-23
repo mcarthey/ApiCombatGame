@@ -22,7 +22,9 @@ public class GlobalExceptionMiddleware
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Unhandled exception on {Method} {Path}", context.Request.Method, context.Request.Path);
+            var correlationId = context.Items.TryGetValue("CorrelationId", out var cid) ? cid?.ToString() : null;
+            _logger.LogError(ex, "Unhandled exception on {Method} {Path} [CorrelationId={CorrelationId}]",
+                context.Request.Method, context.Request.Path, correlationId);
 
             string supportId;
             try
