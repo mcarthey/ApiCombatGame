@@ -161,16 +161,17 @@ public class AdminAnalyticsService : IAdminAnalyticsService
             })
             .ToListAsync();
 
-        // Get battle counts for these players
+        // Get battle counts for these players (project only IDs to avoid loading full entities)
         var playerIds = players.Select(p => p.Id).ToList();
-        var battleCounts = await _context.Battles
+        var battleData = await _context.Battles
             .Where(b => b.Status == BattleStatus.Completed && (playerIds.Contains(b.Player1Id) || (b.Player2Id.HasValue && playerIds.Contains(b.Player2Id.Value))))
+            .Select(b => new { b.Player1Id, b.Player2Id, b.WinnerId })
             .ToListAsync();
 
         foreach (var player in players)
         {
-            var total = battleCounts.Count(b => b.Player1Id == player.Id || b.Player2Id == player.Id);
-            var wins = battleCounts.Count(b => b.WinnerId == player.Id);
+            var total = battleData.Count(b => b.Player1Id == player.Id || b.Player2Id == player.Id);
+            var wins = battleData.Count(b => b.WinnerId == player.Id);
             player.TotalBattles = total;
             player.WinRate = total > 0 ? Math.Round((double)wins / total * 100, 1) : 0;
         }
@@ -245,7 +246,18 @@ public class AdminAnalyticsService : IAdminAnalyticsService
             })
             .ToListAsync();
 
-        // API keys with usage stats
+        // API keys with usage stats (pre-fetch aggregation to avoid correlated subqueries)
+        var playerKeyIds = await _context.ApiKeys
+            .Where(k => k.PlayerId == playerId)
+            .Select(k => k.Id)
+            .ToListAsync();
+
+        var keyUsageStats = await _context.ApiKeyUsageLogs
+            .Where(l => playerKeyIds.Contains(l.ApiKeyId))
+            .GroupBy(l => l.ApiKeyId)
+            .Select(g => new { KeyId = g.Key, TotalRequests = g.Count(), UniqueIps = g.Select(l => l.IpAddress).Distinct().Count() })
+            .ToDictionaryAsync(x => x.KeyId);
+
         var apiKeys = await _context.ApiKeys
             .Where(k => k.PlayerId == playerId)
             .OrderByDescending(k => k.CreatedAt)
@@ -257,11 +269,18 @@ public class AdminAnalyticsService : IAdminAnalyticsService
                 IsActive = k.IsActive,
                 CreatedAt = k.CreatedAt,
                 LastUsedAt = k.LastUsedAt,
-                RevokedAt = k.RevokedAt,
-                TotalRequests = _context.ApiKeyUsageLogs.Count(l => l.ApiKeyId == k.Id),
-                UniqueIps = _context.ApiKeyUsageLogs.Where(l => l.ApiKeyId == k.Id).Select(l => l.IpAddress).Distinct().Count()
+                RevokedAt = k.RevokedAt
             })
             .ToListAsync();
+
+        foreach (var key in apiKeys)
+        {
+            if (keyUsageStats.TryGetValue(key.Id, out var usage))
+            {
+                key.TotalRequests = usage.TotalRequests;
+                key.UniqueIps = usage.UniqueIps;
+            }
+        }
 
         return new AdminPlayerDetailData
         {
