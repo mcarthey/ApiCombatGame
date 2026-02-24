@@ -32,7 +32,8 @@ public class LeaderboardController : ControllerBase
     /// <response code="200">Ranked array of top players with stats.</response>
     [ApiDifficulty("beginner")]
     [ApiGameTip("Fetch the top 10 and inspect their win rates. Players above 70% win rate often rely on specific unit-class synergies you can reverse-engineer by reviewing their public battle replays.")]
-    [ApiPrerequisite("Register and login")]
+    [ApiPrerequisite("None — public endpoint")]
+    [AllowAnonymous]
     [HttpGet]
     [ResponseCache(Duration = 30)]
     [ProducesResponseType(StatusCodes.Status200OK)]
@@ -85,7 +86,8 @@ public class LeaderboardController : ControllerBase
     /// <response code="404">Player not found.</response>
     [ApiDifficulty("beginner")]
     [ApiGameTip("Compare your win rate against the top 10 players periodically. Once you break 50% against the upper bracket, you are ready to push for a higher rank in competitive seasons.")]
-    [ApiPrerequisite("Register and login")]
+    [ApiPrerequisite("None — public endpoint")]
+    [AllowAnonymous]
     [HttpGet("player/{playerId}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]

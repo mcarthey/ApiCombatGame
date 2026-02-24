@@ -208,4 +208,39 @@ public class LeaderboardApiTests : IntegrationTestBase
         var response = await client.GetAsync($"/api/v1/leaderboard/player/{deletedId}");
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
+
+    [Fact]
+    public async Task GetLeaderboard_AnonymousAccess_Returns200()
+    {
+        var client = Factory.CreateClient();
+
+        var response = await client.GetAsync("/api/v1/leaderboard");
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task GetPlayerRanking_AnonymousAccess_Returns200()
+    {
+        var playerId = Guid.NewGuid();
+
+        using (var scope = Factory.Services.CreateScope())
+        {
+            var context = scope.ServiceProvider.GetRequiredService<GameDbContext>();
+            context.Players.Add(new Player
+            {
+                Id = playerId,
+                Username = $"anon-lookup-{Guid.NewGuid():N}",
+                Email = $"anon-{Guid.NewGuid():N}@test.com",
+                PasswordHash = "hashed",
+                Rating = 1200,
+                CreatedAt = DateTime.UtcNow,
+                LastLoginAt = DateTime.UtcNow
+            });
+            await context.SaveChangesAsync();
+        }
+
+        var client = Factory.CreateClient();
+        var response = await client.GetAsync($"/api/v1/leaderboard/player/{playerId}");
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+    }
 }

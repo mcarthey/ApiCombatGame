@@ -35,9 +35,9 @@
                 </p>
             </div>
             <div class="flex gap-3 shrink-0">
-                <a href="#quick-start" class="md3-btn-filled" style="text-decoration: none;">
+                <a href="#try-it-now" class="md3-btn-filled" style="text-decoration: none;">
                     <span class="material-symbols-outlined">arrow_downward</span>
-                    Quick Start
+                    Try It Now
                 </a>
                 <a href="/openapi/v1.json" target="_blank" class="md3-btn-outlined" style="text-decoration: none; border-color: rgba(255,255,255,0.4); color: #ffffff;">
                     <span class="material-symbols-outlined">download</span>
@@ -83,6 +83,46 @@
                 </div>
             </div>
         </div>
+    </div>
+
+    @* ==================== TRY IT NOW ==================== *@
+    <div id="try-it-now" class="py-16 scroll-mt-20" style="border-bottom: 1px solid var(--md-sys-color-outline-variant);">
+        <h2 class="text-2xl font-bold text-center mb-2" style="color: var(--md-sys-color-on-surface);">Try It Now</h2>
+        <p class="text-center mb-10" style="color: var(--md-sys-color-on-surface-variant);">No account needed. Copy any command below into your terminal and hit enter.</p>
+
+        <div class="space-y-6 max-w-3xl mx-auto">
+            @{
+                var tryBaseUrl = $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}";
+                var tryItCommands = new[] {
+                    ("trophy", "See the Leaderboard", $"curl {tryBaseUrl}/api/v1/leaderboard?limit=5", "Real players, real rankings. This is live data.", "try-leaderboard"),
+                    ("monitoring", "Check Game Status", $"curl {tryBaseUrl}/api/v1/sdk/status", "Player count, active seasons, total battles — proof the game is alive.", "try-status"),
+                    ("store", "Browse Strategies", $"curl {tryBaseUrl}/api/v1/strategies/browse?limit=3", "Community-created battle strategies with win rates and ratings.", "try-strategies")
+                };
+            }
+            @foreach (var (icon, title, command, desc, codeId) in tryItCommands)
+            {
+                <div class="md3-card p-5 stat-card">
+                    <div class="flex items-center gap-3 mb-3">
+                        <span class="material-symbols-outlined" style="color: var(--md-sys-color-primary); font-size: 22px;">@icon</span>
+                        <h3 class="font-semibold" style="color: var(--md-sys-color-on-surface);">@title</h3>
+                    </div>
+                    <div class="relative group/code">
+                        <button class="md3-btn-icon absolute top-1 right-1 opacity-0 group-hover/code:opacity-100 transition-all"
+                                onclick="copyToClipboard(document.getElementById('@codeId').textContent, this)"
+                                title="Copy to clipboard">
+                            <span class="material-symbols-outlined copy-icon">content_copy</span>
+                            <span class="material-symbols-outlined check-icon hidden">check</span>
+                        </button>
+                        <pre id="@codeId" class="p-4 overflow-x-auto text-sm" style="background: var(--md-sys-color-inverse-surface); color: var(--md-sys-color-inverse-on-surface); border-radius: var(--md-sys-shape-corner-large);"><code>@command</code></pre>
+                    </div>
+                    <p class="text-sm mt-2" style="color: var(--md-sys-color-on-surface-variant);">@desc</p>
+                </div>
+            }
+        </div>
+
+        <p class="text-center mt-8 text-sm" style="color: var(--md-sys-color-on-surface-variant);">
+            Like what you see? <a href="#quick-start" style="color: var(--md-sys-color-primary);">Register below</a> to start battling.
+        </p>
     </div>
 
     @* ==================== QUICK START ==================== *@
