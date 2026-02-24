@@ -94,6 +94,23 @@ public class AuthService : IAuthService
 
         _context.Players.Add(player);
         _context.Units.AddRange(starterUnits);
+
+        // Auto-create a default team with the starter units so players can battle immediately
+        if (starterUnits.Count > 0)
+        {
+            var defaultTeam = new Team
+            {
+                Id = Guid.NewGuid(),
+                Name = "Starter Team",
+                PlayerId = player.Id,
+                UnitIdsJson = System.Text.Json.JsonSerializer.Serialize(starterUnits.Select(u => u.Id).ToList()),
+                StrategyJson = "{}",
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            };
+            _context.Teams.Add(defaultTeam);
+        }
+
         await _context.SaveChangesAsync();
 
         _logger.LogInformation("New player registered: {Username} ({PlayerId})", player.Username, player.Id);

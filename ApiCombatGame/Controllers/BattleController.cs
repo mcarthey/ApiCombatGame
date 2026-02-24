@@ -45,8 +45,8 @@ public class BattleController : ControllerBase
     [ApiDifficulty("intermediate")]
     [ApiGameTip("Always check the active modifiers via GET /api/v1/modifiers/active before queuing — a modifier that weakens your main unit class can cost you the match.")]
     [ApiGameTip("Use casual mode to test new strategies without risking your ranked rating. Switch to ranked once your win rate in casual exceeds 60%.")]
-    [ApiPrerequisite("Register and login", "Build a team")]
-    [ApiExample("Queue Ranked Battle", Request = "{\n  \"teamId\": \"a1b2c3d4-5678-9abc-def0-1234567890ab\",\n  \"mode\": \"ranked\"\n}", Response = "{\n  \"battleId\": \"f47ac10b-58cc-4372-a567-0e02b2c3d479\",\n  \"status\": \"Queued\",\n  \"queuedAt\": \"2026-02-11T14:30:00Z\",\n  \"estimatedWaitSeconds\": 12\n}")]
+    [ApiPrerequisite("Register and login")]
+    [ApiExample("Queue Ranked Battle", Request = "{\n  \"mode\": \"ranked\"\n}", Response = "{\n  \"battleId\": \"f47ac10b-58cc-4372-a567-0e02b2c3d479\",\n  \"status\": \"Queued\",\n  \"queuedAt\": \"2026-02-11T14:30:00Z\",\n  \"estimatedWaitSeconds\": 12\n}")]
     [HttpPost("queue")]
     [ProducesResponseType(typeof(BattleStatusResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -82,6 +82,20 @@ public class BattleController : ControllerBase
 
                 player.DailyBattlesUsed++;
                 await _context.SaveChangesAsync();
+            }
+
+            // Auto-select team if not specified
+            if (request.TeamId == Guid.Empty)
+            {
+                var defaultTeam = await _context.Teams
+                    .Where(t => t.PlayerId == playerId)
+                    .OrderByDescending(t => t.UpdatedAt)
+                    .FirstOrDefaultAsync();
+
+                if (defaultTeam == null)
+                    return BadRequest(new { error = "You have no teams. Create one first via POST /api/v1/team/configure." });
+
+                request.TeamId = defaultTeam.Id;
             }
 
             var response = await _battleService.QueueBattleAsync(playerId, request);

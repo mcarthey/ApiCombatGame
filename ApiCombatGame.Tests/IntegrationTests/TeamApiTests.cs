@@ -149,7 +149,7 @@ public class TeamApiTests : IntegrationTestBase
 
         var teams = JsonSerializer.Deserialize<List<TeamResponse>>(
             await response.Content.ReadAsStringAsync(), Json)!;
-        Assert.Equal(2, teams.Count);
+        Assert.True(teams.Count >= 2, $"Expected at least 2 teams (+ auto-created Starter Team), got {teams.Count}");
     }
 
     [Fact]

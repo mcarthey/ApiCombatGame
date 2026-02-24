@@ -59,6 +59,31 @@ public class AuthApiTests : IntegrationTestBase
     }
 
     [Fact]
+    public async Task Register_CreatesStarterTeam()
+    {
+        var (client, _) = await CreateAuthenticatedClient();
+
+        var response = await client.GetAsync("/api/v1/team/list");
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        var content = await response.Content.ReadAsStringAsync();
+        var teams = JsonSerializer.Deserialize<List<JsonElement>>(content, Json)!;
+
+        Assert.True(teams.Count >= 1, "New player should have at least one team (Starter Team)");
+        Assert.Contains(teams, t => t.GetProperty("name").GetString() == "Starter Team");
+    }
+
+    [Fact]
+    public async Task QueueBattle_WithoutTeamId_UsesDefaultTeam()
+    {
+        var (client, _) = await CreateAuthenticatedClient();
+
+        // Queue with just mode, no teamId — should auto-select Starter Team
+        var response = await client.PostAsJsonAsync("/api/v1/battle/queue", new { mode = "casual" });
+        Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+    }
+
+    [Fact]
     public async Task Login_Returns200_WithToken()
     {
         var client = CreateClient();

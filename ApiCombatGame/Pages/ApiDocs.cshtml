@@ -128,17 +128,14 @@
     @* ==================== QUICK START ==================== *@
     <div id="quick-start" class="py-16 scroll-mt-20" style="border-bottom: 1px solid var(--md-sys-color-outline-variant);">
         <h2 class="text-2xl font-bold text-center mb-2" style="color: var(--md-sys-color-on-surface);">Quick Start</h2>
-        <p class="text-center mb-10" style="color: var(--md-sys-color-on-surface-variant);">Go from zero to your first battle in 6 API calls.</p>
+        <p class="text-center mb-10" style="color: var(--md-sys-color-on-surface-variant);">3 steps to your first battle. You start with 3 units and a ready-to-go team.</p>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             @{
                 var steps = new[] {
-                    ("1", "Register", "POST /api/v1/auth/register", "Create an account with username, email, and password. Get your JWT token.", "#3b82f6"),
-                    ("2", "Browse Units", "GET /api/v1/player/roster/available", "Explore the unit shop. You start with 3 free units across five classes.", "#8b5cf6"),
-                    ("3", "Unlock Units", "POST /api/v1/player/roster/unlock", "Spend your starting 1000 currency to add to your roster.", "#06b6d4"),
-                    ("4", "Build a Team", "POST /api/v1/team/configure", "Assemble up to 5 units with a declarative battle strategy.", "#10b981"),
-                    ("5", "Enter Battle", "POST /api/v1/battle/queue", "Queue for matchmaking. The system pairs you by API rating.", "#ef4444"),
-                    ("6", "Check Results", "GET /api/v1/battle/results/{id}", "Get the full turn-by-turn combat log and rewards.", "#f59e0b")
+                    ("1", "Register", "POST /api/v1/auth/register", "Create an account. You get a JWT token, 3 starter units, and a default team — ready to fight.", "#3b82f6"),
+                    ("2", "Queue Battle", "POST /api/v1/battle/queue", "Enter matchmaking. Skip teamId to use your default team. The system pairs you by rating.", "#ef4444"),
+                    ("3", "Check Results", "GET /api/v1/battle/results/{id}", "Get the full turn-by-turn combat log, rewards, and rating change.", "#f59e0b")
                 };
             }
             @foreach (var (num, title, endpoint, desc, color) in steps)
@@ -153,6 +150,11 @@
                 </div>
             }
         </div>
+        <p class="text-center mt-6 text-sm" style="color: var(--md-sys-color-on-surface-variant);">
+            Want more control? <a href="#team" style="color: var(--md-sys-color-primary);">Build custom teams</a>,
+            <a href="#player" style="color: var(--md-sys-color-primary);">unlock more units</a>, and
+            <a href="#guild" style="color: var(--md-sys-color-primary);">join a guild</a> when you're ready.
+        </p>
     </div>
 
     @* ==================== AUTHENTICATION ==================== *@
