@@ -155,6 +155,40 @@
             <a href="#player" style="color: var(--md-sys-color-primary);">unlock more units</a>, and
             <a href="#guild" style="color: var(--md-sys-color-primary);">join a guild</a> when you're ready.
         </p>
+
+        @* Troubleshooting *@
+        <div class="mt-10 p-5" style="background: color-mix(in srgb, var(--md-sys-color-error) 6%, var(--md-sys-color-surface-container-low)); border: 1px solid color-mix(in srgb, var(--md-sys-color-error) 20%, var(--md-sys-color-outline-variant)); border-radius: var(--md-sys-shape-corner-large);">
+            <div class="flex items-center gap-2 mb-4">
+                <span class="material-symbols-outlined" style="color: var(--md-sys-color-error); font-size: 22px;">troubleshoot</span>
+                <h3 class="font-bold" style="color: var(--md-sys-color-on-surface);">Stuck? Try This</h3>
+            </div>
+            <div class="space-y-3">
+                <div class="flex items-start gap-3">
+                    <code class="text-xs px-1.5 py-0.5 shrink-0 mt-0.5" style="background: color-mix(in srgb, var(--md-sys-color-error) 12%, transparent); color: var(--md-sys-color-error); border-radius: var(--md-sys-shape-corner-small);">401</code>
+                    <div>
+                        <p class="text-sm font-medium" style="color: var(--md-sys-color-on-surface);">"Unauthorized"</p>
+                        <p class="text-xs" style="color: var(--md-sys-color-on-surface-variant);">Your token expired (they last 60 minutes). Hit <code class="text-xs px-1 py-0.5" style="background: var(--md-sys-color-surface-container-high); border-radius: 4px;">POST /api/v1/auth/login</code> again to get a fresh one.</p>
+                    </div>
+                </div>
+                <div class="flex items-start gap-3">
+                    <code class="text-xs px-1.5 py-0.5 shrink-0 mt-0.5" style="background: color-mix(in srgb, var(--md-sys-color-error) 12%, transparent); color: var(--md-sys-color-error); border-radius: var(--md-sys-shape-corner-small);">404</code>
+                    <div>
+                        <p class="text-sm font-medium" style="color: var(--md-sys-color-on-surface);">"Battle not found"</p>
+                        <p class="text-xs" style="color: var(--md-sys-color-on-surface-variant);">Battles resolve asynchronously. Wait 10–15 seconds after queuing, then poll <code class="text-xs px-1 py-0.5" style="background: var(--md-sys-color-surface-container-high); border-radius: 4px;">GET /api/v1/battle/results/{id}</code> with the battleId from the queue response.</p>
+                    </div>
+                </div>
+                <div class="flex items-start gap-3">
+                    <code class="text-xs px-1.5 py-0.5 shrink-0 mt-0.5" style="background: color-mix(in srgb, var(--md-sys-color-error) 12%, transparent); color: var(--md-sys-color-error); border-radius: var(--md-sys-shape-corner-small);">400</code>
+                    <div>
+                        <p class="text-sm font-medium" style="color: var(--md-sys-color-on-surface);">"Team not found" or "No teams"</p>
+                        <p class="text-xs" style="color: var(--md-sys-color-on-surface-variant);">Your Starter Team is created automatically on registration. If you deleted it, create a new one via <code class="text-xs px-1 py-0.5" style="background: var(--md-sys-color-surface-container-high); border-radius: 4px;">POST /api/v1/team/configure</code> with at least 1 unit.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-4 pt-3 text-xs" style="border-top: 1px solid color-mix(in srgb, var(--md-sys-color-error) 12%, var(--md-sys-color-outline-variant)); color: var(--md-sys-color-on-surface-variant);">
+                Still stuck? <a href="https://discord.gg/jfSCSfAN49" target="_blank" style="color: var(--md-sys-color-primary);">Join the Discord</a> or email <a href="mailto:support@@apicombat.com" style="color: var(--md-sys-color-primary);">support@@apicombat.com</a>
+            </div>
+        </div>
     </div>
 
     @* ==================== AUTHENTICATION ==================== *@
