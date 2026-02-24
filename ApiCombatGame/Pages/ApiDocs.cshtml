@@ -195,12 +195,22 @@
             </div>
             <div class="relative group/code">
                 <span class="absolute top-2 left-3 text-xs font-medium uppercase tracking-wide" style="color: var(--md-sys-color-on-surface-variant);">Example</span>
-                <button class="md3-btn-icon absolute top-1 right-1 opacity-0 group-hover/code:opacity-100 transition-all"
-                        onclick="copyToClipboard(document.getElementById('auth-example').textContent, this)"
-                        title="Copy to clipboard">
-                    <span class="material-symbols-outlined copy-icon">content_copy</span>
-                    <span class="material-symbols-outlined check-icon hidden">check</span>
-                </button>
+                <div class="absolute top-1 right-1 flex gap-1 opacity-0 group-hover/code:opacity-100 transition-all">
+                    <button onclick="copyWithToken(document.getElementById('auth-example').textContent, this)"
+                            class="flex items-center gap-1 px-2 py-1 text-xs font-medium"
+                            style="background: var(--md-sys-color-tertiary-container); color: var(--md-sys-color-on-tertiary-container); border-radius: var(--md-sys-shape-corner-small);"
+                            title="Copy with your saved API token">
+                        <span class="material-symbols-outlined copy-icon" style="font-size: 14px;">key</span>
+                        <span class="copy-icon">My token</span>
+                        <span class="check-icon hidden" style="font-size: 12px;">Copied!</span>
+                    </button>
+                    <button class="md3-btn-icon"
+                            onclick="copyToClipboard(document.getElementById('auth-example').textContent, this)"
+                            title="Copy to clipboard">
+                        <span class="material-symbols-outlined copy-icon">content_copy</span>
+                        <span class="material-symbols-outlined check-icon hidden">check</span>
+                    </button>
+                </div>
                 <pre id="auth-example" class="p-4 pt-8 overflow-x-auto text-sm" style="background: var(--md-sys-color-inverse-surface); color: var(--md-sys-color-inverse-on-surface); border-radius: var(--md-sys-shape-corner-large);"><code><span style="color: var(--md-sys-color-on-surface-variant);"># Register</span>
 curl -X POST /api/v1/auth/register \
   -H "Content-Type: application/json" \
@@ -209,6 +219,64 @@ curl -X POST /api/v1/auth/register \
 <span style="color: var(--md-sys-color-on-surface-variant);"># Use the returned token</span>
 curl /api/v1/player/profile \
   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIs..."</code></pre>
+            </div>
+        </div>
+
+        @* Token storage widget *@
+        <div id="token-widget" class="mt-8 p-5" style="background: color-mix(in srgb, var(--md-sys-color-tertiary) 8%, var(--md-sys-color-surface-container-low)); border: 1px solid color-mix(in srgb, var(--md-sys-color-tertiary) 20%, var(--md-sys-color-outline-variant)); border-radius: var(--md-sys-shape-corner-large);">
+            <div class="flex items-center gap-2 mb-2">
+                <span class="material-symbols-outlined" style="color: var(--md-sys-color-tertiary); font-size: 20px;">key</span>
+                <h4 class="font-semibold text-sm" style="color: var(--md-sys-color-on-surface);">Your API Token</h4>
+                <span id="token-status" class="text-xs px-2 py-0.5 hidden" style="border-radius: 999px; background: color-mix(in srgb, var(--md-sys-color-primary) 15%, transparent); color: var(--md-sys-color-primary);">Saved</span>
+            </div>
+            <p class="text-xs mb-3" style="color: var(--md-sys-color-on-surface-variant);">
+                Paste your JWT token below. All <strong>"My token"</strong> copy buttons will auto-fill it. Stored in your browser only — never sent anywhere.
+            </p>
+            <div class="flex gap-2">
+                <input id="api-token-input" type="text" placeholder="eyJhbGciOiJIUzI1NiIs..."
+                       class="flex-1 min-w-0 px-3 py-2 text-sm font-mono truncate"
+                       style="background: var(--md-sys-color-surface-container-high); color: var(--md-sys-color-on-surface); border: 1px solid var(--md-sys-color-outline-variant); border-radius: var(--md-sys-shape-corner-medium); outline: none;"
+                       oninput="saveToken()">
+                <button onclick="clearToken()" class="md3-btn-outlined px-3 py-2 text-sm shrink-0" title="Clear saved token">
+                    <span class="material-symbols-outlined" style="font-size: 18px;">delete</span>
+                </button>
+            </div>
+        </div>
+
+        @* Authenticated quick-copy examples *@
+        <div class="mt-6">
+            <h4 class="font-semibold text-sm mb-1" style="color: var(--md-sys-color-on-surface);">Quick Copy — Authenticated Commands</h4>
+            <p class="text-xs mb-3" style="color: var(--md-sys-color-on-surface-variant);">Save your token above, then use the <strong>"My token"</strong> button to copy these with it pre-filled.</p>
+            @{
+                var authExamples = new[] {
+                    ("auth-ex-profile", $"# View your profile\ncurl {tryBaseUrl}/api/v1/player/profile \\\n  -H \"Authorization: Bearer YOUR_TOKEN\""),
+                    ("auth-ex-battle", $"# Queue a casual battle\ncurl -X POST {tryBaseUrl}/api/v1/battle/queue \\\n  -H \"Authorization: Bearer YOUR_TOKEN\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{{\"mode\":\"casual\"}}'"),
+                    ("auth-ex-units", $"# Check your roster\ncurl {tryBaseUrl}/api/v1/player/units \\\n  -H \"Authorization: Bearer YOUR_TOKEN\"")
+                };
+            }
+            <div class="space-y-3">
+                @foreach (var (codeId, cmd) in authExamples)
+                {
+                <div class="relative group/code">
+                    <div class="absolute top-1 right-1 flex gap-1 opacity-0 group-hover/code:opacity-100 transition-all z-10">
+                        <button onclick="copyWithToken(document.getElementById('@codeId').textContent, this)"
+                                class="flex items-center gap-1 px-2 py-1 text-xs font-medium"
+                                style="background: var(--md-sys-color-tertiary-container); color: var(--md-sys-color-on-tertiary-container); border-radius: var(--md-sys-shape-corner-small);"
+                                title="Copy with your saved API token">
+                            <span class="material-symbols-outlined copy-icon" style="font-size: 14px;">key</span>
+                            <span class="copy-icon">My token</span>
+                            <span class="check-icon hidden" style="font-size: 12px;">Copied!</span>
+                        </button>
+                        <button class="md3-btn-icon"
+                                onclick="copyToClipboard(document.getElementById('@codeId').textContent, this)"
+                                title="Copy as-is">
+                            <span class="material-symbols-outlined copy-icon">content_copy</span>
+                            <span class="material-symbols-outlined check-icon hidden">check</span>
+                        </button>
+                    </div>
+                    <pre id="@codeId" class="p-4 pr-24 overflow-x-auto text-sm" style="background: var(--md-sys-color-inverse-surface); color: var(--md-sys-color-inverse-on-surface); border-radius: var(--md-sys-shape-corner-large);"><code>@cmd</code></pre>
+                </div>
+                }
             </div>
         </div>
     </div>
@@ -605,5 +673,47 @@ curl /api/v1/player/profile \
                 setTimeout(() => button.classList.remove('copy-done'), 2000);
             });
         }
+
+        // Copy with token substitution — replaces Bearer placeholder with saved token
+        function copyWithToken(text, button) {
+            var token = localStorage.getItem('acg_api_token') || 'YOUR_TOKEN';
+            var result = text.trim().replace(/Bearer\s+\S+/g, 'Bearer ' + token);
+            navigator.clipboard.writeText(result).then(function() {
+                button.classList.add('copy-done');
+                setTimeout(function() { button.classList.remove('copy-done'); }, 2000);
+            });
+        }
+
+        // Token storage
+        function saveToken() {
+            var input = document.getElementById('api-token-input');
+            var token = input.value.trim();
+            var status = document.getElementById('token-status');
+            if (token) {
+                localStorage.setItem('acg_api_token', token);
+                status.classList.remove('hidden');
+            } else {
+                localStorage.removeItem('acg_api_token');
+                status.classList.add('hidden');
+            }
+        }
+
+        function clearToken() {
+            localStorage.removeItem('acg_api_token');
+            document.getElementById('api-token-input').value = '';
+            document.getElementById('token-status').classList.add('hidden');
+        }
+
+        // Load saved token on page init
+        (function() {
+            var saved = localStorage.getItem('acg_api_token');
+            if (saved) {
+                var input = document.getElementById('api-token-input');
+                if (input) {
+                    input.value = saved;
+                    document.getElementById('token-status').classList.remove('hidden');
+                }
+            }
+        })();
     </script>
 }
