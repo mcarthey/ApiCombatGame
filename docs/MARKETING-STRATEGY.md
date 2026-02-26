@@ -2143,37 +2143,18 @@ Mark
 
 ### 3. Educational Licensing
 
-**Pricing Tiers:**
+> **Canonical pricing is in the [Educational Partnerships](#educational-partnerships) section above.**
 
-**Individual Educator - Free**
-- Up to 30 students
-- Basic support
-- Curriculum materials
+**Standard Institutional License: $500/semester flat + $20/student**
 
-**Small Institution - $500/semester**
-- Up to 100 students
-- Dedicated support channel
-- Custom assignments
-- Branded leaderboard
+Students get Premium access (unlimited battles, 10 team slots, priority matchmaking) while enrolled. Institution pays — students never see a payment screen.
 
-**Large Institution - $1,000/semester**
-- Unlimited students
-- Priority support
-- Custom features
-- Onsite training (optional)
-- Co-marketing opportunities
+**Discounts:** Annual/multi-semester commitments and dedicated curriculum integrations negotiated case by case. Pilot pricing available for first cohort.
 
-**Enterprise - $5,000/year**
-- Multiple campuses
-- White-label option
-- API access for LMS integration
-- Dedicated account manager
-
-**Revenue Potential:**
-- 10 small institutions x $500 x 2 semesters = $10,000/year
-- 3 large institutions x $1,000 x 2 semesters = $6,000/year
-- 1 enterprise x $5,000 = $5,000/year
-- **Total: $21,000/year**
+**Revenue Potential (conservative):**
+- 5 institutions × avg 30 students × ($500 + $600) = $5,500/semester
+- 2 semesters/year = **$11,000/year**
+- Plus post-course student → personal Premium conversion (~10-15% of students)
 
 ---
 

@@ -475,6 +475,7 @@ using (var scope = app.Services.CreateScope())
         await SeedData.InitializeAsync(context);
         await Phase3SeedData.InitializeAsync(context);
         await AdminSeedData.InitializeAsync(context, config);
+        await EducationSeedData.InitializeAsync(context);
 
         // Seed bot players for matchmaking
         var botNameGenerator = scope.ServiceProvider.GetRequiredService<IBotNameGenerator>();
