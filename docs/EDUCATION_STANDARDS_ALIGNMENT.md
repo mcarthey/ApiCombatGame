@@ -69,33 +69,28 @@ Maps the [5-Week REST API Curriculum](https://learnedgeek.com/Blog/Post/rest-api
 
 **No gaps.** Students create 3 team configs with different strategies, run 20+ AI practice battles each, compare results.
 
-### Week 4: Advanced Features & Collaboration — PARTIAL
+### Week 4: Advanced Features & Collaboration — READY
 
 | Curriculum Activity | API Combat Feature | Status |
 |--------------------|--------------------|--------|
-| Batch operations (100+ battles) | No batch endpoint | **GAP** (see below) |
+| Batch operations (100+ battles) | Batch practice endpoint | READY |
 | Statistical analysis | Battle history + analytics | READY |
 | Guild collaboration | Guild system + strategy library | READY |
 | Team GitHub repos | External — not platform | N/A |
 | Peer review | Guild strategy library | READY |
 
-**Gap: Batch simulation endpoint.** The curriculum calls for running 100+ simulated battles for data analysis. Current workarounds:
-- Students can loop 100+ AI practice battles via their bot scripts (each resolves instantly)
-- This actually reinforces Week 2 skills and is arguably better pedagogy
-- A dedicated batch endpoint would reduce friction but isn't strictly required
+**No gaps.** `POST /api/v1/ai/batch-practice` runs up to 200 simulated battles server-side and returns aggregate stats (wins, losses, avg turns, damage). Ideal for Week 4 data analysis.
 
-### Week 5: Tournament & Presentation — PARTIAL
+### Week 5: Tournament & Presentation — READY
 
 | Curriculum Activity | API Combat Feature | Status |
 |--------------------|--------------------|--------|
 | Final bot optimization | AI practice + ranked | READY |
-| Class tournament | Weekly tournament system | **GAP** (see below) |
-| Live leaderboard | Leaderboard API | READY (polling) |
+| Class tournament | Class-scoped tournament | READY |
+| Live leaderboard | Class leaderboard API | READY |
 | Team presentations | External | N/A |
 
-**Gap: Class-scoped tournaments.** The existing tournament system is global (all players). For classroom use:
-- An instructor cannot create a tournament limited to enrolled students
-- Workaround: time a global tournament to class schedule, or use the leaderboard filtered by class
+**No gaps.** Instructors create class-only tournaments via `POST /api/v1/education/modules/{id}/tournament`. Class leaderboard at `GET /api/v1/education/modules/{id}/leaderboard` shows enrolled students ranked by rating/wins.
 
 ---
 
@@ -105,14 +100,15 @@ The blog post promises these Education Mode features. Here's what exists:
 
 | Promised Feature | Implementation | Status |
 |-----------------|----------------|--------|
-| Private class instance | No multi-tenancy / classroom isolation | **GAP** |
+| Private class instance | No multi-tenancy / classroom isolation | **FUTURE** (not required — class tournaments + leaderboards provide scoping) |
 | Student progress tracking dashboard | `EducationService` with enrollment, lesson completion, instructor dashboard | READY |
-| Custom challenge assignments tied to endpoints | `CurriculumModule` with lessons — but lessons are instructional, not challenge-based | **PARTIAL** |
-| Leaderboards | Global leaderboard exists | READY (not class-scoped) |
-| Tournament infrastructure | Weekly tournament exists | READY (not class-scoped) |
+| Custom challenge assignments tied to endpoints | Lessons with `verificationEndpoint` — auto-complete when student hits the right endpoint | READY |
+| Leaderboards | Class-scoped leaderboard per module | READY |
+| Tournament infrastructure | Class-scoped tournaments (instructor creates for enrolled students) | READY |
 | Guild Wars functionality | Full guild war system | READY |
+| Batch practice | `POST /api/v1/ai/batch-practice` — up to 200 battles with aggregate stats | READY |
 
-### Existing Education Endpoints (5.15)
+### Education Endpoints (12 total)
 
 | Endpoint | Purpose |
 |----------|---------|
@@ -122,47 +118,20 @@ The blog post promises these Education Mode features. Here's what exists:
 | `POST /api/v1/education/modules/{id}/publish` | Publish module |
 | `POST /api/v1/education/enroll/{id}` | Enroll by module ID |
 | `POST /api/v1/education/enroll/code/{code}` | Enroll by join code |
+| `DELETE /api/v1/education/enroll/{id}` | Unenroll from module |
 | `POST /api/v1/education/modules/{id}/lessons/{idx}/complete` | Mark lesson complete |
 | `GET /api/v1/education/my-progress` | Student progress across all modules |
+| `GET /api/v1/education/modules/{id}/leaderboard` | Class leaderboard (enrolled students) |
+| `POST /api/v1/education/modules/{id}/tournament` | Create class tournament (instructor) |
 | `GET /api/v1/education/instructor/dashboard` | Instructor analytics |
 
 ---
 
-## Implementation Gaps — Prioritized
+## Remaining Enhancements (Nice-to-Have)
 
-### Priority 1: Class-Scoped Leaderboard (Low Effort, High Value)
+All curriculum-blocking gaps have been resolved. The following are enhancements for future development:
 
-**Why:** Every week of the curriculum uses leaderboards. Class-scoped leaderboards let instructors see just their students.
-
-**Proposed:** Add `GET /api/v1/education/modules/{moduleId}/leaderboard` that returns enrolled students ranked by rating/wins.
-
-**Effort:** Small — query enrolled students, join with player stats, sort.
-
-### Priority 2: Batch Practice Endpoint (Medium Effort, High Value)
-
-**Why:** Week 4 requires 100+ simulated battles for statistical analysis. Students CAN loop their bots, but a batch endpoint reduces friction.
-
-**Proposed:** Add `POST /api/v1/ai/batch-practice` that accepts a team ID + count (max 200), runs N practice battles server-side, returns aggregate results (wins, losses, avg turns, damage stats).
-
-**Effort:** Medium — reuse existing `AiOpponentService` in a loop, return summary.
-
-### Priority 3: Class-Scoped Tournament (Medium Effort, High Value)
-
-**Why:** Week 5 culminates in a class tournament. Currently tournaments are global.
-
-**Proposed:** Add `POST /api/v1/education/modules/{moduleId}/tournament` (instructor only) that creates a tournament limited to enrolled students.
-
-**Effort:** Medium — extend `TournamentService` with optional `moduleId` filter on registration.
-
-### Priority 4: Endpoint-Linked Challenge Assignments (Medium Effort, Medium Value)
-
-**Why:** Education Mode promises "custom challenge assignments tied to endpoints." Current lessons are instructional (read/complete), not challenge-based (verify via API call).
-
-**Proposed:** Extend `CurriculumModule` lessons with optional `verificationEndpoint` + `verificationCriteria` fields. When a student hits the right endpoint with correct parameters, the lesson auto-completes.
-
-**Effort:** Medium — add verification logic to lesson completion, or add a new challenge type to the education module.
-
-### Priority 5: Classroom Isolation (High Effort, Future)
+### Classroom Isolation (High Effort, Future)
 
 **Why:** "Private class instance" means students only battle each other, not the global player pool.
 
@@ -170,7 +139,9 @@ The blog post promises these Education Mode features. Here's what exists:
 - **Option A (simple):** Tag enrolled students with a `classroomId`; matchmaking prefers same-classroom opponents
 - **Option B (complex):** Full multi-tenant isolation per classroom
 
-**Effort:** High — touches matchmaking, leaderboards, tournaments. Defer to post-launch.
+**Effort:** High — touches matchmaking, leaderboards, tournaments. Defer until demand justifies it.
+
+**Current workaround:** Class-scoped tournaments and leaderboards already provide isolation where it matters most. Students battling the global pool adds realism. AI practice mode provides fully controlled experiments.
 
 ### Not Required (Advanced Extensions)
 
@@ -215,16 +186,16 @@ Can students produce every curriculum deliverable with current features?
 
 ## Summary
 
-**The game meets all 15 Wisconsin CS standards and supports all 5 weekly deliverables today.**
+**The game meets all 15 Wisconsin CS standards and supports all 5 weekly deliverables today. All curriculum weeks are fully READY.**
 
-Gaps are enhancements to the Education Mode experience, not blockers:
-
-| Gap | Blocking? | Workaround |
-|-----|-----------|-----------|
-| Batch practice endpoint | No | Students loop AI practice via bot scripts (reinforces Week 2 skills) |
-| Class-scoped leaderboard | No | Use global leaderboard; instructor dashboard shows enrolled student progress |
-| Class-scoped tournament | No | Use global weekly tournament timed to class schedule |
-| Endpoint-linked challenges | No | Instructor verifies via lesson completion + student demo |
-| Classroom isolation | No | Students battle global pool (adds realism); AI practice for controlled experiments |
+| Feature | Status |
+|---------|--------|
+| Batch practice endpoint (`POST /api/v1/ai/batch-practice`) | READY |
+| Class-scoped leaderboard (`GET /api/v1/education/modules/{id}/leaderboard`) | READY |
+| Class-scoped tournament (`POST /api/v1/education/modules/{id}/tournament`) | READY |
+| Endpoint-linked lesson verification (`verificationEndpoint` on lessons) | READY |
+| Instructor dashboard with student analytics | READY |
+| Pre-seeded "API Basics 101" module (join code: `BASICS01`) | READY |
+| Classroom isolation (private matchmaking pool) | FUTURE — not required, class tournaments provide scoping |
 
 *Last updated: February 2026*
