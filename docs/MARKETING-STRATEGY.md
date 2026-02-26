@@ -684,7 +684,7 @@ Month 6: Hit $150 MRR
 
 **What's Working:**
 - Free tier → premium conversion: 12%
-- Educational licenses: 3 universities ($500 each)
+- Educational licenses: 3 institutions ($500 flat + $20/student each)
 - Word of mouth from Discord community
 
 **What's Not:**
@@ -1331,13 +1331,35 @@ Mark
 - [ ] Video tutorials for students
 - [ ] Discord channel for student questions
 
-**Pricing:**
+**Education Pricing — Institutional License:**
 
-- **Free tier:** Individual students (10 battles/day)
-- **Educational license:** $500/semester (unlimited for all students)
-- **Enterprise:** $1000/year + custom features
+| Component | Cost | Details |
+|-----------|------|---------|
+| **Platform fee** | $500/semester | Instructor tools, curriculum builder, class leaderboards, class tournaments, instructor dashboard, onboarding support |
+| **Per student** | $20/student | Premium access (unlimited battles, 10 team slots, priority matchmaking) for the semester |
 
-**Expected Impact:** 3-5 universities in first year = $1,500-2,500 revenue + 100-250 students as users
+**Example pricing:**
+
+| Scenario | Flat | Students | Total |
+|----------|------|----------|-------|
+| 25-student class | $500 | 25 × $20 = $500 | **$1,000/semester** |
+| 60-student bootcamp (3 cohorts) | $500 | 60 × $20 = $1,200 | **$1,700/semester** |
+| 15-student continuing ed | $500 | 15 × $20 = $300 | **$800/semester** |
+
+**Key terms:**
+- **Students are always free.** The institution pays. Students never see a payment screen.
+- **Students get Premium** while enrolled — unlimited battles, full feature access. Drops to Free tier when semester ends or they unenroll.
+- **Post-course conversion:** Students who want to keep playing after the course can upgrade to personal Premium ($5/mo). Built-in upsell.
+- **Discounts:** Annual/multi-semester commitments and dedicated curriculum integrations negotiated case by case. Pilot pricing available for first cohort.
+- **Billing:** Invoice at start of semester, payment due on receipt. Instructor setup is manual (white-glove onboarding).
+
+**What's built today:**
+- Education endpoints (curriculum modules, join codes, enrollment, progress tracking, class leaderboards, class tournaments, instructor dashboard)
+- `IsEducator` flag on player accounts (verified .edu email or admin-granted)
+- Enrolled students are blocked from purchasing subscriptions (institution pays, not the student)
+- **Not yet built:** Admin bulk-upgrade of enrolled students to Premium (manual per-student for now — automate when volume justifies it)
+
+**Expected Impact:** 3-5 institutions in first year = $3,000-8,500 revenue + 100-250 students as users (with post-course Premium conversion potential)
 
 ---
 
