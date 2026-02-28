@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace ApiCombatGame.Models.DTOs.Education;
 
 public class CurriculumModuleResponse
@@ -46,21 +48,44 @@ public class EnrollmentProgressDto
 
 public class CreateModuleRequest
 {
+    [Required]
+    [MaxLength(100)]
     public string Title { get; set; } = string.Empty;
+
+    [MaxLength(500)]
     public string Description { get; set; } = string.Empty;
+
+    [MaxLength(20)]
+    [RegularExpression("^(beginner|intermediate|advanced)$", ErrorMessage = "Difficulty must be 'beginner', 'intermediate', or 'advanced'.")]
     public string Difficulty { get; set; } = "beginner";
+
+    [MinLength(1)]
     public List<CreateLessonRequest> Lessons { get; set; } = new();
 }
 
 public class CreateLessonRequest
 {
+    [Required]
+    [MaxLength(100)]
     public string Title { get; set; } = string.Empty;
+
+    [Required]
+    [MaxLength(500)]
     public string Objective { get; set; } = string.Empty;
+
+    [Required]
+    [MaxLength(200)]
     public string Endpoint { get; set; } = string.Empty;
+
+    [MaxLength(500)]
     public string? Hint { get; set; }
+
     /// <summary>If set, calling this endpoint successfully auto-completes the lesson.</summary>
+    [MaxLength(200)]
     public string? VerificationEndpoint { get; set; }
+
     /// <summary>HTTP method for verification (GET, POST, PUT, DELETE). Defaults to the endpoint's method.</summary>
+    [MaxLength(10)]
     public string? VerificationMethod { get; set; }
 }
 
@@ -96,7 +121,11 @@ public class ClassLeaderboardEntry
 public class BatchPracticeRequest
 {
     public Guid TeamId { get; set; }
+
+    [MaxLength(50)]
     public string? OpponentId { get; set; }
+
+    [Range(1, 200)]
     public int Count { get; set; } = 10;
 }
 
@@ -112,6 +141,9 @@ public class BatchPracticeResponse
 
 public class CreateClassTournamentRequest
 {
+    [Range(0, 10000)]
     public int EntryFee { get; set; } = 0;
+
+    [Range(2, 128)]
     public int MaxParticipants { get; set; } = 16;
 }

@@ -26,5 +26,6 @@ public class TreasurySpendRequest
 
 public class TreasuryDepositRequest
 {
+    [System.ComponentModel.DataAnnotations.Range(1, 1000000)]
     public int Amount { get; set; }
 }

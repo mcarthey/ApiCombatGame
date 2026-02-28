@@ -9,5 +9,7 @@ public class BattleQueueRequest
     public Guid TeamId { get; set; }
 
     /// <summary>Battle mode: "ranked" (affects API rating) or "casual" (no rating change). Default: "ranked".</summary>
+    [MaxLength(20)]
+    [RegularExpression("^(ranked|casual)$", ErrorMessage = "Mode must be 'ranked' or 'casual'.")]
     public string Mode { get; set; } = "ranked";
 }

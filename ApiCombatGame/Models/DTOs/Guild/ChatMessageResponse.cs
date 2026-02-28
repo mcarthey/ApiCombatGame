@@ -12,5 +12,7 @@ public class ChatMessageResponse
 
 public class PostChatRequest
 {
+    [System.ComponentModel.DataAnnotations.Required]
+    [System.ComponentModel.DataAnnotations.MaxLength(500)]
     public string Message { get; set; } = string.Empty;
 }

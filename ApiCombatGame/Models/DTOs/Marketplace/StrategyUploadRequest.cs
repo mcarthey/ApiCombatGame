@@ -16,8 +16,10 @@ public class StrategyUploadRequest
 
     /// <summary>The strategy configuration as a JSON string matching the StrategyConfig schema.</summary>
     [Required]
+    [MaxLength(51200)]
     public string StrategyJson { get; set; } = "{}";
 
     /// <summary>Price in currency. Set to 0 to share for free. Buyers pay this amount to download.</summary>
+    [Range(0, 100000)]
     public int Price { get; set; } = 0;
 }
