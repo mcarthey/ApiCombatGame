@@ -47,6 +47,9 @@ public class RateLimitingMiddleware
         var clientKey = $"{clientIp}:{tierClaim ?? "Free"}";
         var clientInfo = Clients.GetOrAdd(clientKey, _ => new ClientRateInfo());
 
+        bool rateLimited = false;
+        string? rateLimitBody = null;
+
         lock (clientInfo)
         {
             var now = DateTime.UtcNow;
@@ -73,16 +76,21 @@ public class RateLimitingMiddleware
                 context.Response.StatusCode = StatusCodes.Status429TooManyRequests;
                 context.Response.Headers["Retry-After"] = ((int)(resetTime - now).TotalSeconds).ToString();
                 context.Response.ContentType = "application/json";
-                var body = System.Text.Json.JsonSerializer.Serialize(new
+                rateLimitBody = System.Text.Json.JsonSerializer.Serialize(new
                 {
                     error = "Rate limit exceeded. Try again later.",
                     limit = maxRequests,
                     tier = tierClaim ?? "Free",
                     retryAfterSeconds = (int)(resetTime - now).TotalSeconds
                 });
-                context.Response.WriteAsync(body).Wait();
-                return;
+                rateLimited = true;
             }
+        }
+
+        if (rateLimited)
+        {
+            await context.Response.WriteAsync(rateLimitBody!);
+            return;
         }
 
         await _next(context);

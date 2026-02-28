@@ -179,8 +179,12 @@ public class EducationService : IEducationService
             ModuleId = moduleId
         };
 
-        module.EnrolledCount++;
         _context.Set<StudentEnrollment>().Add(enrollment);
+        await _context.SaveChangesAsync();
+
+        // Update count from actual DB state to avoid race conditions
+        module.EnrolledCount = await _context.Set<StudentEnrollment>()
+            .CountAsync(e => e.ModuleId == moduleId);
         await _context.SaveChangesAsync();
 
         return new EnrollmentProgressDto
@@ -355,12 +359,17 @@ public class EducationService : IEducationService
             .FirstOrDefaultAsync(e => e.PlayerId == playerId && e.ModuleId == moduleId)
             ?? throw new KeyNotFoundException("Not enrolled in this module.");
 
-        var module = await _context.Set<CurriculumModule>().FindAsync(moduleId);
-        if (module != null && module.EnrolledCount > 0)
-            module.EnrolledCount--;
-
         _context.Set<StudentEnrollment>().Remove(enrollment);
         await _context.SaveChangesAsync();
+
+        // Update count from actual DB state to avoid race conditions
+        var module = await _context.Set<CurriculumModule>().FindAsync(moduleId);
+        if (module != null)
+        {
+            module.EnrolledCount = await _context.Set<StudentEnrollment>()
+                .CountAsync(e => e.ModuleId == moduleId);
+            await _context.SaveChangesAsync();
+        }
 
         _logger.LogInformation("Player {PlayerId} unenrolled from module {ModuleId}", playerId, moduleId);
     }
@@ -381,7 +390,7 @@ public class EducationService : IEducationService
         return player;
     }
 
-    private static CurriculumModuleResponse ToResponse(CurriculumModule m, string instructorUsername) => new()
+    private CurriculumModuleResponse ToResponse(CurriculumModule m, string instructorUsername) => new()
     {
         Id = m.Id,
         InstructorUsername = instructorUsername,
@@ -395,10 +404,14 @@ public class EducationService : IEducationService
         CreatedAt = m.CreatedAt
     };
 
-    private static int CountLessons(string json)
+    private int CountLessons(string json)
     {
         try { return JsonSerializer.Deserialize<List<CreateLessonRequest>>(json, JsonOptions)?.Count ?? 0; }
-        catch (JsonException) { return 0; }
+        catch (JsonException ex)
+        {
+            _logger.LogWarning(ex, "Failed to deserialize lessons JSON for count");
+            return 0;
+        }
     }
 
     private List<LessonData> DeserializeLessons(string json)

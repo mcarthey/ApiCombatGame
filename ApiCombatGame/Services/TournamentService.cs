@@ -356,14 +356,26 @@ public class TournamentService : ITournamentService
 
         if (!roundComplete)
         {
-            // Resolve unresolved matches (simulate battle results)
-            foreach (var match in roundMatches.Where(m => m.Status == "pending" && m.Player1Id.HasValue && m.Player2Id.HasValue))
-            {
-                // Use rating to determine winner (higher rated = more likely to win)
-                var p1 = await _context.Players.FindAsync(match.Player1Id!.Value);
-                var p2 = await _context.Players.FindAsync(match.Player2Id!.Value);
+            // Batch-fetch all players needed for this round (avoid N+1 queries)
+            var pendingMatches = roundMatches
+                .Where(m => m.Status == "pending" && m.Player1Id.HasValue && m.Player2Id.HasValue)
+                .ToList();
 
-                if (p1 == null || p2 == null) continue;
+            var playerIds = pendingMatches
+                .SelectMany(m => new[] { m.Player1Id!.Value, m.Player2Id!.Value })
+                .Distinct()
+                .ToList();
+
+            var players = await _context.Players
+                .Where(p => playerIds.Contains(p.Id))
+                .ToDictionaryAsync(p => p.Id);
+
+            // Resolve unresolved matches (simulate battle results)
+            foreach (var match in pendingMatches)
+            {
+                if (!players.TryGetValue(match.Player1Id!.Value, out var p1) ||
+                    !players.TryGetValue(match.Player2Id!.Value, out var p2))
+                    continue;
 
                 double p1WinChance = 1.0 / (1.0 + Math.Pow(10, (p2.Rating - p1.Rating) / 400.0));
                 match.WinnerId = Random.Shared.NextDouble() < p1WinChance ? match.Player1Id : match.Player2Id;
