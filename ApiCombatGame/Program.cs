@@ -170,6 +170,7 @@ builder.Services.AddSingleton<IEmailTemplateService, EmailTemplateService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 
 // Admin
+builder.Services.AddScoped<IAdminAuditService, AdminAuditService>();
 builder.Services.AddScoped<IAdminAnalyticsService, AdminAnalyticsService>();
 builder.Services.AddScoped<IAdminPlayerManagementService, AdminPlayerManagementService>();
 builder.Services.AddScoped<IAdminReconciliationService, AdminReconciliationService>();

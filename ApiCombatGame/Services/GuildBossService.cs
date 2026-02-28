@@ -105,39 +105,6 @@ public class GuildBossService : IGuildBossService
         boss.CurrentHp = Math.Max(0, boss.CurrentHp - totalDamage);
         bool killingBlow = boss.CurrentHp <= 0;
 
-        if (killingBlow)
-        {
-            boss.IsDefeated = true;
-            boss.DefeatedAt = DateTime.UtcNow;
-
-            // Deposit reward to guild treasury
-            var oldTreasury = membership.Guild.TreasuryBalance;
-            membership.Guild.TreasuryBalance += boss.RewardCurrency;
-            _ledger.LogGuild(boss.GuildId, "TreasuryBalance", oldTreasury, membership.Guild.TreasuryBalance, "GuildBoss", "BossDefeated", boss.Id);
-
-            // Award XP and gold to all contributors
-            var contributors = boss.Attempts
-                .Select(a => a.PlayerId)
-                .Append(playerId)
-                .Distinct()
-                .ToList();
-
-            foreach (var contributorId in contributors)
-            {
-                await _progressionService.AwardCurrencyAsync(contributorId, boss.RewardCurrency / contributors.Count);
-                await _progressionService.AwardExperienceAsync(contributorId, boss.RewardExperience / contributors.Count);
-            }
-
-            _logger.LogInformation("Boss {BossName} defeated by {PlayerId} (killing blow). {ContributorCount} contributors rewarded.",
-                boss.Name, playerId, contributors.Count);
-
-            // Achievement: killing blow
-            await _achievementService.CheckAndAwardAsync(playerId, "boss_killing_blow");
-
-            await _notifications.SendToGuildAsync(boss.GuildId, Models.Enums.NotificationType.GuildBossDefeated, "Boss Defeated!",
-                $"{(await _context.Players.FindAsync(playerId))?.Username} landed the killing blow on {boss.Name}! Rewards deposited to guild treasury.");
-        }
-
         // Create attempt record
         var attempt = new GuildBossAttempt
         {
@@ -151,9 +118,61 @@ public class GuildBossService : IGuildBossService
         };
 
         membership.ContributionPoints += totalDamage / 10;
-
         _context.GuildBossAttempts.Add(attempt);
-        await _context.SaveChangesAsync();
+
+        if (killingBlow)
+        {
+            // Use an explicit transaction so boss defeat, treasury deposit, and all
+            // contributor rewards succeed or fail atomically — no partial payouts.
+            await using var transaction = await _context.Database.BeginTransactionAsync();
+            try
+            {
+                boss.IsDefeated = true;
+                boss.DefeatedAt = DateTime.UtcNow;
+
+                // Deposit reward to guild treasury
+                var oldTreasury = membership.Guild.TreasuryBalance;
+                membership.Guild.TreasuryBalance += boss.RewardCurrency;
+                _ledger.LogGuild(boss.GuildId, "TreasuryBalance", oldTreasury, membership.Guild.TreasuryBalance, "GuildBoss", "BossDefeated", boss.Id);
+
+                // Save boss state + attempt before awarding rewards (progression service does its own saves)
+                await _context.SaveChangesAsync();
+
+                // Award XP and gold to all contributors
+                var contributors = boss.Attempts
+                    .Select(a => a.PlayerId)
+                    .Append(playerId)
+                    .Distinct()
+                    .ToList();
+
+                foreach (var contributorId in contributors)
+                {
+                    await _progressionService.AwardCurrencyAsync(contributorId, boss.RewardCurrency / contributors.Count);
+                    await _progressionService.AwardExperienceAsync(contributorId, boss.RewardExperience / contributors.Count);
+                }
+
+                await transaction.CommitAsync();
+
+                _logger.LogInformation("Boss {BossName} defeated by {PlayerId} (killing blow). {ContributorCount} contributors rewarded.",
+                    boss.Name, playerId, contributors.Count);
+
+                // Achievement and notifications are outside the transaction — non-critical side effects
+                await _achievementService.CheckAndAwardAsync(playerId, "boss_killing_blow");
+
+                await _notifications.SendToGuildAsync(boss.GuildId, Models.Enums.NotificationType.GuildBossDefeated, "Boss Defeated!",
+                    $"{(await _context.Players.FindAsync(playerId))?.Username} landed the killing blow on {boss.Name}! Rewards deposited to guild treasury.");
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                _logger.LogError(ex, "Failed to process boss defeat rewards for boss {BossId}. Transaction rolled back — no partial rewards distributed.", boss.Id);
+                throw;
+            }
+        }
+        else
+        {
+            await _context.SaveChangesAsync();
+        }
 
         return attempt;
     }

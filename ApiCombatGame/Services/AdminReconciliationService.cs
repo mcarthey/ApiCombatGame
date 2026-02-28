@@ -11,27 +11,15 @@ public class AdminReconciliationService : IAdminReconciliationService
 {
     private readonly GameDbContext _context;
     private readonly INotificationService _notifications;
+    private readonly IAdminAuditService _audit;
     private readonly ILogger<AdminReconciliationService> _logger;
 
-    public AdminReconciliationService(GameDbContext context, INotificationService notifications, ILogger<AdminReconciliationService> logger)
+    public AdminReconciliationService(GameDbContext context, INotificationService notifications, IAdminAuditService audit, ILogger<AdminReconciliationService> logger)
     {
         _context = context;
         _notifications = notifications;
+        _audit = audit;
         _logger = logger;
-    }
-
-    private async Task AuditLogAsync(Guid adminPlayerId, string action, Guid? targetPlayerId = null, string? detailsJson = null)
-    {
-        _context.AdminAuditLogs.Add(new AdminAuditLog
-        {
-            Id = Guid.NewGuid(),
-            AdminPlayerId = adminPlayerId,
-            Action = action,
-            TargetPlayerId = targetPlayerId,
-            DetailsJson = detailsJson,
-            CreatedAt = DateTime.UtcNow
-        });
-        await _context.SaveChangesAsync();
     }
 
     public Task<ReconciliationPreview> PreviewReconciliationAsync(DateTime? since = null)
@@ -213,27 +201,29 @@ public class AdminReconciliationService : IAdminReconciliationService
 
                 if (player.Rating > player.HighestRating)
                     player.HighestRating = player.Rating;
+
+                _audit.AddEntry(adminPlayerId.Value, "ReconcileRating", d.PlayerId,
+                    $"{{\"oldRating\":{d.CurrentRating},\"newRating\":{d.RecalculatedRating},\"delta\":{d.Delta}}}");
             }
 
+            _audit.AddEntry(adminPlayerId.Value, "ReconcileAll", null,
+                $"{{\"playersAffected\":{affectedCount},\"battlesReprocessed\":{replayBattles.Count},\"casualBattlesFixed\":{totalCasualFixed},\"since\":\"{since?.ToString("o") ?? "full"}\"}}");
+
+            // Single save: rating changes + all audit log entries atomically
             await _context.SaveChangesAsync();
 
+            // Notifications are non-critical — sent after the atomic save
             foreach (var d in deltas.Where(d => d.Delta != 0))
             {
-                var direction = d.Delta > 0 ? "increased" : "decreased";
-                await AuditLogAsync(adminPlayerId.Value, "ReconcileRating", d.PlayerId,
-                    $"{{\"oldRating\":{d.CurrentRating},\"newRating\":{d.RecalculatedRating},\"delta\":{d.Delta}}}");
-
                 if (!allPlayers.First(p => p.Id == d.PlayerId).IsDeleted)
                 {
+                    var direction = d.Delta > 0 ? "increased" : "decreased";
                     await _notifications.SendAsync(d.PlayerId,
                         NotificationType.AdminActionOnAccount,
                         "Rating Corrected",
                         $"Your rating has been {direction} by {Math.Abs(d.Delta)} (from {d.CurrentRating} to {d.RecalculatedRating}) as part of a data reconciliation.");
                 }
             }
-
-            await AuditLogAsync(adminPlayerId.Value, "ReconcileAll", null,
-                $"{{\"playersAffected\":{affectedCount},\"battlesReprocessed\":{replayBattles.Count},\"casualBattlesFixed\":{totalCasualFixed},\"since\":\"{since?.ToString("o") ?? "full"}\"}}");
 
             _logger.LogInformation(
                 "Rating reconciliation completed: {Affected} players affected, {Battles} battles reprocessed, {Casual} casual fixed, since={Since}",

@@ -13,28 +13,16 @@ public class AdminPlayerManagementService : IAdminPlayerManagementService
     private readonly GameDbContext _context;
     private readonly INotificationService _notifications;
     private readonly IActivityLedger _ledger;
+    private readonly IAdminAuditService _audit;
     private readonly ILogger<AdminPlayerManagementService> _logger;
 
-    public AdminPlayerManagementService(GameDbContext context, INotificationService notifications, IActivityLedger ledger, ILogger<AdminPlayerManagementService> logger)
+    public AdminPlayerManagementService(GameDbContext context, INotificationService notifications, IActivityLedger ledger, IAdminAuditService audit, ILogger<AdminPlayerManagementService> logger)
     {
         _context = context;
         _notifications = notifications;
         _ledger = ledger;
+        _audit = audit;
         _logger = logger;
-    }
-
-    private async Task AuditLogAsync(Guid adminPlayerId, string action, Guid? targetPlayerId = null, string? detailsJson = null)
-    {
-        _context.AdminAuditLogs.Add(new AdminAuditLog
-        {
-            Id = Guid.NewGuid(),
-            AdminPlayerId = adminPlayerId,
-            Action = action,
-            TargetPlayerId = targetPlayerId,
-            DetailsJson = detailsJson,
-            CreatedAt = DateTime.UtcNow
-        });
-        await _context.SaveChangesAsync();
     }
 
     public async Task<bool> ToggleAdminAsync(Guid adminPlayerId, Guid playerId, bool isAdmin, AdminRole role)
@@ -45,9 +33,9 @@ public class AdminPlayerManagementService : IAdminPlayerManagementService
         var oldState = $"IsAdmin={player.IsAdmin}, Role={player.AdminRole}";
         player.IsAdmin = isAdmin;
         player.AdminRole = isAdmin ? role : AdminRole.None;
+        _audit.AddEntry(adminPlayerId, "ToggleAdmin", playerId, $"{{\"old\":\"{oldState}\",\"new\":\"IsAdmin={isAdmin}, Role={role}\"}}");
         await _context.SaveChangesAsync();
 
-        await AuditLogAsync(adminPlayerId, "ToggleAdmin", playerId, $"{{\"old\":\"{oldState}\",\"new\":\"IsAdmin={isAdmin}, Role={role}\"}}");
         await _notifications.SendAsync(playerId, NotificationType.AdminActionOnAccount, "Admin Status Changed",
             isAdmin ? $"You have been granted admin role: {role}" : "Your admin access has been removed.");
 
@@ -61,9 +49,8 @@ public class AdminPlayerManagementService : IAdminPlayerManagementService
         if (player == null) return false;
 
         player.IsEducator = isEducator;
+        _audit.AddEntry(adminPlayerId, "ToggleEducator", playerId, $"{{\"isEducator\":{isEducator.ToString().ToLower()}}}");
         await _context.SaveChangesAsync();
-
-        await AuditLogAsync(adminPlayerId, "ToggleEducator", playerId, $"{{\"isEducator\":{isEducator.ToString().ToLower()}}}");
         _logger.LogInformation("Educator status changed for {Username}: IsEducator={IsEducator}", player.Username, isEducator);
         return true;
     }
@@ -77,9 +64,9 @@ public class AdminPlayerManagementService : IAdminPlayerManagementService
         player.Currency += amount;
         if (player.Currency < 0) player.Currency = 0;
         _ledger.LogPlayer(playerId, "Currency", oldBalance, player.Currency, "AdminAction", "AdminAdjust");
+        _audit.AddEntry(adminPlayerId, "AdjustCurrency", playerId, $"{{\"amount\":{amount},\"oldBalance\":{oldBalance},\"newBalance\":{player.Currency}}}");
         await _context.SaveChangesAsync();
 
-        await AuditLogAsync(adminPlayerId, "AdjustCurrency", playerId, $"{{\"amount\":{amount},\"oldBalance\":{oldBalance},\"newBalance\":{player.Currency}}}");
         await _notifications.SendAsync(playerId, NotificationType.AdminActionOnAccount, "Currency Adjusted",
             $"An administrator adjusted your gold by {(amount >= 0 ? "+" : "")}{amount}. New balance: {player.Currency}g.");
 
@@ -95,9 +82,9 @@ public class AdminPlayerManagementService : IAdminPlayerManagementService
         var oldRating = player.Rating;
         player.Rating = Math.Max(100, player.Rating + amount);
         _ledger.LogPlayer(playerId, "Rating", oldRating, player.Rating, "AdminAction", "AdminAdjust");
+        _audit.AddEntry(adminPlayerId, "AdjustRating", playerId, $"{{\"amount\":{amount},\"oldRating\":{oldRating},\"newRating\":{player.Rating}}}");
         await _context.SaveChangesAsync();
 
-        await AuditLogAsync(adminPlayerId, "AdjustRating", playerId, $"{{\"amount\":{amount},\"oldRating\":{oldRating},\"newRating\":{player.Rating}}}");
         await _notifications.SendAsync(playerId, NotificationType.AdminActionOnAccount, "Rating Adjusted",
             $"An administrator adjusted your rating by {(amount >= 0 ? "+" : "")}{amount}. New rating: {player.Rating}.");
 
@@ -112,12 +99,7 @@ public class AdminPlayerManagementService : IAdminPlayerManagementService
 
         var oldTier = player.CurrentTier;
         player.CurrentTier = tier;
-        await _context.SaveChangesAsync();
-
-        await AuditLogAsync(adminPlayerId, "SetTier", playerId, $"{{\"oldTier\":\"{oldTier}\",\"newTier\":\"{tier}\"}}");
-        await _notifications.SendAsync(playerId, NotificationType.TierChanged, "Subscription Tier Changed",
-            $"Your subscription tier has been changed from {oldTier} to {tier} by an administrator.");
-
+        _audit.AddEntry(adminPlayerId, "SetTier", playerId, $"{{\"oldTier\":\"{oldTier}\",\"newTier\":\"{tier}\"}}");
         _context.SubscriptionEvents.Add(new SubscriptionEvent
         {
             Id = Guid.NewGuid(),
@@ -129,6 +111,9 @@ public class AdminPlayerManagementService : IAdminPlayerManagementService
         });
         await _context.SaveChangesAsync();
 
+        await _notifications.SendAsync(playerId, NotificationType.TierChanged, "Subscription Tier Changed",
+            $"Your subscription tier has been changed from {oldTier} to {tier} by an administrator.");
+
         _logger.LogInformation("Tier changed for {Username}: {Tier}", player.Username, tier);
         return true;
     }
@@ -139,9 +124,9 @@ public class AdminPlayerManagementService : IAdminPlayerManagementService
         if (player == null) return false;
 
         player.PasswordHash = BCrypt.Net.BCrypt.HashPassword(newPassword);
+        _audit.AddEntry(adminPlayerId, "ResetPassword", playerId);
         await _context.SaveChangesAsync();
 
-        await AuditLogAsync(adminPlayerId, "ResetPassword", playerId);
         await _notifications.SendAsync(playerId, NotificationType.PasswordChanged, "Password Reset",
             "Your password was reset by an administrator. If you did not request this, please contact support.");
 
@@ -166,10 +151,9 @@ public class AdminPlayerManagementService : IAdminPlayerManagementService
         if (alert == null) return;
 
         alert.IsAcknowledged = true;
-        await _context.SaveChangesAsync();
-
         var json = JsonSerializer.Serialize(new { alertId, category = alert.Category, message = alert.Message });
-        await AuditLogAsync(adminPlayerId, "AcknowledgeAlert", null, json);
+        _audit.AddEntry(adminPlayerId, "AcknowledgeAlert", null, json);
+        await _context.SaveChangesAsync();
     }
 
     public async Task<AdminAuditLogData> GetAuditLogsAsync(string? actionFilter, int page, int pageSize = 25)

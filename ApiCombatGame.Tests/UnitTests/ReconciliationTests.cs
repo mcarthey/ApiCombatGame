@@ -15,6 +15,7 @@ public class ReconciliationTests : IDisposable
     private readonly GameDbContext _context;
     private readonly Mock<INotificationService> _notifications;
     private readonly Mock<ILogger<AdminReconciliationService>> _logger;
+    private readonly AdminAuditService _audit;
     private readonly AdminReconciliationService _service;
 
     public ReconciliationTests()
@@ -22,7 +23,8 @@ public class ReconciliationTests : IDisposable
         _context = TestDbContextFactory.Create();
         _notifications = new Mock<INotificationService>();
         _logger = new Mock<ILogger<AdminReconciliationService>>();
-        _service = new AdminReconciliationService(_context, _notifications.Object, _logger.Object);
+        _audit = new AdminAuditService(_context);
+        _service = new AdminReconciliationService(_context, _notifications.Object, _audit, _logger.Object);
     }
 
     public void Dispose() => _context.Dispose();
