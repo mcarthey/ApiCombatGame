@@ -37,7 +37,7 @@
 
         <div class="flex justify-center gap-12 mt-16">
             <div class="text-center">
-                <div class="stat-number">6</div>
+                <div class="stat-number">5</div>
                 <div class="stat-label">Unit Classes</div>
             </div>
             <div class="text-center">
@@ -74,7 +74,7 @@
             </div>
             <h3 class="text-lg font-semibold mb-2" style="color: var(--md-sys-color-on-surface); letter-spacing: -0.01em;">Build Your Team</h3>
             <p class="text-sm" style="color: var(--md-sys-color-on-surface-variant); line-height: 1.6;">
-                Unlock units across 6 classes, configure teams, and design battle strategies via JSON payloads.
+                Unlock units across 5 classes, configure teams, and design battle strategies via JSON payloads.
             </p>
         </div>
         <div class="bento-item">
@@ -129,6 +129,67 @@
         </div>
     </div>
 </section>
+
+<!-- Live Leaderboard -->
+<section class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pb-24">
+    <div class="text-center mb-10">
+        <span class="label-muted">Live Rankings</span>
+        <h2 class="display-md mt-3" style="color: var(--md-sys-color-on-surface);">The arena is active</h2>
+    </div>
+    <div id="live-leaderboard" class="md3-card p-0 overflow-hidden max-w-3xl mx-auto" style="display: none;">
+        <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+                <tr style="background: var(--md-sys-color-surface-container-high);">
+                    <th class="text-left text-xs font-semibold uppercase px-5 py-3" style="color: var(--md-sys-color-on-surface-variant); letter-spacing: 0.05em;">Rank</th>
+                    <th class="text-left text-xs font-semibold uppercase px-5 py-3" style="color: var(--md-sys-color-on-surface-variant); letter-spacing: 0.05em;">Player</th>
+                    <th class="text-right text-xs font-semibold uppercase px-5 py-3" style="color: var(--md-sys-color-on-surface-variant); letter-spacing: 0.05em;">Rating</th>
+                    <th class="text-left text-xs font-semibold uppercase px-5 py-3 hidden sm:table-cell" style="color: var(--md-sys-color-on-surface-variant); letter-spacing: 0.05em;">Tier</th>
+                    <th class="text-right text-xs font-semibold uppercase px-5 py-3 hidden sm:table-cell" style="color: var(--md-sys-color-on-surface-variant); letter-spacing: 0.05em;">Win Rate</th>
+                </tr>
+            </thead>
+            <tbody id="leaderboard-body"></tbody>
+        </table>
+        <div class="text-center py-4" style="border-top: 1px solid var(--md-sys-color-outline-variant);">
+            <a href="/Leaderboard" class="text-sm font-medium" style="color: var(--md-sys-color-primary); text-decoration: none;">
+                View Full Leaderboard
+                <span class="material-symbols-outlined" style="font-size: 16px; vertical-align: middle;">arrow_forward</span>
+            </a>
+        </div>
+    </div>
+</section>
+
+<script>
+    (function () {
+        function getTier(rating) {
+            if (rating >= 1900) return 'I Use Arch btw';
+            if (rating >= 1700) return 'Wizard';
+            if (rating >= 1500) return '10x Dev';
+            if (rating >= 1300) return 'Bug Hunter';
+            if (rating >= 1100) return 'Code Monkey';
+            if (rating >= 800) return 'Copy Pasta';
+            return 'Rubber Duck';
+        }
+
+        fetch('/api/v1/leaderboard?limit=5')
+            .then(function (r) { return r.ok ? r.json() : Promise.reject(); })
+            .then(function (players) {
+                var tbody = document.getElementById('leaderboard-body');
+                players.forEach(function (p) {
+                    var tr = document.createElement('tr');
+                    tr.style.borderTop = '1px solid var(--md-sys-color-outline-variant)';
+                    tr.innerHTML =
+                        '<td class="px-5 py-3 text-sm font-semibold" style="color: var(--md-sys-color-on-surface);">#' + p.rank + '</td>' +
+                        '<td class="px-5 py-3 text-sm font-medium" style="color: var(--md-sys-color-on-surface);">' + p.username + '</td>' +
+                        '<td class="px-5 py-3 text-sm font-semibold text-right" style="color: var(--md-sys-color-primary);">' + p.rating + '</td>' +
+                        '<td class="px-5 py-3 text-xs hidden sm:table-cell" style="color: var(--md-sys-color-on-surface-variant);">' + getTier(p.rating) + '</td>' +
+                        '<td class="px-5 py-3 text-sm text-right hidden sm:table-cell" style="color: var(--md-sys-color-on-surface-variant);">' + p.winRate + '%</td>';
+                    tbody.appendChild(tr);
+                });
+                document.getElementById('live-leaderboard').style.display = 'block';
+            })
+            .catch(function () { /* silently hide if API unavailable */ });
+    })();
+</script>
 
 <!-- Features Grid -->
 <section class="py-24" style="background: var(--md-sys-color-surface-container-lowest);">
